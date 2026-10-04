@@ -710,3 +710,163 @@ domain.Tenancy _mapTenancy(db.Tenancy row) => domain.Tenancy(
       ? domain.TenancyStatus.active
       : domain.TenancyStatus.movedOut,
 );
+
+/// Drift storage for effective-dated recurring charges and meter setup.
+class DriftChargeConfigurationRepository extends DriftRepository
+    implements ChargeConfigurationRepository {
+  /// Creates charge configuration persistence.
+  const DriftChargeConfigurationRepository(super.database);
+
+  @override
+  Future<Result<List<domain.RecurringChargeRule>>> listRules(
+    EntityId tenancyId,
+  ) => guard<List<domain.RecurringChargeRule>>(() async {
+    final List<db.RecurringChargeRule> rows =
+        await (database.select(database.recurringChargeRules)
+              ..where(
+                (RecurringChargeRules table) =>
+                    table.tenancyId.equals(tenancyId.value),
+              )
+              ..orderBy(<OrderingTerm Function(RecurringChargeRules)>[
+                (RecurringChargeRules table) =>
+                    OrderingTerm.desc(table.effectiveFrom),
+              ]))
+            .get();
+    return rows.map(_rule).toList(growable: false);
+  });
+
+  @override
+  Future<Result<domain.RecurringChargeRule?>> ruleForMonth(
+    EntityId tenancyId,
+    ChargeType chargeType,
+    BillingMonth month,
+  ) => guard<domain.RecurringChargeRule?>(() async {
+    final DateTime start = DateTime.utc(month.year, month.month);
+    final DateTime end = DateTime.utc(month.year, month.month + 1);
+    final db.RecurringChargeRule? row =
+        await (database.select(database.recurringChargeRules)
+              ..where(
+                (RecurringChargeRules table) =>
+                    table.tenancyId.equals(tenancyId.value) &
+                    table.chargeType.equals(chargeType.name) &
+                    table.isActive.equals(true) &
+                    table.effectiveFrom.isSmallerThanValue(end) &
+                    (table.effectiveTo.isNull() |
+                        table.effectiveTo.isBiggerOrEqualValue(start)),
+              )
+              ..orderBy(<OrderingTerm Function(RecurringChargeRules)>[
+                (RecurringChargeRules table) =>
+                    OrderingTerm.desc(table.effectiveFrom),
+              ]))
+            .getSingleOrNull();
+    return row == null ? null : _rule(row);
+  });
+
+  @override
+  Future<Result<void>> saveRule(domain.RecurringChargeRule rule) =>
+      guard<void>(() async {
+        await database
+            .into(database.recurringChargeRules)
+            .insertOnConflictUpdate(
+              db.RecurringChargeRulesCompanion.insert(
+                id: rule.id.value,
+                tenancyId: rule.tenancyId.value,
+                chargeType: rule.chargeType.name,
+                calculationMethod: rule.calculationMethod.name,
+                fixedAmountPoisha: Value<int>(rule.fixedAmount.poisha),
+                ratePoisha: Value<int?>(rule.ratePerUnit?.poisha),
+                effectiveFrom: DateTime.utc(
+                  rule.effectiveFrom.year,
+                  rule.effectiveFrom.month,
+                ),
+                effectiveTo: Value<DateTime?>(
+                  rule.effectiveTo == null
+                      ? null
+                      : DateTime.utc(
+                          rule.effectiveTo!.year,
+                          rule.effectiveTo!.month,
+                        ),
+                ),
+                isActive: Value<bool>(rule.isActive),
+                createdAt: Value<DateTime>(DateTime.now().toUtc()),
+                updatedAt: Value<DateTime>(DateTime.now().toUtc()),
+              ),
+            );
+      });
+
+  @override
+  Future<Result<domain.UtilityMeterConfiguration?>> meterForUnit(
+    EntityId unitId,
+  ) => guard<domain.UtilityMeterConfiguration?>(() async {
+    final db.UtilityMeterConfig? row =
+        await (database.select(database.utilityMeterConfigs)..where(
+              (UtilityMeterConfigs table) =>
+                  table.unitId.equals(unitId.value) &
+                  table.isActive.equals(true),
+            ))
+            .getSingleOrNull();
+    return row == null ? null : _meter(row);
+  });
+
+  @override
+  Future<Result<void>> saveMeter(
+    domain.UtilityMeterConfiguration configuration,
+  ) => guard<void>(() async {
+    await database
+        .into(database.utilityMeterConfigs)
+        .insertOnConflictUpdate(
+          db.UtilityMeterConfigsCompanion.insert(
+            id: configuration.id.value,
+            unitId: configuration.unitId.value,
+            meterNumber: Value<String?>(configuration.meterNumber),
+            billingMode: configuration.billingMode,
+            ratePerUnitPoisha: Value<int>(configuration.ratePerUnit.poisha),
+            additionalChargePoisha: Value<int>(configuration.fixedFee.poisha),
+            initialReading: Value<int>(configuration.initialReading.value),
+            isActive: Value<bool>(configuration.isActive),
+            createdAt: Value<DateTime>(DateTime.now().toUtc()),
+            updatedAt: Value<DateTime>(DateTime.now().toUtc()),
+          ),
+        );
+  });
+
+  domain.RecurringChargeRule _rule(db.RecurringChargeRule row) =>
+      domain.RecurringChargeRule(
+        id: EntityId(row.id),
+        tenancyId: EntityId(row.tenancyId),
+        chargeType: _chargeType(row.chargeType),
+        calculationMethod: _method(row.calculationMethod),
+        fixedAmount: Money.fromPoisha(row.fixedAmountPoisha),
+        ratePerUnit: row.ratePoisha == null
+            ? null
+            : Money.fromPoisha(row.ratePoisha!),
+        effectiveFrom: BillingMonth.fromDate(row.effectiveFrom),
+        effectiveTo: row.effectiveTo == null
+            ? null
+            : BillingMonth.fromDate(row.effectiveTo!),
+        isActive: row.isActive,
+      );
+
+  domain.UtilityMeterConfiguration _meter(db.UtilityMeterConfig row) =>
+      domain.UtilityMeterConfiguration(
+        id: EntityId(row.id),
+        unitId: EntityId(row.unitId),
+        meterNumber: row.meterNumber,
+        billingMode: row.billingMode,
+        ratePerUnit: Money.fromPoisha(row.ratePerUnitPoisha),
+        fixedFee: Money.fromPoisha(row.additionalChargePoisha),
+        initialReading: MeterReading(row.initialReading),
+        isActive: row.isActive,
+      );
+
+  ChargeType _chargeType(String value) => ChargeType.values.firstWhere(
+    (ChargeType type) => type.name == value,
+    orElse: () => ChargeType.other,
+  );
+
+  domain.ChargeCalculationMethod _method(String value) =>
+      domain.ChargeCalculationMethod.values.firstWhere(
+        (domain.ChargeCalculationMethod method) => method.name == value,
+        orElse: () => domain.ChargeCalculationMethod.fixed,
+      );
+}

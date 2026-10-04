@@ -4,6 +4,7 @@ import 'package:barivara/core/domain/models.dart';
 import 'package:barivara/core/domain/value_types.dart';
 import 'package:barivara/core/localization/bari_vara_formatters.dart';
 import 'package:barivara/core/result/result.dart';
+import 'package:barivara/features/charges/presentation/charge_configuration_screen.dart';
 import 'package:barivara/features/settings/application/settings_controller.dart';
 import 'package:barivara/features/settings/domain/app_settings.dart';
 import 'package:barivara/features/tenants/application/tenant_tenancy_use_cases.dart';
@@ -132,6 +133,17 @@ class _TenantDetailsScreenState extends ConsumerState<TenantDetailsScreen> {
         appBar: AppBar(
           title: Text(tenant.fullName),
           actions: <Widget>[
+            if (tenancy != null)
+              IconButton(
+                icon: const Icon(Icons.tune_rounded),
+                tooltip: text.chargeConfiguration,
+                onPressed: () => Navigator.of(context).push<void>(
+                  MaterialPageRoute<void>(
+                    builder: (BuildContext context) =>
+                        ChargeConfigurationScreen(tenancy: tenancy),
+                  ),
+                ),
+              ),
             IconButton(
               icon: const Icon(Icons.edit_outlined),
               tooltip: text.editTenant,

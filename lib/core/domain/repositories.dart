@@ -44,6 +44,19 @@ abstract interface class TenancyRepository {
   Future<Result<void>> moveOut(EntityId tenancyId, DateTime effectiveDate);
 }
 
+/// Persistence contract for versioned charge setup and unit meter settings.
+abstract interface class ChargeConfigurationRepository {
+  Future<Result<List<RecurringChargeRule>>> listRules(EntityId tenancyId);
+  Future<Result<RecurringChargeRule?>> ruleForMonth(
+    EntityId tenancyId,
+    ChargeType chargeType,
+    BillingMonth month,
+  );
+  Future<Result<void>> saveRule(RecurringChargeRule rule);
+  Future<Result<UtilityMeterConfiguration?>> meterForUnit(EntityId unitId);
+  Future<Result<void>> saveMeter(UtilityMeterConfiguration configuration);
+}
+
 /// Application-facing billing persistence contract.
 abstract interface class BillingRepository {
   Future<Result<MonthlyBill?>> findForPeriod(

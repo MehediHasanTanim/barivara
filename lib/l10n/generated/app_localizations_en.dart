@@ -449,4 +449,34 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get stepDeposit => 'Deposit & advance';
+
+  @override
+  String get chargeConfiguration => 'Charge configuration';
+
+  @override
+  String get electricity => 'Electricity';
+
+  @override
+  String get gas => 'Gas';
+
+  @override
+  String get water => 'Water';
+
+  @override
+  String get otherCharges => 'Other recurring charges';
+
+  @override
+  String get calculationMethod => 'Calculation method';
+
+  @override
+  String get fixedMonthly => 'Fixed monthly amount';
+
+  @override
+  String get meterBased => 'Meter reading × rate';
+
+  @override
+  String get manualMonthly => 'Manual monthly amount';
+
+  @override
+  String get saveCharge => 'Save charge';
 }

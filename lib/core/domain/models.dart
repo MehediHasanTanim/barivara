@@ -109,6 +109,59 @@ class UnitSummary {
   final String? activeTenantName;
 }
 
+/// Ways a recurring charge becomes a monthly bill line item.
+enum ChargeCalculationMethod { fixed, meterRate, manual, previousBalance }
+
+/// Immutable versioned charge configuration used for a billing period.
+class RecurringChargeRule {
+  /// Creates a recurring charge rule.
+  const RecurringChargeRule({
+    required this.id,
+    required this.tenancyId,
+    required this.chargeType,
+    required this.calculationMethod,
+    required this.fixedAmount,
+    required this.effectiveFrom,
+    this.ratePerUnit,
+    this.effectiveTo,
+    this.isActive = true,
+  });
+
+  final EntityId id;
+  final EntityId tenancyId;
+  final ChargeType chargeType;
+  final ChargeCalculationMethod calculationMethod;
+  final Money fixedAmount;
+  final Money? ratePerUnit;
+  final BillingMonth effectiveFrom;
+  final BillingMonth? effectiveTo;
+  final bool isActive;
+}
+
+/// Stored electricity meter setup independent from monthly readings.
+class UtilityMeterConfiguration {
+  /// Creates a unit meter configuration.
+  const UtilityMeterConfiguration({
+    required this.id,
+    required this.unitId,
+    required this.billingMode,
+    required this.ratePerUnit,
+    required this.fixedFee,
+    required this.initialReading,
+    this.meterNumber,
+    this.isActive = true,
+  });
+
+  final EntityId id;
+  final EntityId unitId;
+  final String billingMode;
+  final Money ratePerUnit;
+  final Money fixedFee;
+  final MeterReading initialReading;
+  final String? meterNumber;
+  final bool isActive;
+}
+
 /// Tenant identity aggregate.
 class Tenant {
   /// Creates a tenant.

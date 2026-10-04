@@ -451,4 +451,34 @@ class AppLocalizationsBn extends AppLocalizations {
 
   @override
   String get stepDeposit => 'জামানত ও অগ্রিম';
+
+  @override
+  String get chargeConfiguration => 'চার্জ কনফিগারেশন';
+
+  @override
+  String get electricity => 'বিদ্যুৎ';
+
+  @override
+  String get gas => 'গ্যাস';
+
+  @override
+  String get water => 'পানি';
+
+  @override
+  String get otherCharges => 'অন্যান্য নিয়মিত চার্জ';
+
+  @override
+  String get calculationMethod => 'হিসাবের পদ্ধতি';
+
+  @override
+  String get fixedMonthly => 'নির্দিষ্ট মাসিক পরিমাণ';
+
+  @override
+  String get meterBased => 'মিটার রিডিং × রেট';
+
+  @override
+  String get manualMonthly => 'প্রতি মাসে হাতে যোগ করুন';
+
+  @override
+  String get saveCharge => 'চার্জ সংরক্ষণ করুন';
 }

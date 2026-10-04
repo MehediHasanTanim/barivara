@@ -967,6 +967,66 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Deposit & advance'**
   String get stepDeposit;
+
+  /// No description provided for @chargeConfiguration.
+  ///
+  /// In en, this message translates to:
+  /// **'Charge configuration'**
+  String get chargeConfiguration;
+
+  /// No description provided for @electricity.
+  ///
+  /// In en, this message translates to:
+  /// **'Electricity'**
+  String get electricity;
+
+  /// No description provided for @gas.
+  ///
+  /// In en, this message translates to:
+  /// **'Gas'**
+  String get gas;
+
+  /// No description provided for @water.
+  ///
+  /// In en, this message translates to:
+  /// **'Water'**
+  String get water;
+
+  /// No description provided for @otherCharges.
+  ///
+  /// In en, this message translates to:
+  /// **'Other recurring charges'**
+  String get otherCharges;
+
+  /// No description provided for @calculationMethod.
+  ///
+  /// In en, this message translates to:
+  /// **'Calculation method'**
+  String get calculationMethod;
+
+  /// No description provided for @fixedMonthly.
+  ///
+  /// In en, this message translates to:
+  /// **'Fixed monthly amount'**
+  String get fixedMonthly;
+
+  /// No description provided for @meterBased.
+  ///
+  /// In en, this message translates to:
+  /// **'Meter reading × rate'**
+  String get meterBased;
+
+  /// No description provided for @manualMonthly.
+  ///
+  /// In en, this message translates to:
+  /// **'Manual monthly amount'**
+  String get manualMonthly;
+
+  /// No description provided for @saveCharge.
+  ///
+  /// In en, this message translates to:
+  /// **'Save charge'**
+  String get saveCharge;
 }
 
 class _AppLocalizationsDelegate
