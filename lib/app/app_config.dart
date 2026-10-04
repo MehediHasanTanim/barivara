@@ -2,6 +2,9 @@ import 'package:flutter/foundation.dart';
 
 /// Immutable application-wide configuration that contains no user secrets.
 abstract final class AppConfig {
+  /// App release marker recorded in portable backup manifests.
+  static const String applicationVersion = '1.0.0+1';
+
   /// Name of the local SQLite database introduced in Phase 1.
   static const String databaseName = 'bari_vara.sqlite';
 

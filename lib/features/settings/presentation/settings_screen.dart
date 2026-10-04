@@ -1,13 +1,17 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:barivara/app/app_services.dart';
 import 'package:barivara/core/notifications/local_notification_service.dart';
 import 'package:barivara/core/result/result.dart';
+import 'package:barivara/features/backup/application/backup_archive_service.dart';
 import 'package:barivara/features/settings/application/settings_controller.dart';
 import 'package:barivara/features/settings/domain/app_settings.dart';
 import 'package:barivara/l10n/generated/app_localizations.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:uuid/uuid.dart';
 
 /// First-run language selection specified by the Bari Vara mobile UX guide.
@@ -162,8 +166,8 @@ class SettingsScreen extends ConsumerWidget {
               _SettingTile(
                 icon: Icons.backup_outlined,
                 title: text.dataAndBackup,
-                subtitle: text.backupRestorePlaceholder,
-                onTap: () => _placeholder(context, text.dataAndBackup),
+                subtitle: 'Backup, restore, and CSV exports',
+                onTap: () => _open(context, const BackupRestoreScreen()),
               ),
             ],
           ),
@@ -194,6 +198,232 @@ class SettingsScreen extends ConsumerWidget {
     );
   }
 }
+
+/// Manual, user-owned archive backup, restore, and CSV portability tools.
+class BackupRestoreScreen extends ConsumerStatefulWidget {
+  const BackupRestoreScreen({super.key});
+
+  @override
+  ConsumerState<BackupRestoreScreen> createState() =>
+      _BackupRestoreScreenState();
+}
+
+class _BackupRestoreScreenState extends ConsumerState<BackupRestoreScreen> {
+  late final BackupArchiveService _backups;
+  late Future<BackupHistory> _history;
+  bool _working = false;
+
+  @override
+  void initState() {
+    super.initState();
+    final AppServices services = ref.read(appServicesProvider);
+    _backups = BackupArchiveService(
+      database: services.database,
+      preferences: services.preferences,
+      closeActiveDatabase: services.database.close,
+    );
+    _history = _backups.history();
+  }
+
+  @override
+  Widget build(BuildContext context) => Scaffold(
+    appBar: AppBar(title: const Text('Data & backup')),
+    body: ListView(
+      padding: const EdgeInsets.all(16),
+      children: <Widget>[
+        const Card(
+          child: Padding(
+            padding: EdgeInsets.all(16),
+            child: Text(
+              'Backups stay entirely under your control. Save or share the '
+              '.bvbackup archive with any installed storage app.',
+            ),
+          ),
+        ),
+        const SizedBox(height: 12),
+        FutureBuilder<BackupHistory>(
+          future: _history,
+          builder:
+              (BuildContext context, AsyncSnapshot<BackupHistory> snapshot) {
+                final BackupHistory? history = snapshot.data;
+                return Card(
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        const Text('Backup history'),
+                        const SizedBox(height: 6),
+                        Text(
+                          'Last backup: ${_dateLabel(history?.lastBackupAt)}',
+                        ),
+                        Text(
+                          'Last restore: ${_dateLabel(history?.lastRestoreAt)}',
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              },
+        ),
+        const SizedBox(height: 12),
+        FilledButton.icon(
+          onPressed: _working ? null : () => _createBackup(share: true),
+          icon: const Icon(Icons.share_rounded),
+          label: const Text('Create and share backup'),
+        ),
+        const SizedBox(height: 8),
+        OutlinedButton.icon(
+          onPressed: _working ? null : () => _createBackup(share: false),
+          icon: const Icon(Icons.save_alt_rounded),
+          label: const Text('Create and save backup'),
+        ),
+        const SizedBox(height: 8),
+        OutlinedButton.icon(
+          onPressed: _working ? null : _restore,
+          icon: const Icon(Icons.settings_backup_restore_rounded),
+          label: const Text('Restore from backup'),
+        ),
+        const Divider(height: 36),
+        Text('CSV exports', style: Theme.of(context).textTheme.titleMedium),
+        const SizedBox(height: 4),
+        const Text(
+          'CSV files are for viewing and reporting; use a backup to restore full data.',
+        ),
+        const SizedBox(height: 8),
+        for (final CsvExportKind kind in CsvExportKind.values)
+          ListTile(
+            contentPadding: EdgeInsets.zero,
+            title: Text(_csvLabel(kind)),
+            trailing: const Icon(Icons.download_outlined),
+            onTap: _working ? null : () => _exportCsv(kind),
+          ),
+      ],
+    ),
+  );
+
+  Future<void> _createBackup({required bool share}) async {
+    await _run(() async {
+      final Result<BackupArchive> result = await _backups.createBackup();
+      if (result case Failure<BackupArchive>(:final failure)) {
+        _message(failure.message);
+        return;
+      }
+      final BackupArchive archive = (result as Success<BackupArchive>).value;
+      if (share) {
+        await SharePlus.instance.share(
+          ShareParams(
+            files: <XFile>[XFile(archive.path, mimeType: 'application/zip')],
+            subject: 'Bari Vara backup',
+            text: 'Bari Vara offline backup',
+          ),
+        );
+      } else {
+        final Uri? location = await FilePicker.saveFile(
+          dialogTitle: 'Save Bari Vara backup',
+          fileName: archive.fileName,
+          bytes: await File(archive.path).readAsBytes(),
+          mimeType: 'application/octet-stream',
+          type: FileType.custom,
+          allowedExtensions: const <String>['bvbackup'],
+        );
+        if (location != null) _message('Backup saved to selected location.');
+      }
+      if (mounted) setState(() => _history = _backups.history());
+    });
+  }
+
+  Future<void> _restore() async {
+    final List<PlatformFile> selection = await FilePicker.pickFiles(
+      type: FileType.custom,
+      allowedExtensions: const <String>['bvbackup'],
+    );
+    final String? path = selection.isEmpty ? null : selection.first.path;
+    if (path == null || !mounted) return;
+    final bool? confirmed = await showDialog<bool>(
+      context: context,
+      builder: (BuildContext context) => AlertDialog(
+        title: const Text('Restore backup?'),
+        content: const Text(
+          'Current local data will be replaced only after this backup is verified. '
+          'A temporary safety snapshot is kept if replacement fails.',
+        ),
+        actions: <Widget>[
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Restore'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true) return;
+    await _run(() async {
+      final Result<void> result = await _backups.restore(path);
+      if (result case Failure<void>(:final failure)) {
+        _message(failure.message);
+      } else {
+        _message(
+          'Restore completed. Restart the app to load the restored data.',
+        );
+        if (mounted) setState(() => _history = _backups.history());
+      }
+    });
+  }
+
+  Future<void> _exportCsv(CsvExportKind kind) async {
+    await _run(() async {
+      final Result<CsvExport> result = await _backups.createCsv(kind);
+      if (result case Failure<CsvExport>(:final failure)) {
+        _message(failure.message);
+        return;
+      }
+      final CsvExport export = (result as Success<CsvExport>).value;
+      final Uri? location = await FilePicker.saveFile(
+        dialogTitle: 'Save ${_csvLabel(kind)} CSV',
+        fileName: export.fileName,
+        bytes: export.bytes,
+        mimeType: 'text/csv;charset=utf-8',
+        type: FileType.custom,
+        allowedExtensions: const <String>['csv'],
+      );
+      if (location != null) _message('CSV saved to selected location.');
+    });
+  }
+
+  Future<void> _run(Future<void> Function() action) async {
+    setState(() => _working = true);
+    try {
+      await action();
+    } on Object {
+      _message('This data operation could not be completed.');
+    } finally {
+      if (mounted) setState(() => _working = false);
+    }
+  }
+
+  void _message(String message) {
+    if (mounted) {
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(message)));
+    }
+  }
+}
+
+String _dateLabel(DateTime? value) =>
+    value == null ? 'Never' : value.toLocal().toString().split('.').first;
+
+String _csvLabel(CsvExportKind kind) => switch (kind) {
+  CsvExportKind.tenants => 'Tenants',
+  CsvExportKind.units => 'Units',
+  CsvExportKind.bills => 'Bills',
+  CsvExportKind.payments => 'Payments',
+  CsvExportKind.deposits => 'Deposits',
+  CsvExportKind.repairs => 'Repairs',
+};
 
 /// Language and numeral-style controls with an immediate localized preview.
 class LanguageSettingsScreen extends ConsumerWidget {
