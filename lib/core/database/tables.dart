@@ -7,12 +7,15 @@ class Properties extends Table {
 
   TextColumn get id => text()();
   TextColumn get name => text()();
+  TextColumn get propertyType =>
+      text().withDefault(const Constant('residential'))();
   TextColumn get nickname => text().nullable()();
   TextColumn get addressLine => text().nullable()();
   TextColumn get area => text().nullable()();
   TextColumn get cityDistrict => text().nullable()();
   TextColumn get ownerName => text().nullable()();
   TextColumn get ownerPhone => text().nullable()();
+  TextColumn get notes => text().nullable()();
   TextColumn get status => text().withDefault(const Constant('active'))();
   BoolColumn get isArchived => boolean().withDefault(const Constant(false))();
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
@@ -33,6 +36,7 @@ class Units extends Table {
   TextColumn get name => text()();
   TextColumn get floorName => text().nullable()();
   TextColumn get unitType => text().withDefault(const Constant('apartment'))();
+  IntColumn get bedrooms => integer().nullable()();
   IntColumn get defaultRentPoisha => integer().withDefault(const Constant(0))();
   IntColumn get defaultServiceChargePoisha =>
       integer().withDefault(const Constant(0))();
@@ -42,6 +46,7 @@ class Units extends Table {
       integer().withDefault(const Constant(0))();
   TextColumn get occupancyStatus =>
       text().withDefault(const Constant('vacant'))();
+  TextColumn get notes => text().nullable()();
   BoolColumn get isArchived => boolean().withDefault(const Constant(false))();
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
   DateTimeColumn get updatedAt => dateTime().withDefault(currentDateAndTime)();

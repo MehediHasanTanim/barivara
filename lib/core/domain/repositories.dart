@@ -5,7 +5,10 @@ import 'package:barivara/core/result/result.dart';
 /// Application-facing property persistence contract.
 abstract interface class PropertyRepository {
   Future<Result<List<Property>>> list();
+  Future<Result<List<Property>>> listArchived();
+  Future<Result<List<PropertySummary>>> listSummaries();
   Future<Result<Property?>> findById(EntityId id);
+  Future<Result<bool>> hasDuplicateName(String name, {EntityId? excludingId});
   Future<Result<void>> save(Property property);
   Future<Result<void>> archive(EntityId id);
 }
@@ -13,6 +16,10 @@ abstract interface class PropertyRepository {
 /// Application-facing unit persistence contract.
 abstract interface class UnitRepository {
   Future<Result<List<RentalUnit>>> listByProperty(EntityId propertyId);
+  Future<Result<List<UnitSummary>>> listSummariesByProperty(
+    EntityId propertyId, {
+    UnitFilter filter = UnitFilter.all,
+  });
   Future<Result<RentalUnit?>> findById(EntityId id);
   Future<Result<void>> save(RentalUnit unit);
   Future<Result<void>> archive(EntityId id);

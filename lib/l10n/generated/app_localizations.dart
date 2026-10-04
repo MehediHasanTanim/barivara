@@ -379,6 +379,360 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Coming soon'**
   String get comingSoon;
+
+  /// No description provided for @propertiesAndUnits.
+  ///
+  /// In en, this message translates to:
+  /// **'Properties & Units'**
+  String get propertiesAndUnits;
+
+  /// No description provided for @properties.
+  ///
+  /// In en, this message translates to:
+  /// **'Properties'**
+  String get properties;
+
+  /// No description provided for @units.
+  ///
+  /// In en, this message translates to:
+  /// **'Units'**
+  String get units;
+
+  /// No description provided for @addProperty.
+  ///
+  /// In en, this message translates to:
+  /// **'Add property'**
+  String get addProperty;
+
+  /// No description provided for @editProperty.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit property'**
+  String get editProperty;
+
+  /// No description provided for @archiveProperty.
+  ///
+  /// In en, this message translates to:
+  /// **'Archive property'**
+  String get archiveProperty;
+
+  /// No description provided for @addUnit.
+  ///
+  /// In en, this message translates to:
+  /// **'Add unit'**
+  String get addUnit;
+
+  /// No description provided for @editUnit.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit unit'**
+  String get editUnit;
+
+  /// No description provided for @archiveUnit.
+  ///
+  /// In en, this message translates to:
+  /// **'Archive unit'**
+  String get archiveUnit;
+
+  /// No description provided for @propertyName.
+  ///
+  /// In en, this message translates to:
+  /// **'Property name'**
+  String get propertyName;
+
+  /// No description provided for @propertyType.
+  ///
+  /// In en, this message translates to:
+  /// **'Property type'**
+  String get propertyType;
+
+  /// No description provided for @address.
+  ///
+  /// In en, this message translates to:
+  /// **'Address'**
+  String get address;
+
+  /// No description provided for @area.
+  ///
+  /// In en, this message translates to:
+  /// **'Area'**
+  String get area;
+
+  /// No description provided for @cityDistrict.
+  ///
+  /// In en, this message translates to:
+  /// **'City / district'**
+  String get cityDistrict;
+
+  /// No description provided for @notesOptional.
+  ///
+  /// In en, this message translates to:
+  /// **'Notes (optional)'**
+  String get notesOptional;
+
+  /// No description provided for @unitName.
+  ///
+  /// In en, this message translates to:
+  /// **'Unit name / number'**
+  String get unitName;
+
+  /// No description provided for @floor.
+  ///
+  /// In en, this message translates to:
+  /// **'Floor'**
+  String get floor;
+
+  /// No description provided for @unitType.
+  ///
+  /// In en, this message translates to:
+  /// **'Unit type'**
+  String get unitType;
+
+  /// No description provided for @bedroomsOptional.
+  ///
+  /// In en, this message translates to:
+  /// **'Bedrooms (optional)'**
+  String get bedroomsOptional;
+
+  /// No description provided for @monthlyRent.
+  ///
+  /// In en, this message translates to:
+  /// **'Default monthly rent'**
+  String get monthlyRent;
+
+  /// No description provided for @serviceCharge.
+  ///
+  /// In en, this message translates to:
+  /// **'Default service charge'**
+  String get serviceCharge;
+
+  /// No description provided for @gasCharge.
+  ///
+  /// In en, this message translates to:
+  /// **'Default gas charge'**
+  String get gasCharge;
+
+  /// No description provided for @waterCharge.
+  ///
+  /// In en, this message translates to:
+  /// **'Default water charge'**
+  String get waterCharge;
+
+  /// No description provided for @saveProperty.
+  ///
+  /// In en, this message translates to:
+  /// **'Save property'**
+  String get saveProperty;
+
+  /// No description provided for @saveUnit.
+  ///
+  /// In en, this message translates to:
+  /// **'Save unit'**
+  String get saveUnit;
+
+  /// No description provided for @cancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get cancel;
+
+  /// No description provided for @all.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get all;
+
+  /// No description provided for @occupied.
+  ///
+  /// In en, this message translates to:
+  /// **'Occupied'**
+  String get occupied;
+
+  /// No description provided for @vacant.
+  ///
+  /// In en, this message translates to:
+  /// **'Vacant'**
+  String get vacant;
+
+  /// No description provided for @archived.
+  ///
+  /// In en, this message translates to:
+  /// **'Archived'**
+  String get archived;
+
+  /// No description provided for @reserved.
+  ///
+  /// In en, this message translates to:
+  /// **'Reserved'**
+  String get reserved;
+
+  /// No description provided for @currentDue.
+  ///
+  /// In en, this message translates to:
+  /// **'Current due'**
+  String get currentDue;
+
+  /// No description provided for @unitCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Units'**
+  String get unitCount;
+
+  /// No description provided for @monthlySummary.
+  ///
+  /// In en, this message translates to:
+  /// **'Monthly summary'**
+  String get monthlySummary;
+
+  /// No description provided for @repairs.
+  ///
+  /// In en, this message translates to:
+  /// **'Repairs'**
+  String get repairs;
+
+  /// No description provided for @propertySettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Property settings'**
+  String get propertySettings;
+
+  /// No description provided for @tenantsAndOccupancy.
+  ///
+  /// In en, this message translates to:
+  /// **'Tenants / occupancy'**
+  String get tenantsAndOccupancy;
+
+  /// No description provided for @utilityDefaults.
+  ///
+  /// In en, this message translates to:
+  /// **'Utility & service defaults'**
+  String get utilityDefaults;
+
+  /// No description provided for @discardChangesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Discard changes?'**
+  String get discardChangesTitle;
+
+  /// No description provided for @discardChangesMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Your unsaved changes will be lost.'**
+  String get discardChangesMessage;
+
+  /// No description provided for @discard.
+  ///
+  /// In en, this message translates to:
+  /// **'Discard'**
+  String get discard;
+
+  /// No description provided for @keepEditing.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep editing'**
+  String get keepEditing;
+
+  /// No description provided for @archivePropertyMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Archived properties are removed from normal lists. Archive all active units first.'**
+  String get archivePropertyMessage;
+
+  /// No description provided for @archiveUnitMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Archived units are removed from normal lists. An occupied unit cannot be archived.'**
+  String get archiveUnitMessage;
+
+  /// No description provided for @confirmArchive.
+  ///
+  /// In en, this message translates to:
+  /// **'Archive'**
+  String get confirmArchive;
+
+  /// No description provided for @noPropertiesYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No property has been added yet.'**
+  String get noPropertiesYet;
+
+  /// No description provided for @noUnitsYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No units match this filter.'**
+  String get noUnitsYet;
+
+  /// No description provided for @propertySaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Property saved'**
+  String get propertySaved;
+
+  /// No description provided for @unitSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Unit saved'**
+  String get unitSaved;
+
+  /// No description provided for @requiredField.
+  ///
+  /// In en, this message translates to:
+  /// **'This field is required'**
+  String get requiredField;
+
+  /// No description provided for @invalidAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a valid whole-taka amount'**
+  String get invalidAmount;
+
+  /// No description provided for @residential.
+  ///
+  /// In en, this message translates to:
+  /// **'Residential'**
+  String get residential;
+
+  /// No description provided for @commercial.
+  ///
+  /// In en, this message translates to:
+  /// **'Commercial'**
+  String get commercial;
+
+  /// No description provided for @mixedUse.
+  ///
+  /// In en, this message translates to:
+  /// **'Mixed use'**
+  String get mixedUse;
+
+  /// No description provided for @otherType.
+  ///
+  /// In en, this message translates to:
+  /// **'Other'**
+  String get otherType;
+
+  /// No description provided for @apartment.
+  ///
+  /// In en, this message translates to:
+  /// **'Apartment'**
+  String get apartment;
+
+  /// No description provided for @room.
+  ///
+  /// In en, this message translates to:
+  /// **'Room'**
+  String get room;
+
+  /// No description provided for @shop.
+  ///
+  /// In en, this message translates to:
+  /// **'Shop'**
+  String get shop;
+
+  /// No description provided for @office.
+  ///
+  /// In en, this message translates to:
+  /// **'Office'**
+  String get office;
 }
 
 class _AppLocalizationsDelegate

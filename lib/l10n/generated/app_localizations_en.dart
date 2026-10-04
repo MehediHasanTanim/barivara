@@ -152,4 +152,183 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get comingSoon => 'Coming soon';
+
+  @override
+  String get propertiesAndUnits => 'Properties & Units';
+
+  @override
+  String get properties => 'Properties';
+
+  @override
+  String get units => 'Units';
+
+  @override
+  String get addProperty => 'Add property';
+
+  @override
+  String get editProperty => 'Edit property';
+
+  @override
+  String get archiveProperty => 'Archive property';
+
+  @override
+  String get addUnit => 'Add unit';
+
+  @override
+  String get editUnit => 'Edit unit';
+
+  @override
+  String get archiveUnit => 'Archive unit';
+
+  @override
+  String get propertyName => 'Property name';
+
+  @override
+  String get propertyType => 'Property type';
+
+  @override
+  String get address => 'Address';
+
+  @override
+  String get area => 'Area';
+
+  @override
+  String get cityDistrict => 'City / district';
+
+  @override
+  String get notesOptional => 'Notes (optional)';
+
+  @override
+  String get unitName => 'Unit name / number';
+
+  @override
+  String get floor => 'Floor';
+
+  @override
+  String get unitType => 'Unit type';
+
+  @override
+  String get bedroomsOptional => 'Bedrooms (optional)';
+
+  @override
+  String get monthlyRent => 'Default monthly rent';
+
+  @override
+  String get serviceCharge => 'Default service charge';
+
+  @override
+  String get gasCharge => 'Default gas charge';
+
+  @override
+  String get waterCharge => 'Default water charge';
+
+  @override
+  String get saveProperty => 'Save property';
+
+  @override
+  String get saveUnit => 'Save unit';
+
+  @override
+  String get cancel => 'Cancel';
+
+  @override
+  String get all => 'All';
+
+  @override
+  String get occupied => 'Occupied';
+
+  @override
+  String get vacant => 'Vacant';
+
+  @override
+  String get archived => 'Archived';
+
+  @override
+  String get reserved => 'Reserved';
+
+  @override
+  String get currentDue => 'Current due';
+
+  @override
+  String get unitCount => 'Units';
+
+  @override
+  String get monthlySummary => 'Monthly summary';
+
+  @override
+  String get repairs => 'Repairs';
+
+  @override
+  String get propertySettings => 'Property settings';
+
+  @override
+  String get tenantsAndOccupancy => 'Tenants / occupancy';
+
+  @override
+  String get utilityDefaults => 'Utility & service defaults';
+
+  @override
+  String get discardChangesTitle => 'Discard changes?';
+
+  @override
+  String get discardChangesMessage => 'Your unsaved changes will be lost.';
+
+  @override
+  String get discard => 'Discard';
+
+  @override
+  String get keepEditing => 'Keep editing';
+
+  @override
+  String get archivePropertyMessage =>
+      'Archived properties are removed from normal lists. Archive all active units first.';
+
+  @override
+  String get archiveUnitMessage =>
+      'Archived units are removed from normal lists. An occupied unit cannot be archived.';
+
+  @override
+  String get confirmArchive => 'Archive';
+
+  @override
+  String get noPropertiesYet => 'No property has been added yet.';
+
+  @override
+  String get noUnitsYet => 'No units match this filter.';
+
+  @override
+  String get propertySaved => 'Property saved';
+
+  @override
+  String get unitSaved => 'Unit saved';
+
+  @override
+  String get requiredField => 'This field is required';
+
+  @override
+  String get invalidAmount => 'Enter a valid whole-taka amount';
+
+  @override
+  String get residential => 'Residential';
+
+  @override
+  String get commercial => 'Commercial';
+
+  @override
+  String get mixedUse => 'Mixed use';
+
+  @override
+  String get otherType => 'Other';
+
+  @override
+  String get apartment => 'Apartment';
+
+  @override
+  String get room => 'Room';
+
+  @override
+  String get shop => 'Shop';
+
+  @override
+  String get office => 'Office';
 }

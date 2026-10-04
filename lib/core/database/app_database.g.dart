@@ -27,6 +27,18 @@ class $PropertiesTable extends Properties
     type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _propertyTypeMeta = const VerificationMeta(
+    'propertyType',
+  );
+  @override
+  late final GeneratedColumn<String> propertyType = GeneratedColumn<String>(
+    'property_type',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('residential'),
+  );
   static const VerificationMeta _nicknameMeta = const VerificationMeta(
     'nickname',
   );
@@ -91,6 +103,15 @@ class $PropertiesTable extends Properties
     type: DriftSqlType.string,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _notesMeta = const VerificationMeta('notes');
+  @override
+  late final GeneratedColumn<String> notes = GeneratedColumn<String>(
+    'notes',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _statusMeta = const VerificationMeta('status');
   @override
   late final GeneratedColumn<String> status = GeneratedColumn<String>(
@@ -144,12 +165,14 @@ class $PropertiesTable extends Properties
   List<GeneratedColumn> get $columns => [
     id,
     name,
+    propertyType,
     nickname,
     addressLine,
     area,
     cityDistrict,
     ownerName,
     ownerPhone,
+    notes,
     status,
     isArchived,
     createdAt,
@@ -179,6 +202,15 @@ class $PropertiesTable extends Properties
       );
     } else if (isInserting) {
       context.missing(_nameMeta);
+    }
+    if (data.containsKey('property_type')) {
+      context.handle(
+        _propertyTypeMeta,
+        propertyType.isAcceptableOrUnknown(
+          data['property_type']!,
+          _propertyTypeMeta,
+        ),
+      );
     }
     if (data.containsKey('nickname')) {
       context.handle(
@@ -222,6 +254,12 @@ class $PropertiesTable extends Properties
         ownerPhone.isAcceptableOrUnknown(data['owner_phone']!, _ownerPhoneMeta),
       );
     }
+    if (data.containsKey('notes')) {
+      context.handle(
+        _notesMeta,
+        notes.isAcceptableOrUnknown(data['notes']!, _notesMeta),
+      );
+    }
     if (data.containsKey('status')) {
       context.handle(
         _statusMeta,
@@ -263,6 +301,10 @@ class $PropertiesTable extends Properties
         DriftSqlType.string,
         data['${effectivePrefix}name'],
       )!,
+      propertyType: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}property_type'],
+      )!,
       nickname: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}nickname'],
@@ -286,6 +328,10 @@ class $PropertiesTable extends Properties
       ownerPhone: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}owner_phone'],
+      ),
+      notes: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}notes'],
       ),
       status: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
@@ -315,12 +361,14 @@ class $PropertiesTable extends Properties
 class Property extends DataClass implements Insertable<Property> {
   final String id;
   final String name;
+  final String propertyType;
   final String? nickname;
   final String? addressLine;
   final String? area;
   final String? cityDistrict;
   final String? ownerName;
   final String? ownerPhone;
+  final String? notes;
   final String status;
   final bool isArchived;
   final DateTime createdAt;
@@ -328,12 +376,14 @@ class Property extends DataClass implements Insertable<Property> {
   const Property({
     required this.id,
     required this.name,
+    required this.propertyType,
     this.nickname,
     this.addressLine,
     this.area,
     this.cityDistrict,
     this.ownerName,
     this.ownerPhone,
+    this.notes,
     required this.status,
     required this.isArchived,
     required this.createdAt,
@@ -344,6 +394,7 @@ class Property extends DataClass implements Insertable<Property> {
     final map = <String, Expression>{};
     map['id'] = Variable<String>(id);
     map['name'] = Variable<String>(name);
+    map['property_type'] = Variable<String>(propertyType);
     if (!nullToAbsent || nickname != null) {
       map['nickname'] = Variable<String>(nickname);
     }
@@ -362,6 +413,9 @@ class Property extends DataClass implements Insertable<Property> {
     if (!nullToAbsent || ownerPhone != null) {
       map['owner_phone'] = Variable<String>(ownerPhone);
     }
+    if (!nullToAbsent || notes != null) {
+      map['notes'] = Variable<String>(notes);
+    }
     map['status'] = Variable<String>(status);
     map['is_archived'] = Variable<bool>(isArchived);
     map['created_at'] = Variable<DateTime>(createdAt);
@@ -373,6 +427,7 @@ class Property extends DataClass implements Insertable<Property> {
     return PropertiesCompanion(
       id: Value(id),
       name: Value(name),
+      propertyType: Value(propertyType),
       nickname: nickname == null && nullToAbsent
           ? const Value.absent()
           : Value(nickname),
@@ -389,6 +444,9 @@ class Property extends DataClass implements Insertable<Property> {
       ownerPhone: ownerPhone == null && nullToAbsent
           ? const Value.absent()
           : Value(ownerPhone),
+      notes: notes == null && nullToAbsent
+          ? const Value.absent()
+          : Value(notes),
       status: Value(status),
       isArchived: Value(isArchived),
       createdAt: Value(createdAt),
@@ -404,12 +462,14 @@ class Property extends DataClass implements Insertable<Property> {
     return Property(
       id: serializer.fromJson<String>(json['id']),
       name: serializer.fromJson<String>(json['name']),
+      propertyType: serializer.fromJson<String>(json['propertyType']),
       nickname: serializer.fromJson<String?>(json['nickname']),
       addressLine: serializer.fromJson<String?>(json['addressLine']),
       area: serializer.fromJson<String?>(json['area']),
       cityDistrict: serializer.fromJson<String?>(json['cityDistrict']),
       ownerName: serializer.fromJson<String?>(json['ownerName']),
       ownerPhone: serializer.fromJson<String?>(json['ownerPhone']),
+      notes: serializer.fromJson<String?>(json['notes']),
       status: serializer.fromJson<String>(json['status']),
       isArchived: serializer.fromJson<bool>(json['isArchived']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
@@ -422,12 +482,14 @@ class Property extends DataClass implements Insertable<Property> {
     return <String, dynamic>{
       'id': serializer.toJson<String>(id),
       'name': serializer.toJson<String>(name),
+      'propertyType': serializer.toJson<String>(propertyType),
       'nickname': serializer.toJson<String?>(nickname),
       'addressLine': serializer.toJson<String?>(addressLine),
       'area': serializer.toJson<String?>(area),
       'cityDistrict': serializer.toJson<String?>(cityDistrict),
       'ownerName': serializer.toJson<String?>(ownerName),
       'ownerPhone': serializer.toJson<String?>(ownerPhone),
+      'notes': serializer.toJson<String?>(notes),
       'status': serializer.toJson<String>(status),
       'isArchived': serializer.toJson<bool>(isArchived),
       'createdAt': serializer.toJson<DateTime>(createdAt),
@@ -438,12 +500,14 @@ class Property extends DataClass implements Insertable<Property> {
   Property copyWith({
     String? id,
     String? name,
+    String? propertyType,
     Value<String?> nickname = const Value.absent(),
     Value<String?> addressLine = const Value.absent(),
     Value<String?> area = const Value.absent(),
     Value<String?> cityDistrict = const Value.absent(),
     Value<String?> ownerName = const Value.absent(),
     Value<String?> ownerPhone = const Value.absent(),
+    Value<String?> notes = const Value.absent(),
     String? status,
     bool? isArchived,
     DateTime? createdAt,
@@ -451,12 +515,14 @@ class Property extends DataClass implements Insertable<Property> {
   }) => Property(
     id: id ?? this.id,
     name: name ?? this.name,
+    propertyType: propertyType ?? this.propertyType,
     nickname: nickname.present ? nickname.value : this.nickname,
     addressLine: addressLine.present ? addressLine.value : this.addressLine,
     area: area.present ? area.value : this.area,
     cityDistrict: cityDistrict.present ? cityDistrict.value : this.cityDistrict,
     ownerName: ownerName.present ? ownerName.value : this.ownerName,
     ownerPhone: ownerPhone.present ? ownerPhone.value : this.ownerPhone,
+    notes: notes.present ? notes.value : this.notes,
     status: status ?? this.status,
     isArchived: isArchived ?? this.isArchived,
     createdAt: createdAt ?? this.createdAt,
@@ -466,6 +532,9 @@ class Property extends DataClass implements Insertable<Property> {
     return Property(
       id: data.id.present ? data.id.value : this.id,
       name: data.name.present ? data.name.value : this.name,
+      propertyType: data.propertyType.present
+          ? data.propertyType.value
+          : this.propertyType,
       nickname: data.nickname.present ? data.nickname.value : this.nickname,
       addressLine: data.addressLine.present
           ? data.addressLine.value
@@ -478,6 +547,7 @@ class Property extends DataClass implements Insertable<Property> {
       ownerPhone: data.ownerPhone.present
           ? data.ownerPhone.value
           : this.ownerPhone,
+      notes: data.notes.present ? data.notes.value : this.notes,
       status: data.status.present ? data.status.value : this.status,
       isArchived: data.isArchived.present
           ? data.isArchived.value
@@ -492,12 +562,14 @@ class Property extends DataClass implements Insertable<Property> {
     return (StringBuffer('Property(')
           ..write('id: $id, ')
           ..write('name: $name, ')
+          ..write('propertyType: $propertyType, ')
           ..write('nickname: $nickname, ')
           ..write('addressLine: $addressLine, ')
           ..write('area: $area, ')
           ..write('cityDistrict: $cityDistrict, ')
           ..write('ownerName: $ownerName, ')
           ..write('ownerPhone: $ownerPhone, ')
+          ..write('notes: $notes, ')
           ..write('status: $status, ')
           ..write('isArchived: $isArchived, ')
           ..write('createdAt: $createdAt, ')
@@ -510,12 +582,14 @@ class Property extends DataClass implements Insertable<Property> {
   int get hashCode => Object.hash(
     id,
     name,
+    propertyType,
     nickname,
     addressLine,
     area,
     cityDistrict,
     ownerName,
     ownerPhone,
+    notes,
     status,
     isArchived,
     createdAt,
@@ -527,12 +601,14 @@ class Property extends DataClass implements Insertable<Property> {
       (other is Property &&
           other.id == this.id &&
           other.name == this.name &&
+          other.propertyType == this.propertyType &&
           other.nickname == this.nickname &&
           other.addressLine == this.addressLine &&
           other.area == this.area &&
           other.cityDistrict == this.cityDistrict &&
           other.ownerName == this.ownerName &&
           other.ownerPhone == this.ownerPhone &&
+          other.notes == this.notes &&
           other.status == this.status &&
           other.isArchived == this.isArchived &&
           other.createdAt == this.createdAt &&
@@ -542,12 +618,14 @@ class Property extends DataClass implements Insertable<Property> {
 class PropertiesCompanion extends UpdateCompanion<Property> {
   final Value<String> id;
   final Value<String> name;
+  final Value<String> propertyType;
   final Value<String?> nickname;
   final Value<String?> addressLine;
   final Value<String?> area;
   final Value<String?> cityDistrict;
   final Value<String?> ownerName;
   final Value<String?> ownerPhone;
+  final Value<String?> notes;
   final Value<String> status;
   final Value<bool> isArchived;
   final Value<DateTime> createdAt;
@@ -556,12 +634,14 @@ class PropertiesCompanion extends UpdateCompanion<Property> {
   const PropertiesCompanion({
     this.id = const Value.absent(),
     this.name = const Value.absent(),
+    this.propertyType = const Value.absent(),
     this.nickname = const Value.absent(),
     this.addressLine = const Value.absent(),
     this.area = const Value.absent(),
     this.cityDistrict = const Value.absent(),
     this.ownerName = const Value.absent(),
     this.ownerPhone = const Value.absent(),
+    this.notes = const Value.absent(),
     this.status = const Value.absent(),
     this.isArchived = const Value.absent(),
     this.createdAt = const Value.absent(),
@@ -571,12 +651,14 @@ class PropertiesCompanion extends UpdateCompanion<Property> {
   PropertiesCompanion.insert({
     required String id,
     required String name,
+    this.propertyType = const Value.absent(),
     this.nickname = const Value.absent(),
     this.addressLine = const Value.absent(),
     this.area = const Value.absent(),
     this.cityDistrict = const Value.absent(),
     this.ownerName = const Value.absent(),
     this.ownerPhone = const Value.absent(),
+    this.notes = const Value.absent(),
     this.status = const Value.absent(),
     this.isArchived = const Value.absent(),
     this.createdAt = const Value.absent(),
@@ -587,12 +669,14 @@ class PropertiesCompanion extends UpdateCompanion<Property> {
   static Insertable<Property> custom({
     Expression<String>? id,
     Expression<String>? name,
+    Expression<String>? propertyType,
     Expression<String>? nickname,
     Expression<String>? addressLine,
     Expression<String>? area,
     Expression<String>? cityDistrict,
     Expression<String>? ownerName,
     Expression<String>? ownerPhone,
+    Expression<String>? notes,
     Expression<String>? status,
     Expression<bool>? isArchived,
     Expression<DateTime>? createdAt,
@@ -602,12 +686,14 @@ class PropertiesCompanion extends UpdateCompanion<Property> {
     return RawValuesInsertable({
       if (id != null) 'id': id,
       if (name != null) 'name': name,
+      if (propertyType != null) 'property_type': propertyType,
       if (nickname != null) 'nickname': nickname,
       if (addressLine != null) 'address_line': addressLine,
       if (area != null) 'area': area,
       if (cityDistrict != null) 'city_district': cityDistrict,
       if (ownerName != null) 'owner_name': ownerName,
       if (ownerPhone != null) 'owner_phone': ownerPhone,
+      if (notes != null) 'notes': notes,
       if (status != null) 'status': status,
       if (isArchived != null) 'is_archived': isArchived,
       if (createdAt != null) 'created_at': createdAt,
@@ -619,12 +705,14 @@ class PropertiesCompanion extends UpdateCompanion<Property> {
   PropertiesCompanion copyWith({
     Value<String>? id,
     Value<String>? name,
+    Value<String>? propertyType,
     Value<String?>? nickname,
     Value<String?>? addressLine,
     Value<String?>? area,
     Value<String?>? cityDistrict,
     Value<String?>? ownerName,
     Value<String?>? ownerPhone,
+    Value<String?>? notes,
     Value<String>? status,
     Value<bool>? isArchived,
     Value<DateTime>? createdAt,
@@ -634,12 +722,14 @@ class PropertiesCompanion extends UpdateCompanion<Property> {
     return PropertiesCompanion(
       id: id ?? this.id,
       name: name ?? this.name,
+      propertyType: propertyType ?? this.propertyType,
       nickname: nickname ?? this.nickname,
       addressLine: addressLine ?? this.addressLine,
       area: area ?? this.area,
       cityDistrict: cityDistrict ?? this.cityDistrict,
       ownerName: ownerName ?? this.ownerName,
       ownerPhone: ownerPhone ?? this.ownerPhone,
+      notes: notes ?? this.notes,
       status: status ?? this.status,
       isArchived: isArchived ?? this.isArchived,
       createdAt: createdAt ?? this.createdAt,
@@ -656,6 +746,9 @@ class PropertiesCompanion extends UpdateCompanion<Property> {
     }
     if (name.present) {
       map['name'] = Variable<String>(name.value);
+    }
+    if (propertyType.present) {
+      map['property_type'] = Variable<String>(propertyType.value);
     }
     if (nickname.present) {
       map['nickname'] = Variable<String>(nickname.value);
@@ -674,6 +767,9 @@ class PropertiesCompanion extends UpdateCompanion<Property> {
     }
     if (ownerPhone.present) {
       map['owner_phone'] = Variable<String>(ownerPhone.value);
+    }
+    if (notes.present) {
+      map['notes'] = Variable<String>(notes.value);
     }
     if (status.present) {
       map['status'] = Variable<String>(status.value);
@@ -698,12 +794,14 @@ class PropertiesCompanion extends UpdateCompanion<Property> {
     return (StringBuffer('PropertiesCompanion(')
           ..write('id: $id, ')
           ..write('name: $name, ')
+          ..write('propertyType: $propertyType, ')
           ..write('nickname: $nickname, ')
           ..write('addressLine: $addressLine, ')
           ..write('area: $area, ')
           ..write('cityDistrict: $cityDistrict, ')
           ..write('ownerName: $ownerName, ')
           ..write('ownerPhone: $ownerPhone, ')
+          ..write('notes: $notes, ')
           ..write('status: $status, ')
           ..write('isArchived: $isArchived, ')
           ..write('createdAt: $createdAt, ')
@@ -774,6 +872,17 @@ class $UnitsTable extends Units with TableInfo<$UnitsTable, Unit> {
     requiredDuringInsert: false,
     defaultValue: const Constant('apartment'),
   );
+  static const VerificationMeta _bedroomsMeta = const VerificationMeta(
+    'bedrooms',
+  );
+  @override
+  late final GeneratedColumn<int> bedrooms = GeneratedColumn<int>(
+    'bedrooms',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _defaultRentPoishaMeta = const VerificationMeta(
     'defaultRentPoisha',
   );
@@ -833,6 +942,15 @@ class $UnitsTable extends Units with TableInfo<$UnitsTable, Unit> {
     requiredDuringInsert: false,
     defaultValue: const Constant('vacant'),
   );
+  static const VerificationMeta _notesMeta = const VerificationMeta('notes');
+  @override
+  late final GeneratedColumn<String> notes = GeneratedColumn<String>(
+    'notes',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _isArchivedMeta = const VerificationMeta(
     'isArchived',
   );
@@ -879,11 +997,13 @@ class $UnitsTable extends Units with TableInfo<$UnitsTable, Unit> {
     name,
     floorName,
     unitType,
+    bedrooms,
     defaultRentPoisha,
     defaultServiceChargePoisha,
     defaultGasChargePoisha,
     defaultWaterChargePoisha,
     occupancyStatus,
+    notes,
     isArchived,
     createdAt,
     updatedAt,
@@ -933,6 +1053,12 @@ class $UnitsTable extends Units with TableInfo<$UnitsTable, Unit> {
         unitType.isAcceptableOrUnknown(data['unit_type']!, _unitTypeMeta),
       );
     }
+    if (data.containsKey('bedrooms')) {
+      context.handle(
+        _bedroomsMeta,
+        bedrooms.isAcceptableOrUnknown(data['bedrooms']!, _bedroomsMeta),
+      );
+    }
     if (data.containsKey('default_rent_poisha')) {
       context.handle(
         _defaultRentPoishaMeta,
@@ -976,6 +1102,12 @@ class $UnitsTable extends Units with TableInfo<$UnitsTable, Unit> {
           data['occupancy_status']!,
           _occupancyStatusMeta,
         ),
+      );
+    }
+    if (data.containsKey('notes')) {
+      context.handle(
+        _notesMeta,
+        notes.isAcceptableOrUnknown(data['notes']!, _notesMeta),
       );
     }
     if (data.containsKey('is_archived')) {
@@ -1029,6 +1161,10 @@ class $UnitsTable extends Units with TableInfo<$UnitsTable, Unit> {
         DriftSqlType.string,
         data['${effectivePrefix}unit_type'],
       )!,
+      bedrooms: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}bedrooms'],
+      ),
       defaultRentPoisha: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
         data['${effectivePrefix}default_rent_poisha'],
@@ -1049,6 +1185,10 @@ class $UnitsTable extends Units with TableInfo<$UnitsTable, Unit> {
         DriftSqlType.string,
         data['${effectivePrefix}occupancy_status'],
       )!,
+      notes: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}notes'],
+      ),
       isArchived: attachedDatabase.typeMapping.read(
         DriftSqlType.bool,
         data['${effectivePrefix}is_archived'],
@@ -1076,11 +1216,13 @@ class Unit extends DataClass implements Insertable<Unit> {
   final String name;
   final String? floorName;
   final String unitType;
+  final int? bedrooms;
   final int defaultRentPoisha;
   final int defaultServiceChargePoisha;
   final int defaultGasChargePoisha;
   final int defaultWaterChargePoisha;
   final String occupancyStatus;
+  final String? notes;
   final bool isArchived;
   final DateTime createdAt;
   final DateTime updatedAt;
@@ -1090,11 +1232,13 @@ class Unit extends DataClass implements Insertable<Unit> {
     required this.name,
     this.floorName,
     required this.unitType,
+    this.bedrooms,
     required this.defaultRentPoisha,
     required this.defaultServiceChargePoisha,
     required this.defaultGasChargePoisha,
     required this.defaultWaterChargePoisha,
     required this.occupancyStatus,
+    this.notes,
     required this.isArchived,
     required this.createdAt,
     required this.updatedAt,
@@ -1109,6 +1253,9 @@ class Unit extends DataClass implements Insertable<Unit> {
       map['floor_name'] = Variable<String>(floorName);
     }
     map['unit_type'] = Variable<String>(unitType);
+    if (!nullToAbsent || bedrooms != null) {
+      map['bedrooms'] = Variable<int>(bedrooms);
+    }
     map['default_rent_poisha'] = Variable<int>(defaultRentPoisha);
     map['default_service_charge_poisha'] = Variable<int>(
       defaultServiceChargePoisha,
@@ -1118,6 +1265,9 @@ class Unit extends DataClass implements Insertable<Unit> {
       defaultWaterChargePoisha,
     );
     map['occupancy_status'] = Variable<String>(occupancyStatus);
+    if (!nullToAbsent || notes != null) {
+      map['notes'] = Variable<String>(notes);
+    }
     map['is_archived'] = Variable<bool>(isArchived);
     map['created_at'] = Variable<DateTime>(createdAt);
     map['updated_at'] = Variable<DateTime>(updatedAt);
@@ -1133,11 +1283,17 @@ class Unit extends DataClass implements Insertable<Unit> {
           ? const Value.absent()
           : Value(floorName),
       unitType: Value(unitType),
+      bedrooms: bedrooms == null && nullToAbsent
+          ? const Value.absent()
+          : Value(bedrooms),
       defaultRentPoisha: Value(defaultRentPoisha),
       defaultServiceChargePoisha: Value(defaultServiceChargePoisha),
       defaultGasChargePoisha: Value(defaultGasChargePoisha),
       defaultWaterChargePoisha: Value(defaultWaterChargePoisha),
       occupancyStatus: Value(occupancyStatus),
+      notes: notes == null && nullToAbsent
+          ? const Value.absent()
+          : Value(notes),
       isArchived: Value(isArchived),
       createdAt: Value(createdAt),
       updatedAt: Value(updatedAt),
@@ -1155,6 +1311,7 @@ class Unit extends DataClass implements Insertable<Unit> {
       name: serializer.fromJson<String>(json['name']),
       floorName: serializer.fromJson<String?>(json['floorName']),
       unitType: serializer.fromJson<String>(json['unitType']),
+      bedrooms: serializer.fromJson<int?>(json['bedrooms']),
       defaultRentPoisha: serializer.fromJson<int>(json['defaultRentPoisha']),
       defaultServiceChargePoisha: serializer.fromJson<int>(
         json['defaultServiceChargePoisha'],
@@ -1166,6 +1323,7 @@ class Unit extends DataClass implements Insertable<Unit> {
         json['defaultWaterChargePoisha'],
       ),
       occupancyStatus: serializer.fromJson<String>(json['occupancyStatus']),
+      notes: serializer.fromJson<String?>(json['notes']),
       isArchived: serializer.fromJson<bool>(json['isArchived']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
       updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
@@ -1180,6 +1338,7 @@ class Unit extends DataClass implements Insertable<Unit> {
       'name': serializer.toJson<String>(name),
       'floorName': serializer.toJson<String?>(floorName),
       'unitType': serializer.toJson<String>(unitType),
+      'bedrooms': serializer.toJson<int?>(bedrooms),
       'defaultRentPoisha': serializer.toJson<int>(defaultRentPoisha),
       'defaultServiceChargePoisha': serializer.toJson<int>(
         defaultServiceChargePoisha,
@@ -1189,6 +1348,7 @@ class Unit extends DataClass implements Insertable<Unit> {
         defaultWaterChargePoisha,
       ),
       'occupancyStatus': serializer.toJson<String>(occupancyStatus),
+      'notes': serializer.toJson<String?>(notes),
       'isArchived': serializer.toJson<bool>(isArchived),
       'createdAt': serializer.toJson<DateTime>(createdAt),
       'updatedAt': serializer.toJson<DateTime>(updatedAt),
@@ -1201,11 +1361,13 @@ class Unit extends DataClass implements Insertable<Unit> {
     String? name,
     Value<String?> floorName = const Value.absent(),
     String? unitType,
+    Value<int?> bedrooms = const Value.absent(),
     int? defaultRentPoisha,
     int? defaultServiceChargePoisha,
     int? defaultGasChargePoisha,
     int? defaultWaterChargePoisha,
     String? occupancyStatus,
+    Value<String?> notes = const Value.absent(),
     bool? isArchived,
     DateTime? createdAt,
     DateTime? updatedAt,
@@ -1215,6 +1377,7 @@ class Unit extends DataClass implements Insertable<Unit> {
     name: name ?? this.name,
     floorName: floorName.present ? floorName.value : this.floorName,
     unitType: unitType ?? this.unitType,
+    bedrooms: bedrooms.present ? bedrooms.value : this.bedrooms,
     defaultRentPoisha: defaultRentPoisha ?? this.defaultRentPoisha,
     defaultServiceChargePoisha:
         defaultServiceChargePoisha ?? this.defaultServiceChargePoisha,
@@ -1223,6 +1386,7 @@ class Unit extends DataClass implements Insertable<Unit> {
     defaultWaterChargePoisha:
         defaultWaterChargePoisha ?? this.defaultWaterChargePoisha,
     occupancyStatus: occupancyStatus ?? this.occupancyStatus,
+    notes: notes.present ? notes.value : this.notes,
     isArchived: isArchived ?? this.isArchived,
     createdAt: createdAt ?? this.createdAt,
     updatedAt: updatedAt ?? this.updatedAt,
@@ -1236,6 +1400,7 @@ class Unit extends DataClass implements Insertable<Unit> {
       name: data.name.present ? data.name.value : this.name,
       floorName: data.floorName.present ? data.floorName.value : this.floorName,
       unitType: data.unitType.present ? data.unitType.value : this.unitType,
+      bedrooms: data.bedrooms.present ? data.bedrooms.value : this.bedrooms,
       defaultRentPoisha: data.defaultRentPoisha.present
           ? data.defaultRentPoisha.value
           : this.defaultRentPoisha,
@@ -1251,6 +1416,7 @@ class Unit extends DataClass implements Insertable<Unit> {
       occupancyStatus: data.occupancyStatus.present
           ? data.occupancyStatus.value
           : this.occupancyStatus,
+      notes: data.notes.present ? data.notes.value : this.notes,
       isArchived: data.isArchived.present
           ? data.isArchived.value
           : this.isArchived,
@@ -1267,11 +1433,13 @@ class Unit extends DataClass implements Insertable<Unit> {
           ..write('name: $name, ')
           ..write('floorName: $floorName, ')
           ..write('unitType: $unitType, ')
+          ..write('bedrooms: $bedrooms, ')
           ..write('defaultRentPoisha: $defaultRentPoisha, ')
           ..write('defaultServiceChargePoisha: $defaultServiceChargePoisha, ')
           ..write('defaultGasChargePoisha: $defaultGasChargePoisha, ')
           ..write('defaultWaterChargePoisha: $defaultWaterChargePoisha, ')
           ..write('occupancyStatus: $occupancyStatus, ')
+          ..write('notes: $notes, ')
           ..write('isArchived: $isArchived, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt')
@@ -1286,11 +1454,13 @@ class Unit extends DataClass implements Insertable<Unit> {
     name,
     floorName,
     unitType,
+    bedrooms,
     defaultRentPoisha,
     defaultServiceChargePoisha,
     defaultGasChargePoisha,
     defaultWaterChargePoisha,
     occupancyStatus,
+    notes,
     isArchived,
     createdAt,
     updatedAt,
@@ -1304,11 +1474,13 @@ class Unit extends DataClass implements Insertable<Unit> {
           other.name == this.name &&
           other.floorName == this.floorName &&
           other.unitType == this.unitType &&
+          other.bedrooms == this.bedrooms &&
           other.defaultRentPoisha == this.defaultRentPoisha &&
           other.defaultServiceChargePoisha == this.defaultServiceChargePoisha &&
           other.defaultGasChargePoisha == this.defaultGasChargePoisha &&
           other.defaultWaterChargePoisha == this.defaultWaterChargePoisha &&
           other.occupancyStatus == this.occupancyStatus &&
+          other.notes == this.notes &&
           other.isArchived == this.isArchived &&
           other.createdAt == this.createdAt &&
           other.updatedAt == this.updatedAt);
@@ -1320,11 +1492,13 @@ class UnitsCompanion extends UpdateCompanion<Unit> {
   final Value<String> name;
   final Value<String?> floorName;
   final Value<String> unitType;
+  final Value<int?> bedrooms;
   final Value<int> defaultRentPoisha;
   final Value<int> defaultServiceChargePoisha;
   final Value<int> defaultGasChargePoisha;
   final Value<int> defaultWaterChargePoisha;
   final Value<String> occupancyStatus;
+  final Value<String?> notes;
   final Value<bool> isArchived;
   final Value<DateTime> createdAt;
   final Value<DateTime> updatedAt;
@@ -1335,11 +1509,13 @@ class UnitsCompanion extends UpdateCompanion<Unit> {
     this.name = const Value.absent(),
     this.floorName = const Value.absent(),
     this.unitType = const Value.absent(),
+    this.bedrooms = const Value.absent(),
     this.defaultRentPoisha = const Value.absent(),
     this.defaultServiceChargePoisha = const Value.absent(),
     this.defaultGasChargePoisha = const Value.absent(),
     this.defaultWaterChargePoisha = const Value.absent(),
     this.occupancyStatus = const Value.absent(),
+    this.notes = const Value.absent(),
     this.isArchived = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
@@ -1351,11 +1527,13 @@ class UnitsCompanion extends UpdateCompanion<Unit> {
     required String name,
     this.floorName = const Value.absent(),
     this.unitType = const Value.absent(),
+    this.bedrooms = const Value.absent(),
     this.defaultRentPoisha = const Value.absent(),
     this.defaultServiceChargePoisha = const Value.absent(),
     this.defaultGasChargePoisha = const Value.absent(),
     this.defaultWaterChargePoisha = const Value.absent(),
     this.occupancyStatus = const Value.absent(),
+    this.notes = const Value.absent(),
     this.isArchived = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
@@ -1369,11 +1547,13 @@ class UnitsCompanion extends UpdateCompanion<Unit> {
     Expression<String>? name,
     Expression<String>? floorName,
     Expression<String>? unitType,
+    Expression<int>? bedrooms,
     Expression<int>? defaultRentPoisha,
     Expression<int>? defaultServiceChargePoisha,
     Expression<int>? defaultGasChargePoisha,
     Expression<int>? defaultWaterChargePoisha,
     Expression<String>? occupancyStatus,
+    Expression<String>? notes,
     Expression<bool>? isArchived,
     Expression<DateTime>? createdAt,
     Expression<DateTime>? updatedAt,
@@ -1385,6 +1565,7 @@ class UnitsCompanion extends UpdateCompanion<Unit> {
       if (name != null) 'name': name,
       if (floorName != null) 'floor_name': floorName,
       if (unitType != null) 'unit_type': unitType,
+      if (bedrooms != null) 'bedrooms': bedrooms,
       if (defaultRentPoisha != null) 'default_rent_poisha': defaultRentPoisha,
       if (defaultServiceChargePoisha != null)
         'default_service_charge_poisha': defaultServiceChargePoisha,
@@ -1393,6 +1574,7 @@ class UnitsCompanion extends UpdateCompanion<Unit> {
       if (defaultWaterChargePoisha != null)
         'default_water_charge_poisha': defaultWaterChargePoisha,
       if (occupancyStatus != null) 'occupancy_status': occupancyStatus,
+      if (notes != null) 'notes': notes,
       if (isArchived != null) 'is_archived': isArchived,
       if (createdAt != null) 'created_at': createdAt,
       if (updatedAt != null) 'updated_at': updatedAt,
@@ -1406,11 +1588,13 @@ class UnitsCompanion extends UpdateCompanion<Unit> {
     Value<String>? name,
     Value<String?>? floorName,
     Value<String>? unitType,
+    Value<int?>? bedrooms,
     Value<int>? defaultRentPoisha,
     Value<int>? defaultServiceChargePoisha,
     Value<int>? defaultGasChargePoisha,
     Value<int>? defaultWaterChargePoisha,
     Value<String>? occupancyStatus,
+    Value<String?>? notes,
     Value<bool>? isArchived,
     Value<DateTime>? createdAt,
     Value<DateTime>? updatedAt,
@@ -1422,6 +1606,7 @@ class UnitsCompanion extends UpdateCompanion<Unit> {
       name: name ?? this.name,
       floorName: floorName ?? this.floorName,
       unitType: unitType ?? this.unitType,
+      bedrooms: bedrooms ?? this.bedrooms,
       defaultRentPoisha: defaultRentPoisha ?? this.defaultRentPoisha,
       defaultServiceChargePoisha:
           defaultServiceChargePoisha ?? this.defaultServiceChargePoisha,
@@ -1430,6 +1615,7 @@ class UnitsCompanion extends UpdateCompanion<Unit> {
       defaultWaterChargePoisha:
           defaultWaterChargePoisha ?? this.defaultWaterChargePoisha,
       occupancyStatus: occupancyStatus ?? this.occupancyStatus,
+      notes: notes ?? this.notes,
       isArchived: isArchived ?? this.isArchived,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
@@ -1455,6 +1641,9 @@ class UnitsCompanion extends UpdateCompanion<Unit> {
     if (unitType.present) {
       map['unit_type'] = Variable<String>(unitType.value);
     }
+    if (bedrooms.present) {
+      map['bedrooms'] = Variable<int>(bedrooms.value);
+    }
     if (defaultRentPoisha.present) {
       map['default_rent_poisha'] = Variable<int>(defaultRentPoisha.value);
     }
@@ -1475,6 +1664,9 @@ class UnitsCompanion extends UpdateCompanion<Unit> {
     }
     if (occupancyStatus.present) {
       map['occupancy_status'] = Variable<String>(occupancyStatus.value);
+    }
+    if (notes.present) {
+      map['notes'] = Variable<String>(notes.value);
     }
     if (isArchived.present) {
       map['is_archived'] = Variable<bool>(isArchived.value);
@@ -1499,11 +1691,13 @@ class UnitsCompanion extends UpdateCompanion<Unit> {
           ..write('name: $name, ')
           ..write('floorName: $floorName, ')
           ..write('unitType: $unitType, ')
+          ..write('bedrooms: $bedrooms, ')
           ..write('defaultRentPoisha: $defaultRentPoisha, ')
           ..write('defaultServiceChargePoisha: $defaultServiceChargePoisha, ')
           ..write('defaultGasChargePoisha: $defaultGasChargePoisha, ')
           ..write('defaultWaterChargePoisha: $defaultWaterChargePoisha, ')
           ..write('occupancyStatus: $occupancyStatus, ')
+          ..write('notes: $notes, ')
           ..write('isArchived: $isArchived, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
@@ -10292,12 +10486,14 @@ abstract class _$AppDatabase extends GeneratedDatabase {
 typedef $$PropertiesTableCreateCompanionBuilder = PropertiesCompanion Function({
   required String id,
   required String name,
+  Value<String> propertyType,
   Value<String?> nickname,
   Value<String?> addressLine,
   Value<String?> area,
   Value<String?> cityDistrict,
   Value<String?> ownerName,
   Value<String?> ownerPhone,
+  Value<String?> notes,
   Value<String> status,
   Value<bool> isArchived,
   Value<DateTime> createdAt,
@@ -10307,12 +10503,14 @@ typedef $$PropertiesTableCreateCompanionBuilder = PropertiesCompanion Function({
 typedef $$PropertiesTableUpdateCompanionBuilder = PropertiesCompanion Function({
   Value<String> id,
   Value<String> name,
+  Value<String> propertyType,
   Value<String?> nickname,
   Value<String?> addressLine,
   Value<String?> area,
   Value<String?> cityDistrict,
   Value<String?> ownerName,
   Value<String?> ownerPhone,
+  Value<String?> notes,
   Value<String> status,
   Value<bool> isArchived,
   Value<DateTime> createdAt,
@@ -10400,6 +10598,11 @@ class $$PropertiesTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
+  ColumnFilters<String> get propertyType => $composableBuilder(
+    column: $table.propertyType,
+    builder: (column) => ColumnFilters(column),
+  );
+
   ColumnFilters<String> get nickname => $composableBuilder(
     column: $table.nickname,
     builder: (column) => ColumnFilters(column),
@@ -10427,6 +10630,11 @@ class $$PropertiesTableFilterComposer
 
   ColumnFilters<String> get ownerPhone => $composableBuilder(
     column: $table.ownerPhone,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get notes => $composableBuilder(
+    column: $table.notes,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -10545,6 +10753,11 @@ class $$PropertiesTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get propertyType => $composableBuilder(
+    column: $table.propertyType,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<String> get nickname => $composableBuilder(
     column: $table.nickname,
     builder: (column) => ColumnOrderings(column),
@@ -10572,6 +10785,11 @@ class $$PropertiesTableOrderingComposer
 
   ColumnOrderings<String> get ownerPhone => $composableBuilder(
     column: $table.ownerPhone,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get notes => $composableBuilder(
+    column: $table.notes,
     builder: (column) => ColumnOrderings(column),
   );
 
@@ -10611,6 +10829,11 @@ class $$PropertiesTableAnnotationComposer
   GeneratedColumn<String> get name =>
       $composableBuilder(column: $table.name, builder: (column) => column);
 
+  GeneratedColumn<String> get propertyType => $composableBuilder(
+    column: $table.propertyType,
+    builder: (column) => column,
+  );
+
   GeneratedColumn<String> get nickname =>
       $composableBuilder(column: $table.nickname, builder: (column) => column);
 
@@ -10634,6 +10857,9 @@ class $$PropertiesTableAnnotationComposer
     column: $table.ownerPhone,
     builder: (column) => column,
   );
+
+  GeneratedColumn<String> get notes =>
+      $composableBuilder(column: $table.notes, builder: (column) => column);
 
   GeneratedColumn<String> get status =>
       $composableBuilder(column: $table.status, builder: (column) => column);
@@ -10759,12 +10985,14 @@ class $$PropertiesTableTableManager
               ({
                 Value<String> id = const Value.absent(),
                 Value<String> name = const Value.absent(),
+                Value<String> propertyType = const Value.absent(),
                 Value<String?> nickname = const Value.absent(),
                 Value<String?> addressLine = const Value.absent(),
                 Value<String?> area = const Value.absent(),
                 Value<String?> cityDistrict = const Value.absent(),
                 Value<String?> ownerName = const Value.absent(),
                 Value<String?> ownerPhone = const Value.absent(),
+                Value<String?> notes = const Value.absent(),
                 Value<String> status = const Value.absent(),
                 Value<bool> isArchived = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
@@ -10773,12 +11001,14 @@ class $$PropertiesTableTableManager
               }) => PropertiesCompanion(
                 id: id,
                 name: name,
+                propertyType: propertyType,
                 nickname: nickname,
                 addressLine: addressLine,
                 area: area,
                 cityDistrict: cityDistrict,
                 ownerName: ownerName,
                 ownerPhone: ownerPhone,
+                notes: notes,
                 status: status,
                 isArchived: isArchived,
                 createdAt: createdAt,
@@ -10789,12 +11019,14 @@ class $$PropertiesTableTableManager
               ({
                 required String id,
                 required String name,
+                Value<String> propertyType = const Value.absent(),
                 Value<String?> nickname = const Value.absent(),
                 Value<String?> addressLine = const Value.absent(),
                 Value<String?> area = const Value.absent(),
                 Value<String?> cityDistrict = const Value.absent(),
                 Value<String?> ownerName = const Value.absent(),
                 Value<String?> ownerPhone = const Value.absent(),
+                Value<String?> notes = const Value.absent(),
                 Value<String> status = const Value.absent(),
                 Value<bool> isArchived = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
@@ -10803,12 +11035,14 @@ class $$PropertiesTableTableManager
               }) => PropertiesCompanion.insert(
                 id: id,
                 name: name,
+                propertyType: propertyType,
                 nickname: nickname,
                 addressLine: addressLine,
                 area: area,
                 cityDistrict: cityDistrict,
                 ownerName: ownerName,
                 ownerPhone: ownerPhone,
+                notes: notes,
                 status: status,
                 isArchived: isArchived,
                 createdAt: createdAt,
@@ -10934,11 +11168,13 @@ typedef $$UnitsTableCreateCompanionBuilder = UnitsCompanion Function({
   required String name,
   Value<String?> floorName,
   Value<String> unitType,
+  Value<int?> bedrooms,
   Value<int> defaultRentPoisha,
   Value<int> defaultServiceChargePoisha,
   Value<int> defaultGasChargePoisha,
   Value<int> defaultWaterChargePoisha,
   Value<String> occupancyStatus,
+  Value<String?> notes,
   Value<bool> isArchived,
   Value<DateTime> createdAt,
   Value<DateTime> updatedAt,
@@ -10950,11 +11186,13 @@ typedef $$UnitsTableUpdateCompanionBuilder = UnitsCompanion Function({
   Value<String> name,
   Value<String?> floorName,
   Value<String> unitType,
+  Value<int?> bedrooms,
   Value<int> defaultRentPoisha,
   Value<int> defaultServiceChargePoisha,
   Value<int> defaultGasChargePoisha,
   Value<int> defaultWaterChargePoisha,
   Value<String> occupancyStatus,
+  Value<String?> notes,
   Value<bool> isArchived,
   Value<DateTime> createdAt,
   Value<DateTime> updatedAt,
@@ -11090,6 +11328,11 @@ class $$UnitsTableFilterComposer extends Composer<_$AppDatabase, $UnitsTable> {
     builder: (column) => ColumnFilters(column),
   );
 
+  ColumnFilters<int> get bedrooms => $composableBuilder(
+    column: $table.bedrooms,
+    builder: (column) => ColumnFilters(column),
+  );
+
   ColumnFilters<int> get defaultRentPoisha => $composableBuilder(
     column: $table.defaultRentPoisha,
     builder: (column) => ColumnFilters(column),
@@ -11112,6 +11355,11 @@ class $$UnitsTableFilterComposer extends Composer<_$AppDatabase, $UnitsTable> {
 
   ColumnFilters<String> get occupancyStatus => $composableBuilder(
     column: $table.occupancyStatus,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get notes => $composableBuilder(
+    column: $table.notes,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -11283,6 +11531,11 @@ class $$UnitsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<int> get bedrooms => $composableBuilder(
+    column: $table.bedrooms,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<int> get defaultRentPoisha => $composableBuilder(
     column: $table.defaultRentPoisha,
     builder: (column) => ColumnOrderings(column),
@@ -11305,6 +11558,11 @@ class $$UnitsTableOrderingComposer
 
   ColumnOrderings<String> get occupancyStatus => $composableBuilder(
     column: $table.occupancyStatus,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get notes => $composableBuilder(
+    column: $table.notes,
     builder: (column) => ColumnOrderings(column),
   );
 
@@ -11368,6 +11626,9 @@ class $$UnitsTableAnnotationComposer
   GeneratedColumn<String> get unitType =>
       $composableBuilder(column: $table.unitType, builder: (column) => column);
 
+  GeneratedColumn<int> get bedrooms =>
+      $composableBuilder(column: $table.bedrooms, builder: (column) => column);
+
   GeneratedColumn<int> get defaultRentPoisha => $composableBuilder(
     column: $table.defaultRentPoisha,
     builder: (column) => column,
@@ -11392,6 +11653,9 @@ class $$UnitsTableAnnotationComposer
     column: $table.occupancyStatus,
     builder: (column) => column,
   );
+
+  GeneratedColumn<String> get notes =>
+      $composableBuilder(column: $table.notes, builder: (column) => column);
 
   GeneratedColumn<bool> get isArchived => $composableBuilder(
     column: $table.isArchived,
@@ -11568,11 +11832,13 @@ class $$UnitsTableTableManager
                 Value<String> name = const Value.absent(),
                 Value<String?> floorName = const Value.absent(),
                 Value<String> unitType = const Value.absent(),
+                Value<int?> bedrooms = const Value.absent(),
                 Value<int> defaultRentPoisha = const Value.absent(),
                 Value<int> defaultServiceChargePoisha = const Value.absent(),
                 Value<int> defaultGasChargePoisha = const Value.absent(),
                 Value<int> defaultWaterChargePoisha = const Value.absent(),
                 Value<String> occupancyStatus = const Value.absent(),
+                Value<String?> notes = const Value.absent(),
                 Value<bool> isArchived = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<DateTime> updatedAt = const Value.absent(),
@@ -11583,11 +11849,13 @@ class $$UnitsTableTableManager
                 name: name,
                 floorName: floorName,
                 unitType: unitType,
+                bedrooms: bedrooms,
                 defaultRentPoisha: defaultRentPoisha,
                 defaultServiceChargePoisha: defaultServiceChargePoisha,
                 defaultGasChargePoisha: defaultGasChargePoisha,
                 defaultWaterChargePoisha: defaultWaterChargePoisha,
                 occupancyStatus: occupancyStatus,
+                notes: notes,
                 isArchived: isArchived,
                 createdAt: createdAt,
                 updatedAt: updatedAt,
@@ -11600,11 +11868,13 @@ class $$UnitsTableTableManager
                 required String name,
                 Value<String?> floorName = const Value.absent(),
                 Value<String> unitType = const Value.absent(),
+                Value<int?> bedrooms = const Value.absent(),
                 Value<int> defaultRentPoisha = const Value.absent(),
                 Value<int> defaultServiceChargePoisha = const Value.absent(),
                 Value<int> defaultGasChargePoisha = const Value.absent(),
                 Value<int> defaultWaterChargePoisha = const Value.absent(),
                 Value<String> occupancyStatus = const Value.absent(),
+                Value<String?> notes = const Value.absent(),
                 Value<bool> isArchived = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<DateTime> updatedAt = const Value.absent(),
@@ -11615,11 +11885,13 @@ class $$UnitsTableTableManager
                 name: name,
                 floorName: floorName,
                 unitType: unitType,
+                bedrooms: bedrooms,
                 defaultRentPoisha: defaultRentPoisha,
                 defaultServiceChargePoisha: defaultServiceChargePoisha,
                 defaultGasChargePoisha: defaultGasChargePoisha,
                 defaultWaterChargePoisha: defaultWaterChargePoisha,
                 occupancyStatus: occupancyStatus,
+                notes: notes,
                 isArchived: isArchived,
                 createdAt: createdAt,
                 updatedAt: updatedAt,

@@ -106,8 +106,14 @@ class AppDatabase extends _$AppDatabase {
           from: from,
           to: to,
           action: () async {
-            // Add explicit, tested transitions here as schemaVersion advances.
-            throw StateError('No migration is registered from v$from to v$to.');
+            // Migrations are forward-only. A failed action leaves the source
+            // database in place for the startup health check to recover.
+            if (from < 2) {
+              await migrator.addColumn(properties, properties.propertyType);
+              await migrator.addColumn(properties, properties.notes);
+              await migrator.addColumn(units, units.bedrooms);
+              await migrator.addColumn(units, units.notes);
+            }
           },
         );
       },

@@ -1,6 +1,15 @@
 import 'package:barivara/core/domain/value_types.dart';
 
-/// Minimal property aggregate used by Phase 1 repositories.
+/// High-level categories used to describe a landlord property.
+enum PropertyType { residential, commercial, mixedUse, other }
+
+/// Derived operational unit availability.
+enum UnitAvailability { vacant, occupied, reserved, archived }
+
+/// Filter options for the unit list.
+enum UnitFilter { all, occupied, vacant, archived }
+
+/// Property aggregate retained independently from its current unit activity.
 class Property {
   /// Creates a property.
   const Property({
@@ -8,17 +17,29 @@ class Property {
     required this.name,
     required this.createdAt,
     required this.updatedAt,
+    this.type = PropertyType.residential,
+    this.nickname,
+    this.addressLine,
+    this.area,
+    this.cityDistrict,
+    this.notes,
     this.isArchived = false,
   });
 
   final EntityId id;
   final String name;
+  final PropertyType type;
+  final String? nickname;
+  final String? addressLine;
+  final String? area;
+  final String? cityDistrict;
+  final String? notes;
   final DateTime createdAt;
   final DateTime updatedAt;
   final bool isArchived;
 }
 
-/// Minimal rentable-unit aggregate used by Phase 1 repositories.
+/// Rentable unit configuration, separate from occupancy history.
 class RentalUnit {
   /// Creates a unit.
   const RentalUnit({
@@ -28,6 +49,14 @@ class RentalUnit {
     required this.defaultRent,
     required this.createdAt,
     required this.updatedAt,
+    this.floorName,
+    this.unitType = 'apartment',
+    this.bedrooms,
+    this.defaultServiceCharge = Money.zero,
+    this.defaultGasCharge = Money.zero,
+    this.defaultWaterCharge = Money.zero,
+    this.manualAvailability = UnitAvailability.vacant,
+    this.notes,
     this.isArchived = false,
   });
 
@@ -35,9 +64,49 @@ class RentalUnit {
   final EntityId propertyId;
   final String name;
   final Money defaultRent;
+  final String? floorName;
+  final String unitType;
+  final int? bedrooms;
+  final Money defaultServiceCharge;
+  final Money defaultGasCharge;
+  final Money defaultWaterCharge;
+  final UnitAvailability manualAvailability;
+  final String? notes;
   final DateTime createdAt;
   final DateTime updatedAt;
   final bool isArchived;
+}
+
+/// Property-list data with operating counts derived from local records.
+class PropertySummary {
+  /// Creates a property summary.
+  const PropertySummary({
+    required this.property,
+    required this.unitCount,
+    required this.occupiedCount,
+    required this.vacantCount,
+    required this.currentMonthDue,
+  });
+
+  final Property property;
+  final int unitCount;
+  final int occupiedCount;
+  final int vacantCount;
+  final Money currentMonthDue;
+}
+
+/// Unit-list data whose availability is derived from active tenancy records.
+class UnitSummary {
+  /// Creates a unit summary.
+  const UnitSummary({
+    required this.unit,
+    required this.availability,
+    this.activeTenantName,
+  });
+
+  final RentalUnit unit;
+  final UnitAvailability availability;
+  final String? activeTenantName;
 }
 
 /// Tenant identity aggregate.
