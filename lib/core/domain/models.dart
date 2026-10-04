@@ -408,11 +408,61 @@ class Deposit {
     required this.id,
     required this.tenancyId,
     required this.currentBalance,
+    this.expected = Money.zero,
+    this.advanceRentBalance = Money.zero,
   });
 
   final EntityId id;
   final EntityId tenancyId;
   final Money currentBalance;
+  final Money expected;
+  final Money advanceRentBalance;
+}
+
+/// Append-only categories for funds held outside rent income.
+enum DepositTransactionType {
+  received,
+  additional,
+  refund,
+  deduction,
+  transferToDue,
+  correction,
+}
+
+/// A ledger entry for a tenancy deposit account.
+class DepositTransaction {
+  const DepositTransaction({
+    required this.id,
+    required this.depositId,
+    required this.type,
+    required this.amount,
+    required this.date,
+    this.note,
+    this.method,
+  });
+  final EntityId id;
+  final EntityId depositId;
+  final DepositTransactionType type;
+  final Money amount;
+  final DateTime date;
+  final String? note;
+  final PaymentMethod? method;
+}
+
+/// Move-out calculation separated from normal rent-payment history.
+class MoveOutSettlement {
+  const MoveOutSettlement({
+    required this.outstanding,
+    required this.repairCharges,
+    required this.credits,
+    required this.depositApplied,
+    required this.finalPayable,
+  });
+  final Money outstanding;
+  final Money repairCharges;
+  final Money credits;
+  final Money depositApplied;
+  final Money finalPayable;
 }
 
 /// A property maintenance record.
