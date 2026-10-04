@@ -6454,6 +6454,20 @@ class $PaymentsTable extends Payments with TableInfo<$PaymentsTable, Payment> {
       'REFERENCES tenancies (id)',
     ),
   );
+  static const VerificationMeta _tenantIdMeta = const VerificationMeta(
+    'tenantId',
+  );
+  @override
+  late final GeneratedColumn<String> tenantId = GeneratedColumn<String>(
+    'tenant_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES tenants (id)',
+    ),
+  );
   static const VerificationMeta _paymentNumberMeta = const VerificationMeta(
     'paymentNumber',
   );
@@ -6528,6 +6542,28 @@ class $PaymentsTable extends Payments with TableInfo<$PaymentsTable, Payment> {
     requiredDuringInsert: false,
     defaultValue: const Constant('posted'),
   );
+  static const VerificationMeta _reversalReasonMeta = const VerificationMeta(
+    'reversalReason',
+  );
+  @override
+  late final GeneratedColumn<String> reversalReason = GeneratedColumn<String>(
+    'reversal_reason',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _reversedAtMeta = const VerificationMeta(
+    'reversedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> reversedAt = GeneratedColumn<DateTime>(
+    'reversed_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _createdAtMeta = const VerificationMeta(
     'createdAt',
   );
@@ -6556,6 +6592,7 @@ class $PaymentsTable extends Payments with TableInfo<$PaymentsTable, Payment> {
   List<GeneratedColumn> get $columns => [
     id,
     tenancyId,
+    tenantId,
     paymentNumber,
     paymentDate,
     amountPoisha,
@@ -6563,6 +6600,8 @@ class $PaymentsTable extends Payments with TableInfo<$PaymentsTable, Payment> {
     reference,
     note,
     status,
+    reversalReason,
+    reversedAt,
     createdAt,
     updatedAt,
   ];
@@ -6590,6 +6629,12 @@ class $PaymentsTable extends Payments with TableInfo<$PaymentsTable, Payment> {
       );
     } else if (isInserting) {
       context.missing(_tenancyIdMeta);
+    }
+    if (data.containsKey('tenant_id')) {
+      context.handle(
+        _tenantIdMeta,
+        tenantId.isAcceptableOrUnknown(data['tenant_id']!, _tenantIdMeta),
+      );
     }
     if (data.containsKey('payment_number')) {
       context.handle(
@@ -6653,6 +6698,21 @@ class $PaymentsTable extends Payments with TableInfo<$PaymentsTable, Payment> {
         status.isAcceptableOrUnknown(data['status']!, _statusMeta),
       );
     }
+    if (data.containsKey('reversal_reason')) {
+      context.handle(
+        _reversalReasonMeta,
+        reversalReason.isAcceptableOrUnknown(
+          data['reversal_reason']!,
+          _reversalReasonMeta,
+        ),
+      );
+    }
+    if (data.containsKey('reversed_at')) {
+      context.handle(
+        _reversedAtMeta,
+        reversedAt.isAcceptableOrUnknown(data['reversed_at']!, _reversedAtMeta),
+      );
+    }
     if (data.containsKey('created_at')) {
       context.handle(
         _createdAtMeta,
@@ -6682,6 +6742,10 @@ class $PaymentsTable extends Payments with TableInfo<$PaymentsTable, Payment> {
         DriftSqlType.string,
         data['${effectivePrefix}tenancy_id'],
       )!,
+      tenantId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}tenant_id'],
+      ),
       paymentNumber: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}payment_number'],
@@ -6710,6 +6774,14 @@ class $PaymentsTable extends Payments with TableInfo<$PaymentsTable, Payment> {
         DriftSqlType.string,
         data['${effectivePrefix}status'],
       )!,
+      reversalReason: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}reversal_reason'],
+      ),
+      reversedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}reversed_at'],
+      ),
       createdAt: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
         data['${effectivePrefix}created_at'],
@@ -6730,6 +6802,7 @@ class $PaymentsTable extends Payments with TableInfo<$PaymentsTable, Payment> {
 class Payment extends DataClass implements Insertable<Payment> {
   final String id;
   final String tenancyId;
+  final String? tenantId;
   final String paymentNumber;
   final DateTime paymentDate;
   final int amountPoisha;
@@ -6737,11 +6810,14 @@ class Payment extends DataClass implements Insertable<Payment> {
   final String? reference;
   final String? note;
   final String status;
+  final String? reversalReason;
+  final DateTime? reversedAt;
   final DateTime createdAt;
   final DateTime updatedAt;
   const Payment({
     required this.id,
     required this.tenancyId,
+    this.tenantId,
     required this.paymentNumber,
     required this.paymentDate,
     required this.amountPoisha,
@@ -6749,6 +6825,8 @@ class Payment extends DataClass implements Insertable<Payment> {
     this.reference,
     this.note,
     required this.status,
+    this.reversalReason,
+    this.reversedAt,
     required this.createdAt,
     required this.updatedAt,
   });
@@ -6757,6 +6835,9 @@ class Payment extends DataClass implements Insertable<Payment> {
     final map = <String, Expression>{};
     map['id'] = Variable<String>(id);
     map['tenancy_id'] = Variable<String>(tenancyId);
+    if (!nullToAbsent || tenantId != null) {
+      map['tenant_id'] = Variable<String>(tenantId);
+    }
     map['payment_number'] = Variable<String>(paymentNumber);
     map['payment_date'] = Variable<DateTime>(paymentDate);
     map['amount_poisha'] = Variable<int>(amountPoisha);
@@ -6768,6 +6849,12 @@ class Payment extends DataClass implements Insertable<Payment> {
       map['note'] = Variable<String>(note);
     }
     map['status'] = Variable<String>(status);
+    if (!nullToAbsent || reversalReason != null) {
+      map['reversal_reason'] = Variable<String>(reversalReason);
+    }
+    if (!nullToAbsent || reversedAt != null) {
+      map['reversed_at'] = Variable<DateTime>(reversedAt);
+    }
     map['created_at'] = Variable<DateTime>(createdAt);
     map['updated_at'] = Variable<DateTime>(updatedAt);
     return map;
@@ -6777,6 +6864,9 @@ class Payment extends DataClass implements Insertable<Payment> {
     return PaymentsCompanion(
       id: Value(id),
       tenancyId: Value(tenancyId),
+      tenantId: tenantId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(tenantId),
       paymentNumber: Value(paymentNumber),
       paymentDate: Value(paymentDate),
       amountPoisha: Value(amountPoisha),
@@ -6786,6 +6876,12 @@ class Payment extends DataClass implements Insertable<Payment> {
           : Value(reference),
       note: note == null && nullToAbsent ? const Value.absent() : Value(note),
       status: Value(status),
+      reversalReason: reversalReason == null && nullToAbsent
+          ? const Value.absent()
+          : Value(reversalReason),
+      reversedAt: reversedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(reversedAt),
       createdAt: Value(createdAt),
       updatedAt: Value(updatedAt),
     );
@@ -6799,6 +6895,7 @@ class Payment extends DataClass implements Insertable<Payment> {
     return Payment(
       id: serializer.fromJson<String>(json['id']),
       tenancyId: serializer.fromJson<String>(json['tenancyId']),
+      tenantId: serializer.fromJson<String?>(json['tenantId']),
       paymentNumber: serializer.fromJson<String>(json['paymentNumber']),
       paymentDate: serializer.fromJson<DateTime>(json['paymentDate']),
       amountPoisha: serializer.fromJson<int>(json['amountPoisha']),
@@ -6806,6 +6903,8 @@ class Payment extends DataClass implements Insertable<Payment> {
       reference: serializer.fromJson<String?>(json['reference']),
       note: serializer.fromJson<String?>(json['note']),
       status: serializer.fromJson<String>(json['status']),
+      reversalReason: serializer.fromJson<String?>(json['reversalReason']),
+      reversedAt: serializer.fromJson<DateTime?>(json['reversedAt']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
       updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
     );
@@ -6816,6 +6915,7 @@ class Payment extends DataClass implements Insertable<Payment> {
     return <String, dynamic>{
       'id': serializer.toJson<String>(id),
       'tenancyId': serializer.toJson<String>(tenancyId),
+      'tenantId': serializer.toJson<String?>(tenantId),
       'paymentNumber': serializer.toJson<String>(paymentNumber),
       'paymentDate': serializer.toJson<DateTime>(paymentDate),
       'amountPoisha': serializer.toJson<int>(amountPoisha),
@@ -6823,6 +6923,8 @@ class Payment extends DataClass implements Insertable<Payment> {
       'reference': serializer.toJson<String?>(reference),
       'note': serializer.toJson<String?>(note),
       'status': serializer.toJson<String>(status),
+      'reversalReason': serializer.toJson<String?>(reversalReason),
+      'reversedAt': serializer.toJson<DateTime?>(reversedAt),
       'createdAt': serializer.toJson<DateTime>(createdAt),
       'updatedAt': serializer.toJson<DateTime>(updatedAt),
     };
@@ -6831,6 +6933,7 @@ class Payment extends DataClass implements Insertable<Payment> {
   Payment copyWith({
     String? id,
     String? tenancyId,
+    Value<String?> tenantId = const Value.absent(),
     String? paymentNumber,
     DateTime? paymentDate,
     int? amountPoisha,
@@ -6838,11 +6941,14 @@ class Payment extends DataClass implements Insertable<Payment> {
     Value<String?> reference = const Value.absent(),
     Value<String?> note = const Value.absent(),
     String? status,
+    Value<String?> reversalReason = const Value.absent(),
+    Value<DateTime?> reversedAt = const Value.absent(),
     DateTime? createdAt,
     DateTime? updatedAt,
   }) => Payment(
     id: id ?? this.id,
     tenancyId: tenancyId ?? this.tenancyId,
+    tenantId: tenantId.present ? tenantId.value : this.tenantId,
     paymentNumber: paymentNumber ?? this.paymentNumber,
     paymentDate: paymentDate ?? this.paymentDate,
     amountPoisha: amountPoisha ?? this.amountPoisha,
@@ -6850,6 +6956,10 @@ class Payment extends DataClass implements Insertable<Payment> {
     reference: reference.present ? reference.value : this.reference,
     note: note.present ? note.value : this.note,
     status: status ?? this.status,
+    reversalReason: reversalReason.present
+        ? reversalReason.value
+        : this.reversalReason,
+    reversedAt: reversedAt.present ? reversedAt.value : this.reversedAt,
     createdAt: createdAt ?? this.createdAt,
     updatedAt: updatedAt ?? this.updatedAt,
   );
@@ -6857,6 +6967,7 @@ class Payment extends DataClass implements Insertable<Payment> {
     return Payment(
       id: data.id.present ? data.id.value : this.id,
       tenancyId: data.tenancyId.present ? data.tenancyId.value : this.tenancyId,
+      tenantId: data.tenantId.present ? data.tenantId.value : this.tenantId,
       paymentNumber: data.paymentNumber.present
           ? data.paymentNumber.value
           : this.paymentNumber,
@@ -6872,6 +6983,12 @@ class Payment extends DataClass implements Insertable<Payment> {
       reference: data.reference.present ? data.reference.value : this.reference,
       note: data.note.present ? data.note.value : this.note,
       status: data.status.present ? data.status.value : this.status,
+      reversalReason: data.reversalReason.present
+          ? data.reversalReason.value
+          : this.reversalReason,
+      reversedAt: data.reversedAt.present
+          ? data.reversedAt.value
+          : this.reversedAt,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
     );
@@ -6882,6 +6999,7 @@ class Payment extends DataClass implements Insertable<Payment> {
     return (StringBuffer('Payment(')
           ..write('id: $id, ')
           ..write('tenancyId: $tenancyId, ')
+          ..write('tenantId: $tenantId, ')
           ..write('paymentNumber: $paymentNumber, ')
           ..write('paymentDate: $paymentDate, ')
           ..write('amountPoisha: $amountPoisha, ')
@@ -6889,6 +7007,8 @@ class Payment extends DataClass implements Insertable<Payment> {
           ..write('reference: $reference, ')
           ..write('note: $note, ')
           ..write('status: $status, ')
+          ..write('reversalReason: $reversalReason, ')
+          ..write('reversedAt: $reversedAt, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt')
           ..write(')'))
@@ -6899,6 +7019,7 @@ class Payment extends DataClass implements Insertable<Payment> {
   int get hashCode => Object.hash(
     id,
     tenancyId,
+    tenantId,
     paymentNumber,
     paymentDate,
     amountPoisha,
@@ -6906,6 +7027,8 @@ class Payment extends DataClass implements Insertable<Payment> {
     reference,
     note,
     status,
+    reversalReason,
+    reversedAt,
     createdAt,
     updatedAt,
   );
@@ -6915,6 +7038,7 @@ class Payment extends DataClass implements Insertable<Payment> {
       (other is Payment &&
           other.id == this.id &&
           other.tenancyId == this.tenancyId &&
+          other.tenantId == this.tenantId &&
           other.paymentNumber == this.paymentNumber &&
           other.paymentDate == this.paymentDate &&
           other.amountPoisha == this.amountPoisha &&
@@ -6922,6 +7046,8 @@ class Payment extends DataClass implements Insertable<Payment> {
           other.reference == this.reference &&
           other.note == this.note &&
           other.status == this.status &&
+          other.reversalReason == this.reversalReason &&
+          other.reversedAt == this.reversedAt &&
           other.createdAt == this.createdAt &&
           other.updatedAt == this.updatedAt);
 }
@@ -6929,6 +7055,7 @@ class Payment extends DataClass implements Insertable<Payment> {
 class PaymentsCompanion extends UpdateCompanion<Payment> {
   final Value<String> id;
   final Value<String> tenancyId;
+  final Value<String?> tenantId;
   final Value<String> paymentNumber;
   final Value<DateTime> paymentDate;
   final Value<int> amountPoisha;
@@ -6936,12 +7063,15 @@ class PaymentsCompanion extends UpdateCompanion<Payment> {
   final Value<String?> reference;
   final Value<String?> note;
   final Value<String> status;
+  final Value<String?> reversalReason;
+  final Value<DateTime?> reversedAt;
   final Value<DateTime> createdAt;
   final Value<DateTime> updatedAt;
   final Value<int> rowid;
   const PaymentsCompanion({
     this.id = const Value.absent(),
     this.tenancyId = const Value.absent(),
+    this.tenantId = const Value.absent(),
     this.paymentNumber = const Value.absent(),
     this.paymentDate = const Value.absent(),
     this.amountPoisha = const Value.absent(),
@@ -6949,6 +7079,8 @@ class PaymentsCompanion extends UpdateCompanion<Payment> {
     this.reference = const Value.absent(),
     this.note = const Value.absent(),
     this.status = const Value.absent(),
+    this.reversalReason = const Value.absent(),
+    this.reversedAt = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
     this.rowid = const Value.absent(),
@@ -6956,6 +7088,7 @@ class PaymentsCompanion extends UpdateCompanion<Payment> {
   PaymentsCompanion.insert({
     required String id,
     required String tenancyId,
+    this.tenantId = const Value.absent(),
     required String paymentNumber,
     required DateTime paymentDate,
     required int amountPoisha,
@@ -6963,6 +7096,8 @@ class PaymentsCompanion extends UpdateCompanion<Payment> {
     this.reference = const Value.absent(),
     this.note = const Value.absent(),
     this.status = const Value.absent(),
+    this.reversalReason = const Value.absent(),
+    this.reversedAt = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
     this.rowid = const Value.absent(),
@@ -6975,6 +7110,7 @@ class PaymentsCompanion extends UpdateCompanion<Payment> {
   static Insertable<Payment> custom({
     Expression<String>? id,
     Expression<String>? tenancyId,
+    Expression<String>? tenantId,
     Expression<String>? paymentNumber,
     Expression<DateTime>? paymentDate,
     Expression<int>? amountPoisha,
@@ -6982,6 +7118,8 @@ class PaymentsCompanion extends UpdateCompanion<Payment> {
     Expression<String>? reference,
     Expression<String>? note,
     Expression<String>? status,
+    Expression<String>? reversalReason,
+    Expression<DateTime>? reversedAt,
     Expression<DateTime>? createdAt,
     Expression<DateTime>? updatedAt,
     Expression<int>? rowid,
@@ -6989,6 +7127,7 @@ class PaymentsCompanion extends UpdateCompanion<Payment> {
     return RawValuesInsertable({
       if (id != null) 'id': id,
       if (tenancyId != null) 'tenancy_id': tenancyId,
+      if (tenantId != null) 'tenant_id': tenantId,
       if (paymentNumber != null) 'payment_number': paymentNumber,
       if (paymentDate != null) 'payment_date': paymentDate,
       if (amountPoisha != null) 'amount_poisha': amountPoisha,
@@ -6996,6 +7135,8 @@ class PaymentsCompanion extends UpdateCompanion<Payment> {
       if (reference != null) 'reference': reference,
       if (note != null) 'note': note,
       if (status != null) 'status': status,
+      if (reversalReason != null) 'reversal_reason': reversalReason,
+      if (reversedAt != null) 'reversed_at': reversedAt,
       if (createdAt != null) 'created_at': createdAt,
       if (updatedAt != null) 'updated_at': updatedAt,
       if (rowid != null) 'rowid': rowid,
@@ -7005,6 +7146,7 @@ class PaymentsCompanion extends UpdateCompanion<Payment> {
   PaymentsCompanion copyWith({
     Value<String>? id,
     Value<String>? tenancyId,
+    Value<String?>? tenantId,
     Value<String>? paymentNumber,
     Value<DateTime>? paymentDate,
     Value<int>? amountPoisha,
@@ -7012,6 +7154,8 @@ class PaymentsCompanion extends UpdateCompanion<Payment> {
     Value<String?>? reference,
     Value<String?>? note,
     Value<String>? status,
+    Value<String?>? reversalReason,
+    Value<DateTime?>? reversedAt,
     Value<DateTime>? createdAt,
     Value<DateTime>? updatedAt,
     Value<int>? rowid,
@@ -7019,6 +7163,7 @@ class PaymentsCompanion extends UpdateCompanion<Payment> {
     return PaymentsCompanion(
       id: id ?? this.id,
       tenancyId: tenancyId ?? this.tenancyId,
+      tenantId: tenantId ?? this.tenantId,
       paymentNumber: paymentNumber ?? this.paymentNumber,
       paymentDate: paymentDate ?? this.paymentDate,
       amountPoisha: amountPoisha ?? this.amountPoisha,
@@ -7026,6 +7171,8 @@ class PaymentsCompanion extends UpdateCompanion<Payment> {
       reference: reference ?? this.reference,
       note: note ?? this.note,
       status: status ?? this.status,
+      reversalReason: reversalReason ?? this.reversalReason,
+      reversedAt: reversedAt ?? this.reversedAt,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       rowid: rowid ?? this.rowid,
@@ -7040,6 +7187,9 @@ class PaymentsCompanion extends UpdateCompanion<Payment> {
     }
     if (tenancyId.present) {
       map['tenancy_id'] = Variable<String>(tenancyId.value);
+    }
+    if (tenantId.present) {
+      map['tenant_id'] = Variable<String>(tenantId.value);
     }
     if (paymentNumber.present) {
       map['payment_number'] = Variable<String>(paymentNumber.value);
@@ -7062,6 +7212,12 @@ class PaymentsCompanion extends UpdateCompanion<Payment> {
     if (status.present) {
       map['status'] = Variable<String>(status.value);
     }
+    if (reversalReason.present) {
+      map['reversal_reason'] = Variable<String>(reversalReason.value);
+    }
+    if (reversedAt.present) {
+      map['reversed_at'] = Variable<DateTime>(reversedAt.value);
+    }
     if (createdAt.present) {
       map['created_at'] = Variable<DateTime>(createdAt.value);
     }
@@ -7079,6 +7235,7 @@ class PaymentsCompanion extends UpdateCompanion<Payment> {
     return (StringBuffer('PaymentsCompanion(')
           ..write('id: $id, ')
           ..write('tenancyId: $tenancyId, ')
+          ..write('tenantId: $tenantId, ')
           ..write('paymentNumber: $paymentNumber, ')
           ..write('paymentDate: $paymentDate, ')
           ..write('amountPoisha: $amountPoisha, ')
@@ -7086,6 +7243,8 @@ class PaymentsCompanion extends UpdateCompanion<Payment> {
           ..write('reference: $reference, ')
           ..write('note: $note, ')
           ..write('status: $status, ')
+          ..write('reversalReason: $reversalReason, ')
+          ..write('reversedAt: $reversedAt, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
           ..write('rowid: $rowid')
@@ -12762,6 +12921,25 @@ final class $$TenantsTableReferences
       manager.$state.copyWith(prefetchedData: cache),
     );
   }
+
+  static MultiTypedResultKey<$PaymentsTable, List<Payment>> _paymentsRefsTable(
+    _$AppDatabase db,
+  ) => MultiTypedResultKey.fromTable(
+    db.payments,
+    aliasName: 'tenants__id__payments__tenant_id',
+  );
+
+  $$PaymentsTableProcessedTableManager get paymentsRefs {
+    final manager = $$PaymentsTableTableManager(
+      $_db,
+      $_db.payments,
+    ).filter((f) => f.tenantId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_paymentsRefsTable($_db));
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
 }
 
 class $$TenantsTableFilterComposer
@@ -12864,6 +13042,31 @@ class $$TenantsTableFilterComposer
           }) => $$TenanciesTableFilterComposer(
             $db: $db,
             $table: $db.tenancies,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
+  Expression<bool> paymentsRefs(
+    Expression<bool> Function($$PaymentsTableFilterComposer f) f,
+  ) {
+    final $$PaymentsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.payments,
+      getReferencedColumn: (t) => t.tenantId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$PaymentsTableFilterComposer(
+            $db: $db,
+            $table: $db.payments,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
             $removeJoinBuilderFromRootComposer:
@@ -13047,6 +13250,31 @@ class $$TenantsTableAnnotationComposer
     );
     return f(composer);
   }
+
+  Expression<T> paymentsRefs<T extends Object>(
+    Expression<T> Function($$PaymentsTableAnnotationComposer a) f,
+  ) {
+    final $$PaymentsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.payments,
+      getReferencedColumn: (t) => t.tenantId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$PaymentsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.payments,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
 }
 
 class $$TenantsTableTableManager
@@ -13062,7 +13290,7 @@ class $$TenantsTableTableManager
           $$TenantsTableUpdateCompanionBuilder,
           (Tenant, $$TenantsTableReferences),
           Tenant,
-          PrefetchHooks Function({bool tenanciesRefs})
+          PrefetchHooks Function({bool tenanciesRefs, bool paymentsRefs})
         > {
   $$TenantsTableTableManager(_$AppDatabase db, $TenantsTable table)
     : super(
@@ -13155,28 +13383,63 @@ class $$TenantsTableTableManager
                 ),
               )
               .toList(),
-          prefetchHooksCallback: ({tenanciesRefs = false}) {
-            return PrefetchHooks(
-              db: db,
-              explicitlyWatchedTables: [if (tenanciesRefs) db.tenancies],
-              addJoins: null,
-              getPrefetchedDataCallback: (items) async {
-                return [
-                  if (tenanciesRefs)
-                    await $_getPrefetchedData<Tenant, $TenantsTable, Tenancy>(
-                      currentTable: table,
-                      referencedTable: $$TenantsTableReferences
-                          ._tenanciesRefsTable(db),
-                      managerFromTypedResult: (p0) =>
-                          $$TenantsTableReferences(db, table, p0).tenanciesRefs,
-                      referencedItemsForCurrentItem: (item, referencedItems) =>
-                          referencedItems.where((e) => e.tenantId == item.id),
-                      typedResults: items,
-                    ),
-                ];
+          prefetchHooksCallback:
+              ({tenanciesRefs = false, paymentsRefs = false}) {
+                return PrefetchHooks(
+                  db: db,
+                  explicitlyWatchedTables: [
+                    if (tenanciesRefs) db.tenancies,
+                    if (paymentsRefs) db.payments,
+                  ],
+                  addJoins: null,
+                  getPrefetchedDataCallback: (items) async {
+                    return [
+                      if (tenanciesRefs)
+                        await $_getPrefetchedData<
+                          Tenant,
+                          $TenantsTable,
+                          Tenancy
+                        >(
+                          currentTable: table,
+                          referencedTable: $$TenantsTableReferences
+                              ._tenanciesRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$TenantsTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).tenanciesRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.tenantId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
+                      if (paymentsRefs)
+                        await $_getPrefetchedData<
+                          Tenant,
+                          $TenantsTable,
+                          Payment
+                        >(
+                          currentTable: table,
+                          referencedTable: $$TenantsTableReferences
+                              ._paymentsRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$TenantsTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).paymentsRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.tenantId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
+                    ];
+                  },
+                );
               },
-            );
-          },
         ),
       );
 }
@@ -13193,7 +13456,7 @@ typedef $$TenantsTableProcessedTableManager =
       $$TenantsTableUpdateCompanionBuilder,
       (Tenant, $$TenantsTableReferences),
       Tenant,
-      PrefetchHooks Function({bool tenanciesRefs})
+      PrefetchHooks Function({bool tenanciesRefs, bool paymentsRefs})
     >;
 typedef $$TenanciesTableCreateCompanionBuilder = TenanciesCompanion Function({
   required String id,
@@ -16544,6 +16807,7 @@ typedef $$BillLineItemsTableProcessedTableManager =
 typedef $$PaymentsTableCreateCompanionBuilder = PaymentsCompanion Function({
   required String id,
   required String tenancyId,
+  Value<String?> tenantId,
   required String paymentNumber,
   required DateTime paymentDate,
   required int amountPoisha,
@@ -16551,6 +16815,8 @@ typedef $$PaymentsTableCreateCompanionBuilder = PaymentsCompanion Function({
   Value<String?> reference,
   Value<String?> note,
   Value<String> status,
+  Value<String?> reversalReason,
+  Value<DateTime?> reversedAt,
   Value<DateTime> createdAt,
   Value<DateTime> updatedAt,
   Value<int> rowid,
@@ -16558,6 +16824,7 @@ typedef $$PaymentsTableCreateCompanionBuilder = PaymentsCompanion Function({
 typedef $$PaymentsTableUpdateCompanionBuilder = PaymentsCompanion Function({
   Value<String> id,
   Value<String> tenancyId,
+  Value<String?> tenantId,
   Value<String> paymentNumber,
   Value<DateTime> paymentDate,
   Value<int> amountPoisha,
@@ -16565,6 +16832,8 @@ typedef $$PaymentsTableUpdateCompanionBuilder = PaymentsCompanion Function({
   Value<String?> reference,
   Value<String?> note,
   Value<String> status,
+  Value<String?> reversalReason,
+  Value<DateTime?> reversedAt,
   Value<DateTime> createdAt,
   Value<DateTime> updatedAt,
   Value<int> rowid,
@@ -16585,6 +16854,23 @@ final class $$PaymentsTableReferences
       $_db.tenancies,
     ).filter((f) => f.id.sqlEquals($_column));
     final item = $_typedResult.readTableOrNull(_tenancyIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+
+  static $TenantsTable _tenantIdTable(_$AppDatabase db) =>
+      db.tenants.createAlias('payments__tenant_id__tenants__id');
+
+  $$TenantsTableProcessedTableManager? get tenantId {
+    final $_column = $_itemColumn<String>('tenant_id');
+    if ($_column == null) return null;
+    final manager = $$TenantsTableTableManager(
+      $_db,
+      $_db.tenants,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_tenantIdTable($_db));
     if (item == null) return manager;
     return ProcessedTableManager(
       manager.$state.copyWith(prefetchedData: [item]),
@@ -16662,6 +16948,16 @@ class $$PaymentsTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
+  ColumnFilters<String> get reversalReason => $composableBuilder(
+    column: $table.reversalReason,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get reversedAt => $composableBuilder(
+    column: $table.reversedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
   ColumnFilters<DateTime> get createdAt => $composableBuilder(
     column: $table.createdAt,
     builder: (column) => ColumnFilters(column),
@@ -16686,6 +16982,29 @@ class $$PaymentsTableFilterComposer
           }) => $$TenanciesTableFilterComposer(
             $db: $db,
             $table: $db.tenancies,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$TenantsTableFilterComposer get tenantId {
+    final $$TenantsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.tenantId,
+      referencedTable: $db.tenants,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$TenantsTableFilterComposer(
+            $db: $db,
+            $table: $db.tenants,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
             $removeJoinBuilderFromRootComposer:
@@ -16770,6 +17089,16 @@ class $$PaymentsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get reversalReason => $composableBuilder(
+    column: $table.reversalReason,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get reversedAt => $composableBuilder(
+    column: $table.reversedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<DateTime> get createdAt => $composableBuilder(
     column: $table.createdAt,
     builder: (column) => ColumnOrderings(column),
@@ -16794,6 +17123,29 @@ class $$PaymentsTableOrderingComposer
           }) => $$TenanciesTableOrderingComposer(
             $db: $db,
             $table: $db.tenancies,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$TenantsTableOrderingComposer get tenantId {
+    final $$TenantsTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.tenantId,
+      referencedTable: $db.tenants,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$TenantsTableOrderingComposer(
+            $db: $db,
+            $table: $db.tenants,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
             $removeJoinBuilderFromRootComposer:
@@ -16845,6 +17197,16 @@ class $$PaymentsTableAnnotationComposer
   GeneratedColumn<String> get status =>
       $composableBuilder(column: $table.status, builder: (column) => column);
 
+  GeneratedColumn<String> get reversalReason => $composableBuilder(
+    column: $table.reversalReason,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get reversedAt => $composableBuilder(
+    column: $table.reversedAt,
+    builder: (column) => column,
+  );
+
   GeneratedColumn<DateTime> get createdAt =>
       $composableBuilder(column: $table.createdAt, builder: (column) => column);
 
@@ -16865,6 +17227,29 @@ class $$PaymentsTableAnnotationComposer
           }) => $$TenanciesTableAnnotationComposer(
             $db: $db,
             $table: $db.tenancies,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$TenantsTableAnnotationComposer get tenantId {
+    final $$TenantsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.tenantId,
+      referencedTable: $db.tenants,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$TenantsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.tenants,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
             $removeJoinBuilderFromRootComposer:
@@ -16914,7 +17299,11 @@ class $$PaymentsTableTableManager
           $$PaymentsTableUpdateCompanionBuilder,
           (Payment, $$PaymentsTableReferences),
           Payment,
-          PrefetchHooks Function({bool tenancyId, bool paymentAllocationsRefs})
+          PrefetchHooks Function({
+            bool tenancyId,
+            bool tenantId,
+            bool paymentAllocationsRefs,
+          })
         > {
   $$PaymentsTableTableManager(_$AppDatabase db, $PaymentsTable table)
     : super(
@@ -16931,6 +17320,7 @@ class $$PaymentsTableTableManager
               ({
                 Value<String> id = const Value.absent(),
                 Value<String> tenancyId = const Value.absent(),
+                Value<String?> tenantId = const Value.absent(),
                 Value<String> paymentNumber = const Value.absent(),
                 Value<DateTime> paymentDate = const Value.absent(),
                 Value<int> amountPoisha = const Value.absent(),
@@ -16938,12 +17328,15 @@ class $$PaymentsTableTableManager
                 Value<String?> reference = const Value.absent(),
                 Value<String?> note = const Value.absent(),
                 Value<String> status = const Value.absent(),
+                Value<String?> reversalReason = const Value.absent(),
+                Value<DateTime?> reversedAt = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<DateTime> updatedAt = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => PaymentsCompanion(
                 id: id,
                 tenancyId: tenancyId,
+                tenantId: tenantId,
                 paymentNumber: paymentNumber,
                 paymentDate: paymentDate,
                 amountPoisha: amountPoisha,
@@ -16951,6 +17344,8 @@ class $$PaymentsTableTableManager
                 reference: reference,
                 note: note,
                 status: status,
+                reversalReason: reversalReason,
+                reversedAt: reversedAt,
                 createdAt: createdAt,
                 updatedAt: updatedAt,
                 rowid: rowid,
@@ -16959,6 +17354,7 @@ class $$PaymentsTableTableManager
               ({
                 required String id,
                 required String tenancyId,
+                Value<String?> tenantId = const Value.absent(),
                 required String paymentNumber,
                 required DateTime paymentDate,
                 required int amountPoisha,
@@ -16966,12 +17362,15 @@ class $$PaymentsTableTableManager
                 Value<String?> reference = const Value.absent(),
                 Value<String?> note = const Value.absent(),
                 Value<String> status = const Value.absent(),
+                Value<String?> reversalReason = const Value.absent(),
+                Value<DateTime?> reversedAt = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<DateTime> updatedAt = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => PaymentsCompanion.insert(
                 id: id,
                 tenancyId: tenancyId,
+                tenantId: tenantId,
                 paymentNumber: paymentNumber,
                 paymentDate: paymentDate,
                 amountPoisha: amountPoisha,
@@ -16979,6 +17378,8 @@ class $$PaymentsTableTableManager
                 reference: reference,
                 note: note,
                 status: status,
+                reversalReason: reversalReason,
+                reversedAt: reversedAt,
                 createdAt: createdAt,
                 updatedAt: updatedAt,
                 rowid: rowid,
@@ -16992,7 +17393,11 @@ class $$PaymentsTableTableManager
               )
               .toList(),
           prefetchHooksCallback:
-              ({tenancyId = false, paymentAllocationsRefs = false}) {
+              ({
+                tenancyId = false,
+                tenantId = false,
+                paymentAllocationsRefs = false,
+              }) {
                 return PrefetchHooks(
                   db: db,
                   explicitlyWatchedTables: [
@@ -17022,6 +17427,17 @@ class $$PaymentsTableTableManager
                                 ._tenancyIdTable(db),
                             referencedColumn: $$PaymentsTableReferences
                                 ._tenancyIdTable(db)
+                                .id,
+                          ) as T;
+                        }
+                        if (tenantId) {
+                          state = state.withJoin(
+                            currentTable: table,
+                            currentColumn: table.tenantId,
+                            referencedTable: $$PaymentsTableReferences
+                                ._tenantIdTable(db),
+                            referencedColumn: $$PaymentsTableReferences
+                                ._tenantIdTable(db)
                                 .id,
                           ) as T;
                         }
@@ -17071,7 +17487,11 @@ typedef $$PaymentsTableProcessedTableManager =
       $$PaymentsTableUpdateCompanionBuilder,
       (Payment, $$PaymentsTableReferences),
       Payment,
-      PrefetchHooks Function({bool tenancyId, bool paymentAllocationsRefs})
+      PrefetchHooks Function({
+        bool tenancyId,
+        bool tenantId,
+        bool paymentAllocationsRefs,
+      })
     >;
 typedef $$PaymentAllocationsTableCreateCompanionBuilder =
     PaymentAllocationsCompanion Function({

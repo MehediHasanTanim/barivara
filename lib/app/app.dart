@@ -1,5 +1,6 @@
 import 'package:barivara/app/theme/bari_vara_theme.dart';
 import 'package:barivara/features/billing/presentation/bills_screens.dart';
+import 'package:barivara/features/payments/presentation/payments_screens.dart';
 import 'package:barivara/features/properties/presentation/property_screens.dart';
 import 'package:barivara/features/settings/application/settings_controller.dart';
 import 'package:barivara/features/settings/domain/app_settings.dart';
@@ -56,7 +57,7 @@ class _ApplicationShellState extends State<_ApplicationShell> {
       0 => const _HomeScreen(),
       1 => const TenantListScreen(),
       2 => const BillsDashboardScreen(),
-      3 => _PlaceholderScreen(title: text.payments),
+      3 => const PaymentsDuesScreen(),
       _ => const _MoreScreen(),
     };
     return Scaffold(
@@ -198,21 +199,6 @@ class _MoreScreen extends StatelessWidget {
           ),
         ],
       ),
-    );
-  }
-}
-
-class _PlaceholderScreen extends StatelessWidget {
-  const _PlaceholderScreen({required this.title});
-
-  final String title;
-
-  @override
-  Widget build(BuildContext context) {
-    final AppLocalizations text = AppLocalizations.of(context)!;
-    return Scaffold(
-      appBar: AppBar(title: Text(title)),
-      body: Center(child: Text(text.comingSoon)),
     );
   }
 }

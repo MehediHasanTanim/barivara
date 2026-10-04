@@ -1189,6 +1189,60 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Save reading'**
   String get saveReading;
+
+  /// No description provided for @recordPayment.
+  ///
+  /// In en, this message translates to:
+  /// **'Record payment'**
+  String get recordPayment;
+
+  /// No description provided for @paymentHistory.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment history'**
+  String get paymentHistory;
+
+  /// No description provided for @paymentAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment amount'**
+  String get paymentAmount;
+
+  /// No description provided for @paymentPosted.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment posted'**
+  String get paymentPosted;
+
+  /// No description provided for @reversePayment.
+  ///
+  /// In en, this message translates to:
+  /// **'Reverse payment'**
+  String get reversePayment;
+
+  /// No description provided for @reversalReason.
+  ///
+  /// In en, this message translates to:
+  /// **'Reversal reason'**
+  String get reversalReason;
+
+  /// No description provided for @reference.
+  ///
+  /// In en, this message translates to:
+  /// **'Reference (optional)'**
+  String get reference;
+
+  /// No description provided for @paymentNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Note (optional)'**
+  String get paymentNote;
+
+  /// No description provided for @outstandingTotal.
+  ///
+  /// In en, this message translates to:
+  /// **'Total outstanding'**
+  String get outstandingTotal;
 }
 
 class _AppLocalizationsDelegate

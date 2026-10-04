@@ -182,4 +182,13 @@
   ,"rate": "রেট"
   ,"calculatedAmount": "হিসাবকৃত পরিমাণ"
   ,"saveReading": "রিডিং সংরক্ষণ করুন"
+  ,"recordPayment": "পেমেন্ট গ্রহণ করুন"
+  ,"paymentHistory": "পেমেন্ট ইতিহাস"
+  ,"paymentAmount": "পেমেন্টের পরিমাণ"
+  ,"paymentPosted": "পেমেন্ট সংরক্ষিত হয়েছে"
+  ,"reversePayment": "পেমেন্ট বাতিল করুন"
+  ,"reversalReason": "বাতিলের কারণ"
+  ,"reference": "রেফারেন্স (ঐচ্ছিক)"
+  ,"paymentNote": "নোট (ঐচ্ছিক)"
+  ,"outstandingTotal": "মোট বকেয়া"
 }

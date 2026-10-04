@@ -228,6 +228,7 @@ class Payments extends Table {
 
   TextColumn get id => text()();
   TextColumn get tenancyId => text().references(Tenancies, #id)();
+  TextColumn get tenantId => text().nullable().references(Tenants, #id)();
   TextColumn get paymentNumber => text()();
   DateTimeColumn get paymentDate => dateTime()();
   IntColumn get amountPoisha => integer()();
@@ -235,6 +236,8 @@ class Payments extends Table {
   TextColumn get reference => text().nullable()();
   TextColumn get note => text().nullable()();
   TextColumn get status => text().withDefault(const Constant('posted'))();
+  TextColumn get reversalReason => text().nullable()();
+  DateTimeColumn get reversedAt => dateTime().nullable()();
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
   DateTimeColumn get updatedAt => dateTime().withDefault(currentDateAndTime)();
 

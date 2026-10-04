@@ -5,8 +5,8 @@ abstract final class AppConfig {
   /// Name of the local SQLite database introduced in Phase 1.
   static const String databaseName = 'bari_vara.sqlite';
 
-  /// Local schema version, including immutable billing snapshots.
-  static const int databaseVersion = 4;
+  /// Local schema version, including payment allocations and reversals.
+  static const int databaseVersion = 5;
 
   /// Current portable-backup package version.
   static const int backupFormatVersion = 1;

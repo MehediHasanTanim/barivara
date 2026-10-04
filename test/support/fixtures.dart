@@ -72,9 +72,11 @@ abstract final class Fixtures {
   static Payment payment({String id = 'payment-1'}) => Payment(
     id: EntityId(id),
     tenancyId: EntityId('tenancy-1'),
+    tenantId: EntityId('tenant-1'),
     amount: Money.fromTaka(8000),
     paymentDate: createdAt,
     method: PaymentMethod.cash,
+    createdAt: createdAt,
   );
 
   /// Creates a deposit fixture.

@@ -64,6 +64,9 @@ abstract interface class BillingRepository {
     BillingMonth period,
   );
   Future<Result<List<MonthlyBill>>> listForPeriod(BillingMonth period);
+  Future<Result<List<MonthlyBill>>> listOutstandingByTenancy(
+    EntityId tenancyId,
+  );
   Future<Result<Money>> openingDue(EntityId tenancyId, BillingMonth period);
   Future<Result<MeterReading?>> lastElectricityReading(EntityId unitId);
   Future<Result<BillDraft?>> findDraft(EntityId billId);
@@ -75,7 +78,9 @@ abstract interface class BillingRepository {
 /// Application-facing payment persistence contract.
 abstract interface class PaymentRepository {
   Future<Result<List<Payment>>> listByTenancy(EntityId tenancyId);
-  Future<Result<void>> save(Payment payment);
+  Future<Result<List<Payment>>> listAll();
+  Future<Result<void>> post(PaymentPosting posting);
+  Future<Result<Payment>> reverse(EntityId paymentId, String reason);
 }
 
 /// Application-facing security-deposit persistence contract.

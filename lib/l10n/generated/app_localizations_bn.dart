@@ -562,4 +562,31 @@ class AppLocalizationsBn extends AppLocalizations {
 
   @override
   String get saveReading => 'রিডিং সংরক্ষণ করুন';
+
+  @override
+  String get recordPayment => 'পেমেন্ট গ্রহণ করুন';
+
+  @override
+  String get paymentHistory => 'পেমেন্ট ইতিহাস';
+
+  @override
+  String get paymentAmount => 'পেমেন্টের পরিমাণ';
+
+  @override
+  String get paymentPosted => 'পেমেন্ট সংরক্ষিত হয়েছে';
+
+  @override
+  String get reversePayment => 'পেমেন্ট বাতিল করুন';
+
+  @override
+  String get reversalReason => 'বাতিলের কারণ';
+
+  @override
+  String get reference => 'রেফারেন্স (ঐচ্ছিক)';
+
+  @override
+  String get paymentNote => 'নোট (ঐচ্ছিক)';
+
+  @override
+  String get outstandingTotal => 'মোট বকেয়া';
 }

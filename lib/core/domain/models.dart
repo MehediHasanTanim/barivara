@@ -327,22 +327,78 @@ class BillDraft {
   final List<BillLineItem> items;
 }
 
-/// A locally posted payment.
+/// Lifecycle state retained for posted and reversed ledger entries.
+enum PaymentStatus { posted, reversed }
+
+/// A locally posted payment. Reversed payments are retained for auditability.
 class Payment {
   /// Creates a payment.
   const Payment({
     required this.id,
     required this.tenancyId,
+    required this.tenantId,
     required this.amount,
     required this.paymentDate,
     required this.method,
+    required this.createdAt,
+    this.reference,
+    this.note,
+    this.status = PaymentStatus.posted,
+    this.reversalReason,
+    this.reversedAt,
   });
 
   final EntityId id;
   final EntityId tenancyId;
+  final EntityId tenantId;
   final Money amount;
   final DateTime paymentDate;
   final PaymentMethod method;
+  final String? reference;
+  final String? note;
+  final PaymentStatus status;
+  final String? reversalReason;
+  final DateTime? reversedAt;
+  final DateTime createdAt;
+}
+
+/// Immutable link showing exactly which bill a payment settled.
+class PaymentAllocation {
+  /// Creates a payment-to-bill allocation.
+  const PaymentAllocation({
+    required this.id,
+    required this.paymentId,
+    required this.billId,
+    required this.amount,
+  });
+
+  final EntityId id;
+  final EntityId paymentId;
+  final EntityId billId;
+  final Money amount;
+}
+
+/// Atomic posted-payment request containing its bill allocations.
+class PaymentPosting {
+  /// Creates one auditable payment posting transaction.
+  const PaymentPosting({required this.payment, required this.allocations});
+
+  final Payment payment;
+  final List<PaymentAllocation> allocations;
+}
+
+/// Current due totals shown before posting a payment.
+class DueSummary {
+  /// Creates a tenancy-level due summary.
+  const DueSummary({
+    required this.currentMonthDue,
+    required this.previousOverdue,
+    required this.totalOutstanding,
+  });
+
+  final Money currentMonthDue;
+  final Money previousOverdue;
+  final Money totalOutstanding;
 }
 
 /// A tenant security-deposit account snapshot.

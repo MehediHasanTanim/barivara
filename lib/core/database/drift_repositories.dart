@@ -939,6 +939,27 @@ class DriftBillingRepository extends DriftRepository
       });
 
   @override
+  Future<Result<List<domain.MonthlyBill>>> listOutstandingByTenancy(
+    EntityId tenancyId,
+  ) => guard<List<domain.MonthlyBill>>(() async {
+    final List<db.MonthlyBill> rows =
+        await (database.select(database.monthlyBills)
+              ..where(
+                (MonthlyBills table) =>
+                    table.tenancyId.equals(tenancyId.value) &
+                    table.balancePoisha.isBiggerThanValue(0) &
+                    table.status.isNotValue(domain.BillStatus.draft.name) &
+                    table.status.isNotValue(domain.BillStatus.cancelled.name),
+              )
+              ..orderBy(<OrderingTerm Function(MonthlyBills)>[
+                (MonthlyBills table) => OrderingTerm.asc(table.billingYear),
+                (MonthlyBills table) => OrderingTerm.asc(table.billingMonth),
+              ]))
+            .get();
+    return rows.map(_bill).toList(growable: false);
+  });
+
+  @override
   Future<Result<MeterReading?>> lastElectricityReading(EntityId unitId) =>
       guard<MeterReading?>(() async {
         final QueryRow? row = await database
@@ -1208,4 +1229,206 @@ class DriftBillingRepository extends DriftRepository
       displayOrder: row.sortOrder,
     );
   }
+}
+
+/// Drift-backed append-only payment ledger with atomic bill allocation writes.
+class DriftPaymentRepository extends DriftRepository
+    implements PaymentRepository {
+  /// Creates local payment-ledger operations.
+  const DriftPaymentRepository(super.database);
+
+  @override
+  Future<Result<List<domain.Payment>>> listAll() =>
+      guard<List<domain.Payment>>(() async {
+        final List<db.Payment> rows =
+            await (database.select(database.payments)
+                  ..orderBy(<OrderingTerm Function(Payments)>[
+                    (Payments table) => OrderingTerm.desc(table.paymentDate),
+                  ]))
+                .get();
+        return rows.map(_payment).toList(growable: false);
+      });
+
+  @override
+  Future<Result<List<domain.Payment>>> listByTenancy(EntityId tenancyId) =>
+      guard<List<domain.Payment>>(() async {
+        final List<db.Payment> rows =
+            await (database.select(database.payments)
+                  ..where(
+                    (Payments table) => table.tenancyId.equals(tenancyId.value),
+                  )
+                  ..orderBy(<OrderingTerm Function(Payments)>[
+                    (Payments table) => OrderingTerm.desc(table.paymentDate),
+                  ]))
+                .get();
+        return rows.map(_payment).toList(growable: false);
+      });
+
+  @override
+  Future<Result<void>> post(
+    domain.PaymentPosting posting,
+  ) => inTransaction<void>(() async {
+    final int allocated = posting.allocations.fold<int>(
+      0,
+      (int total, domain.PaymentAllocation allocation) =>
+          total + allocation.amount.poisha,
+    );
+    if (posting.payment.amount.poisha <= 0 ||
+        allocated != posting.payment.amount.poisha ||
+        posting.allocations.isEmpty) {
+      throw StateError('Invalid payment allocation.');
+    }
+    final DateTime now = DateTime.now().toUtc();
+    await database
+        .into(database.payments)
+        .insert(
+          db.PaymentsCompanion.insert(
+            id: posting.payment.id.value,
+            tenancyId: posting.payment.tenancyId.value,
+            tenantId: Value<String?>(posting.payment.tenantId.value),
+            paymentNumber: 'PAY-${posting.payment.id.value.substring(0, 8)}',
+            paymentDate: posting.payment.paymentDate.toUtc(),
+            amountPoisha: posting.payment.amount.poisha,
+            paymentMethod: posting.payment.method.name,
+            reference: Value<String?>(posting.payment.reference),
+            note: Value<String?>(posting.payment.note),
+            status: Value<String>(posting.payment.status.name),
+            createdAt: Value<DateTime>(posting.payment.createdAt.toUtc()),
+            updatedAt: Value<DateTime>(now),
+          ),
+        );
+    for (final domain.PaymentAllocation allocation in posting.allocations) {
+      final db.MonthlyBill? bill =
+          await (database.select(database.monthlyBills)..where(
+                (MonthlyBills table) =>
+                    table.id.equals(allocation.billId.value),
+              ))
+              .getSingleOrNull();
+      if (bill == null ||
+          bill.tenancyId != posting.payment.tenancyId.value ||
+          allocation.amount.poisha <= 0 ||
+          allocation.amount.poisha > bill.balancePoisha) {
+        throw StateError('A payment allocation no longer matches its bill.');
+      }
+      final int paid = bill.paidPoisha + allocation.amount.poisha;
+      final int balance = bill.balancePoisha - allocation.amount.poisha;
+      await database
+          .into(database.paymentAllocations)
+          .insert(
+            db.PaymentAllocationsCompanion.insert(
+              id: allocation.id.value,
+              paymentId: allocation.paymentId.value,
+              billId: allocation.billId.value,
+              amountPoisha: allocation.amount.poisha,
+              createdAt: Value<DateTime>(now),
+            ),
+          );
+      await (database.update(database.monthlyBills)..where(
+            (MonthlyBills table) => table.id.equals(allocation.billId.value),
+          ))
+          .write(
+            db.MonthlyBillsCompanion(
+              paidPoisha: Value<int>(paid),
+              balancePoisha: Value<int>(balance),
+              status: Value<String>(
+                balance == 0
+                    ? domain.BillStatus.paid.name
+                    : domain.BillStatus.partiallyPaid.name,
+              ),
+              updatedAt: Value<DateTime>(now),
+            ),
+          );
+    }
+  });
+
+  @override
+  Future<Result<domain.Payment>> reverse(EntityId paymentId, String reason) =>
+      inTransaction<domain.Payment>(() async {
+        final db.Payment? payment =
+            await (database.select(database.payments)
+                  ..where((Payments table) => table.id.equals(paymentId.value)))
+                .getSingleOrNull();
+        if (payment == null ||
+            payment.status != domain.PaymentStatus.posted.name) {
+          throw StateError('Only a posted payment can be reversed.');
+        }
+        final List<db.PaymentAllocation> allocations =
+            await (database.select(database.paymentAllocations)..where(
+                  (PaymentAllocations table) =>
+                      table.paymentId.equals(paymentId.value),
+                ))
+                .get();
+        final DateTime now = DateTime.now().toUtc();
+        for (final db.PaymentAllocation allocation in allocations) {
+          final db.MonthlyBill? bill =
+              await (database.select(database.monthlyBills)..where(
+                    (MonthlyBills table) => table.id.equals(allocation.billId),
+                  ))
+                  .getSingleOrNull();
+          if (bill == null || bill.paidPoisha < allocation.amountPoisha) {
+            throw StateError('Payment reversal could not restore its bill.');
+          }
+          final int paid = bill.paidPoisha - allocation.amountPoisha;
+          await (database.update(
+            database.monthlyBills,
+          )..where((MonthlyBills table) => table.id.equals(bill.id))).write(
+            db.MonthlyBillsCompanion(
+              paidPoisha: Value<int>(paid),
+              balancePoisha: Value<int>(
+                bill.balancePoisha + allocation.amountPoisha,
+              ),
+              status: Value<String>(
+                paid == 0
+                    ? domain.BillStatus.finalized.name
+                    : domain.BillStatus.partiallyPaid.name,
+              ),
+              updatedAt: Value<DateTime>(now),
+            ),
+          );
+        }
+        await (database.update(
+          database.payments,
+        )..where((Payments table) => table.id.equals(paymentId.value))).write(
+          db.PaymentsCompanion(
+            status: const Value<String>('reversed'),
+            reversalReason: Value<String?>(reason),
+            reversedAt: Value<DateTime?>(now),
+            updatedAt: Value<DateTime>(now),
+          ),
+        );
+        return _payment(
+          payment,
+          status: domain.PaymentStatus.reversed,
+          reason: reason,
+          reversedAt: now,
+        );
+      });
+
+  domain.Payment _payment(
+    db.Payment row, {
+    domain.PaymentStatus? status,
+    String? reason,
+    DateTime? reversedAt,
+  }) => domain.Payment(
+    id: EntityId(row.id),
+    tenancyId: EntityId(row.tenancyId),
+    tenantId: EntityId(row.tenantId ?? row.tenancyId),
+    amount: Money.fromPoisha(row.amountPoisha),
+    paymentDate: row.paymentDate,
+    method: PaymentMethod.values.firstWhere(
+      (PaymentMethod method) => method.name == row.paymentMethod,
+      orElse: () => PaymentMethod.other,
+    ),
+    reference: row.reference,
+    note: row.note,
+    status:
+        status ??
+        domain.PaymentStatus.values.firstWhere(
+          (domain.PaymentStatus value) => value.name == row.status,
+          orElse: () => domain.PaymentStatus.posted,
+        ),
+    reversalReason: reason ?? row.reversalReason,
+    reversedAt: reversedAt ?? row.reversedAt,
+    createdAt: row.createdAt,
+  );
 }

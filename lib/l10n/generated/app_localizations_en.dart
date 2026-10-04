@@ -560,4 +560,31 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get saveReading => 'Save reading';
+
+  @override
+  String get recordPayment => 'Record payment';
+
+  @override
+  String get paymentHistory => 'Payment history';
+
+  @override
+  String get paymentAmount => 'Payment amount';
+
+  @override
+  String get paymentPosted => 'Payment posted';
+
+  @override
+  String get reversePayment => 'Reverse payment';
+
+  @override
+  String get reversalReason => 'Reversal reason';
+
+  @override
+  String get reference => 'Reference (optional)';
+
+  @override
+  String get paymentNote => 'Note (optional)';
+
+  @override
+  String get outstandingTotal => 'Total outstanding';
 }

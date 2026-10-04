@@ -136,6 +136,19 @@ class AppDatabase extends _$AppDatabase {
                 billLineItems.sourceRuleId,
               );
             }
+            if (from < 5) {
+              await migrator.addColumn(payments, payments.tenantId);
+              await migrator.addColumn(payments, payments.reversalReason);
+              await migrator.addColumn(payments, payments.reversedAt);
+              await customStatement('''
+                UPDATE payments
+                SET tenant_id = (
+                  SELECT tenant_id FROM tenancies
+                  WHERE tenancies.id = payments.tenancy_id
+                )
+                WHERE tenant_id IS NULL
+              ''');
+            }
           },
         );
       },

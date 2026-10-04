@@ -182,4 +182,13 @@
   ,"rate": "Rate"
   ,"calculatedAmount": "Calculated amount"
   ,"saveReading": "Save reading"
+  ,"recordPayment": "Record payment"
+  ,"paymentHistory": "Payment history"
+  ,"paymentAmount": "Payment amount"
+  ,"paymentPosted": "Payment posted"
+  ,"reversePayment": "Reverse payment"
+  ,"reversalReason": "Reversal reason"
+  ,"reference": "Reference (optional)"
+  ,"paymentNote": "Note (optional)"
+  ,"outstandingTotal": "Total outstanding"
 }
