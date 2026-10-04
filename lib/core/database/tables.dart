@@ -265,6 +265,33 @@ class PaymentAllocations extends Table {
   Set<Column<Object>> get primaryKey => {id};
 }
 
+/// A permanent, self-contained receipt snapshot for one posted payment.
+///
+/// The JSON payload intentionally includes the names and bill items displayed
+/// on the receipt. This makes regenerated receipts independent of later edits
+/// to tenant, property, unit, or recurring-charge configuration.
+@TableIndex(name: 'receipts_payment_id_idx', columns: <Symbol>{#paymentId})
+class Receipts extends Table {
+  @override
+  String get tableName => 'receipts';
+
+  TextColumn get id => text()();
+  TextColumn get paymentId => text().references(Payments, #id)();
+  TextColumn get receiptNumber => text()();
+  IntColumn get templateVersion => integer()();
+  TextColumn get snapshotJson => text()();
+  DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
+
+  @override
+  Set<Column<Object>> get primaryKey => {id};
+
+  @override
+  List<Set<Column<Object>>> get uniqueKeys => <Set<Column<Object>>>[
+    {paymentId},
+    {receiptNumber},
+  ];
+}
+
 /// Security-deposit account for a tenancy.
 @TableIndex(name: 'deposits_tenancy_id_idx', columns: <Symbol>{#tenancyId})
 class Deposits extends Table {
@@ -274,6 +301,10 @@ class Deposits extends Table {
   TextColumn get id => text()();
   TextColumn get tenancyId => text().references(Tenancies, #id)();
   IntColumn get openingBalancePoisha =>
+      integer().withDefault(const Constant(0))();
+  IntColumn get expectedBalancePoisha =>
+      integer().withDefault(const Constant(0))();
+  IntColumn get advanceRentBalancePoisha =>
       integer().withDefault(const Constant(0))();
   IntColumn get currentBalancePoisha =>
       integer().withDefault(const Constant(0))();
@@ -306,6 +337,8 @@ class DepositTransactions extends Table {
   TextColumn get referenceType => text().nullable()();
   TextColumn get referenceId => text().nullable()();
   TextColumn get note => text().nullable()();
+  TextColumn get paymentMethod => text().nullable()();
+  TextColumn get reference => text().nullable()();
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
 
   @override

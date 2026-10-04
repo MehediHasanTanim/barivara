@@ -104,6 +104,37 @@ void main() {
     },
   );
 
+  test('persists a stable receipt snapshot for a posted payment', () async {
+    final _PaymentFixture fixture = await _fixture();
+    final PaymentPosting posting = (await fixture.payments.record(
+      tenancy: fixture.tenancy,
+      input: PaymentInput(
+        amount: Money.fromTaka(8000),
+        paymentDate: DateTime.utc(2026, 10, 5),
+        method: PaymentMethod.bkash,
+      ),
+    ) as Success<PaymentPosting>).value;
+    final DriftReceiptRepository receipts = DriftReceiptRepository(
+      fixture.database,
+    );
+
+    final ReceiptSnapshot first = (await receipts.createForPayment(
+      posting.payment.id,
+    ) as Success<ReceiptSnapshot>).value;
+    await fixture.database.customStatement(
+      "UPDATE properties SET name = 'Renamed after payment'",
+    );
+    final ReceiptSnapshot again = (await receipts.createForPayment(
+      posting.payment.id,
+    ) as Success<ReceiptSnapshot>).value;
+
+    expect(first.receiptNumber, matches(r'^BV-\d{4}-\d{2}-[A-F0-9]{10}$'));
+    expect(again.receiptNumber, first.receiptNumber);
+    expect(again.propertyName, 'Rahman Villa');
+    expect(again.chargeBreakdown, isNotEmpty);
+    expect(again.remainingDue, Money.fromTaka(7000));
+  });
+
   test(
     'rejects zero amount and rolls back an invalid direct allocation',
     () async {

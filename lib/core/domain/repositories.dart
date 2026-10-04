@@ -83,10 +83,17 @@ abstract interface class PaymentRepository {
   Future<Result<Payment>> reverse(EntityId paymentId, String reason);
 }
 
+/// Persistence contract for immutable, payment-linked receipt snapshots.
+abstract interface class ReceiptRepository {
+  Future<Result<ReceiptSnapshot>> createForPayment(EntityId paymentId);
+  Future<Result<ReceiptSnapshot?>> findByPayment(EntityId paymentId);
+}
+
 /// Application-facing security-deposit persistence contract.
 abstract interface class DepositRepository {
   Future<Result<Deposit?>> findByTenancy(EntityId tenancyId);
-  Future<Result<void>> save(Deposit deposit);
+  Future<Result<List<DepositTransaction>>> history(EntityId tenancyId);
+  Future<Result<void>> post(Deposit deposit, DepositTransaction transaction);
 }
 
 /// Application-facing repair persistence contract.

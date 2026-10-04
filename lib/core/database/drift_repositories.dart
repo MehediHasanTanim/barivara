@@ -7,6 +7,7 @@ import 'package:barivara/core/domain/repositories.dart';
 import 'package:barivara/core/domain/value_types.dart';
 import 'package:barivara/core/result/result.dart';
 import 'package:drift/drift.dart';
+import 'package:uuid/uuid.dart';
 
 /// Shared error boundary and transaction utility for Drift repositories.
 abstract class DriftRepository {
@@ -1339,6 +1340,15 @@ class DriftPaymentRepository extends DriftRepository
             ),
           );
     }
+    // Creating the snapshot in this transaction means every normal payment
+    // posting has historical receipt data before a user can change names or
+    // charge configuration. The repository is idempotent for legacy callers.
+    final Result<domain.ReceiptSnapshot> receipt = await DriftReceiptRepository(
+      database,
+    ).createForPayment(posting.payment.id);
+    if (receipt case Failure<domain.ReceiptSnapshot>()) {
+      throw StateError('The payment receipt snapshot could not be saved.');
+    }
   });
 
   @override
@@ -1430,5 +1440,285 @@ class DriftPaymentRepository extends DriftRepository
     reversalReason: reason ?? row.reversalReason,
     reversedAt: reversedAt ?? row.reversedAt,
     createdAt: row.createdAt,
+  );
+}
+
+/// Builds and persists immutable receipt data from the posted-payment ledger.
+///
+/// All displayed names and bill lines are stored as JSON at creation time. The
+/// saved snapshot, rather than live configuration, is therefore the source for
+/// later PDF regeneration.
+class DriftReceiptRepository extends DriftRepository
+    implements ReceiptRepository {
+  DriftReceiptRepository(super.database, {Uuid? uuid}) : _uuid = uuid ?? Uuid();
+
+  final Uuid _uuid;
+
+  @override
+  Future<Result<domain.ReceiptSnapshot?>> findByPayment(EntityId paymentId) =>
+      guard<domain.ReceiptSnapshot?>(() async {
+        final db.Receipt? row =
+            await (database.select(database.receipts)..where(
+                  (Receipts table) => table.paymentId.equals(paymentId.value),
+                ))
+                .getSingleOrNull();
+        return row == null
+            ? null
+            : domain.ReceiptSnapshot.fromJson(
+                jsonDecode(row.snapshotJson) as Map<String, dynamic>,
+              );
+      });
+
+  @override
+  Future<Result<domain.ReceiptSnapshot>> createForPayment(
+    EntityId paymentId,
+  ) => inTransaction<domain.ReceiptSnapshot>(() async {
+    final db.Receipt? existing =
+        await (database.select(database.receipts)..where(
+              (Receipts table) => table.paymentId.equals(paymentId.value),
+            ))
+            .getSingleOrNull();
+    if (existing != null) {
+      return domain.ReceiptSnapshot.fromJson(
+        jsonDecode(existing.snapshotJson) as Map<String, dynamic>,
+      );
+    }
+    final db.Payment? payment =
+        await (database.select(database.payments)
+              ..where((Payments table) => table.id.equals(paymentId.value)))
+            .getSingleOrNull();
+    if (payment == null || payment.status != domain.PaymentStatus.posted.name) {
+      throw StateError('A receipt can only be created for a posted payment.');
+    }
+    final db.Tenancy? tenancy =
+        await (database.select(database.tenancies)
+              ..where((Tenancies table) => table.id.equals(payment.tenancyId)))
+            .getSingleOrNull();
+    if (tenancy == null) throw StateError('Payment tenancy was not found.');
+    final db.Tenant? tenant =
+        await (database.select(database.tenants)
+              ..where((Tenants table) => table.id.equals(tenancy.tenantId)))
+            .getSingleOrNull();
+    final db.Unit? unit =
+        await (database.select(database.units)
+              ..where((Units table) => table.id.equals(tenancy.unitId)))
+            .getSingleOrNull();
+    if (tenant == null || unit == null) {
+      throw StateError('Receipt party details were not found.');
+    }
+    final db.Property? property =
+        await (database.select(database.properties)
+              ..where((Properties table) => table.id.equals(unit.propertyId)))
+            .getSingleOrNull();
+    if (property == null) throw StateError('Receipt property was not found.');
+
+    final List<db.PaymentAllocation> allocations =
+        await (database.select(database.paymentAllocations)..where(
+              (PaymentAllocations table) =>
+                  table.paymentId.equals(paymentId.value),
+            ))
+            .get();
+    if (allocations.isEmpty) {
+      throw StateError('Payment has no bill allocation.');
+    }
+
+    final List<BillingMonth> months = <BillingMonth>[];
+    final List<domain.ReceiptLineItem> lines = <domain.ReceiptLineItem>[];
+    for (final db.PaymentAllocation allocation in allocations) {
+      final db.MonthlyBill? bill =
+          await (database.select(database.monthlyBills)..where(
+                (MonthlyBills table) => table.id.equals(allocation.billId),
+              ))
+              .getSingleOrNull();
+      if (bill == null) throw StateError('Allocated bill was not found.');
+      final BillingMonth month = BillingMonth(
+        bill.billingYear,
+        bill.billingMonth,
+      );
+      months.add(month);
+      if (bill.previousDuePoisha != 0) {
+        lines.add(
+          domain.ReceiptLineItem(
+            description: 'Previous due (${month.key})',
+            amount: Money.fromPoisha(bill.previousDuePoisha),
+          ),
+        );
+      }
+      final List<db.BillLineItem> items =
+          await (database.select(database.billLineItems)
+                ..where((BillLineItems table) => table.billId.equals(bill.id))
+                ..orderBy(<OrderingTerm Function(BillLineItems)>[
+                  (BillLineItems table) => OrderingTerm.asc(table.sortOrder),
+                ]))
+              .get();
+      lines.addAll(
+        items.map(
+          (db.BillLineItem item) => domain.ReceiptLineItem(
+            description: allocations.length == 1
+                ? item.description
+                : '${month.key} - ${item.description}',
+            amount: Money.fromPoisha(item.amountPoisha),
+          ),
+        ),
+      );
+    }
+    final List<db.MonthlyBill> stillDue =
+        await (database.select(database.monthlyBills)..where(
+              (MonthlyBills table) =>
+                  table.tenancyId.equals(payment.tenancyId) &
+                  table.balancePoisha.isBiggerThanValue(0) &
+                  table.status.isNotValue(domain.BillStatus.draft.name) &
+                  table.status.isNotValue(domain.BillStatus.cancelled.name),
+            ))
+            .get();
+    final int remainingDue = stillDue.fold<int>(
+      0,
+      (int total, db.MonthlyBill bill) => total + bill.balancePoisha,
+    );
+    final DateTime createdAt = DateTime.now().toUtc();
+    final String id = _uuid.v4();
+    // UUID-derived suffix remains unique even if an old backup is restored
+    // and new receipts are issued from two diverging database copies.
+    final String receiptNumber =
+        'BV-${createdAt.year}-${createdAt.month.toString().padLeft(2, '0')}-${id.replaceAll('-', '').substring(0, 10).toUpperCase()}';
+    final String address =
+        <String?>[property.addressLine, property.area, property.cityDistrict]
+            .whereType<String>()
+            .map((String value) => value.trim())
+            .where((String value) => value.isNotEmpty)
+            .join(', ');
+    final domain.ReceiptSnapshot snapshot = domain.ReceiptSnapshot(
+      id: EntityId(id),
+      paymentId: paymentId,
+      receiptNumber: receiptNumber,
+      templateVersion: 1,
+      createdAt: createdAt,
+      propertyName: property.name,
+      propertyAddress: address.isEmpty ? null : address,
+      landlordName: _optionalText(property.ownerName),
+      landlordPhone: _optionalText(property.ownerPhone),
+      tenantName: tenant.fullName,
+      unitName: unit.floorName == null || unit.floorName!.trim().isEmpty
+          ? unit.name
+          : '${unit.floorName} - ${unit.name}',
+      billingMonths: List<BillingMonth>.unmodifiable(months),
+      chargeBreakdown: List<domain.ReceiptLineItem>.unmodifiable(lines),
+      paymentAmount: Money.fromPoisha(payment.amountPoisha),
+      remainingDue: Money.fromPoisha(remainingDue),
+      paymentMethod: PaymentMethod.values.firstWhere(
+        (PaymentMethod method) => method.name == payment.paymentMethod,
+        orElse: () => PaymentMethod.other,
+      ),
+      paymentDate: payment.paymentDate,
+    );
+    await database
+        .into(database.receipts)
+        .insert(
+          db.ReceiptsCompanion.insert(
+            id: id,
+            paymentId: paymentId.value,
+            receiptNumber: receiptNumber,
+            templateVersion: snapshot.templateVersion,
+            snapshotJson: jsonEncode(snapshot.toJson()),
+            createdAt: Value<DateTime>(createdAt),
+          ),
+        );
+    return snapshot;
+  });
+
+  static String? _optionalText(String? value) {
+    final String? trimmed = value?.trim();
+    return trimmed == null || trimmed.isEmpty ? null : trimmed;
+  }
+}
+
+/// Separate ledger for tenant-held deposits and advance balances.
+class DriftDepositRepository extends DriftRepository
+    implements DepositRepository {
+  const DriftDepositRepository(super.database);
+  @override
+  Future<Result<domain.Deposit?>> findByTenancy(EntityId tenancyId) =>
+      guard(() async {
+        final row = await (database.select(
+          database.deposits,
+        )..where((t) => t.tenancyId.equals(tenancyId.value))).getSingleOrNull();
+        return row == null ? null : _deposit(row);
+      });
+  @override
+  Future<Result<List<domain.DepositTransaction>>> history(EntityId tenancyId) =>
+      guard(() async {
+        final account = await (database.select(
+          database.deposits,
+        )..where((t) => t.tenancyId.equals(tenancyId.value))).getSingleOrNull();
+        if (account == null) return <domain.DepositTransaction>[];
+        final rows =
+            await (database.select(database.depositTransactions)
+                  ..where((t) => t.depositId.equals(account.id))
+                  ..orderBy([(t) => OrderingTerm.desc(t.transactionDate)]))
+                .get();
+        return rows
+            .map(
+              (r) => domain.DepositTransaction(
+                id: EntityId(r.id),
+                depositId: EntityId(r.depositId),
+                type: domain.DepositTransactionType.values.firstWhere(
+                  (v) => v.name == r.type,
+                  orElse: () => domain.DepositTransactionType.correction,
+                ),
+                amount: Money.fromPoisha(r.amountPoisha),
+                date: r.transactionDate,
+                note: r.note,
+                method: r.paymentMethod == null
+                    ? null
+                    : PaymentMethod.values.firstWhere(
+                        (v) => v.name == r.paymentMethod,
+                        orElse: () => PaymentMethod.other,
+                      ),
+              ),
+            )
+            .toList();
+      });
+  @override
+  Future<Result<void>> post(
+    domain.Deposit deposit,
+    domain.DepositTransaction transaction,
+  ) => inTransaction(() async {
+    final now = DateTime.now().toUtc();
+    await database
+        .into(database.deposits)
+        .insertOnConflictUpdate(
+          db.DepositsCompanion.insert(
+            id: deposit.id.value,
+            tenancyId: deposit.tenancyId.value,
+            openingBalancePoisha: Value(deposit.currentBalance.poisha),
+            expectedBalancePoisha: Value(deposit.expected.poisha),
+            advanceRentBalancePoisha: Value(deposit.advanceRentBalance.poisha),
+            currentBalancePoisha: Value(deposit.currentBalance.poisha),
+            createdAt: Value(now),
+            updatedAt: Value(now),
+          ),
+        );
+    await database
+        .into(database.depositTransactions)
+        .insert(
+          db.DepositTransactionsCompanion.insert(
+            id: transaction.id.value,
+            depositId: transaction.depositId.value,
+            type: transaction.type.name,
+            amountPoisha: transaction.amount.poisha,
+            transactionDate: transaction.date,
+            note: Value(transaction.note),
+            paymentMethod: Value(transaction.method?.name),
+            reference: const Value(null),
+            createdAt: Value(now),
+          ),
+        );
+  });
+  domain.Deposit _deposit(db.Deposit row) => domain.Deposit(
+    id: EntityId(row.id),
+    tenancyId: EntityId(row.tenancyId),
+    currentBalance: Money.fromPoisha(row.currentBalancePoisha),
+    expected: Money.fromPoisha(row.expectedBalancePoisha),
+    advanceRentBalance: Money.fromPoisha(row.advanceRentBalancePoisha),
   );
 }

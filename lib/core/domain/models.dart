@@ -387,6 +387,132 @@ class PaymentPosting {
   final List<PaymentAllocation> allocations;
 }
 
+/// Language used for the fixed labels of a generated receipt.
+enum ReceiptLanguage { english, bengali }
+
+/// A displayed charge line frozen into a receipt.
+class ReceiptLineItem {
+  const ReceiptLineItem({required this.description, required this.amount});
+
+  final String description;
+  final Money amount;
+
+  Map<String, Object> toJson() => <String, Object>{
+    'description': description,
+    'amountPoisha': amount.poisha,
+  };
+
+  factory ReceiptLineItem.fromJson(Map<String, dynamic> json) =>
+      ReceiptLineItem(
+        description: json['description']! as String,
+        amount: Money.fromPoisha(json['amountPoisha']! as int),
+      );
+}
+
+/// Immutable input used to render a receipt now or years later.
+class ReceiptSnapshot {
+  const ReceiptSnapshot({
+    required this.id,
+    required this.paymentId,
+    required this.receiptNumber,
+    required this.templateVersion,
+    required this.createdAt,
+    required this.propertyName,
+    required this.tenantName,
+    required this.unitName,
+    required this.billingMonths,
+    required this.chargeBreakdown,
+    required this.paymentAmount,
+    required this.remainingDue,
+    required this.paymentMethod,
+    required this.paymentDate,
+    this.propertyAddress,
+    this.landlordName,
+    this.landlordPhone,
+  });
+
+  final EntityId id;
+  final EntityId paymentId;
+  final String receiptNumber;
+  final int templateVersion;
+  final DateTime createdAt;
+  final String propertyName;
+  final String? propertyAddress;
+  final String? landlordName;
+  final String? landlordPhone;
+  final String tenantName;
+  final String unitName;
+  final List<BillingMonth> billingMonths;
+  final List<ReceiptLineItem> chargeBreakdown;
+  final Money paymentAmount;
+  final Money remainingDue;
+  final PaymentMethod paymentMethod;
+  final DateTime paymentDate;
+
+  Map<String, Object?> toJson() => <String, Object?>{
+    'id': id.value,
+    'paymentId': paymentId.value,
+    'receiptNumber': receiptNumber,
+    'templateVersion': templateVersion,
+    'createdAt': createdAt.toUtc().toIso8601String(),
+    'propertyName': propertyName,
+    'propertyAddress': propertyAddress,
+    'landlordName': landlordName,
+    'landlordPhone': landlordPhone,
+    'tenantName': tenantName,
+    'unitName': unitName,
+    'billingMonths': billingMonths
+        .map((BillingMonth value) => <String, int>{
+              'year': value.year,
+              'month': value.month,
+            })
+        .toList(growable: false),
+    'chargeBreakdown': chargeBreakdown
+        .map((ReceiptLineItem value) => value.toJson())
+        .toList(growable: false),
+    'paymentAmountPoisha': paymentAmount.poisha,
+    'remainingDuePoisha': remainingDue.poisha,
+    'paymentMethod': paymentMethod.name,
+    'paymentDate': paymentDate.toUtc().toIso8601String(),
+  };
+
+  factory ReceiptSnapshot.fromJson(Map<String, dynamic> json) {
+    final List<dynamic> months = json['billingMonths']! as List<dynamic>;
+    final List<dynamic> lines = json['chargeBreakdown']! as List<dynamic>;
+    return ReceiptSnapshot(
+      id: EntityId(json['id']! as String),
+      paymentId: EntityId(json['paymentId']! as String),
+      receiptNumber: json['receiptNumber']! as String,
+      templateVersion: json['templateVersion']! as int,
+      createdAt: DateTime.parse(json['createdAt']! as String),
+      propertyName: json['propertyName']! as String,
+      propertyAddress: json['propertyAddress'] as String?,
+      landlordName: json['landlordName'] as String?,
+      landlordPhone: json['landlordPhone'] as String?,
+      tenantName: json['tenantName']! as String,
+      unitName: json['unitName']! as String,
+      billingMonths: months
+          .map((dynamic value) => BillingMonth(
+                (value as Map<String, dynamic>)['year']! as int,
+                value['month']! as int,
+              ))
+          .toList(growable: false),
+      chargeBreakdown: lines
+          .map((dynamic value) => ReceiptLineItem.fromJson(
+                value as Map<String, dynamic>,
+              ))
+          .toList(growable: false),
+      paymentAmount: Money.fromPoisha(json['paymentAmountPoisha']! as int),
+      remainingDue: Money.fromPoisha(json['remainingDuePoisha']! as int),
+      paymentMethod: PaymentMethod.values.firstWhere(
+        (PaymentMethod method) => method.name == json['paymentMethod'],
+        orElse: () => PaymentMethod.other,
+      ),
+      paymentDate: DateTime.parse(json['paymentDate']! as String),
+    );
+  }
+}
+
 /// Current due totals shown before posting a payment.
 class DueSummary {
   /// Creates a tenancy-level due summary.

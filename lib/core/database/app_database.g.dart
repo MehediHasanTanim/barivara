@@ -7624,6 +7624,442 @@ class PaymentAllocationsCompanion extends UpdateCompanion<PaymentAllocation> {
   }
 }
 
+class $ReceiptsTable extends Receipts with TableInfo<$ReceiptsTable, Receipt> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $ReceiptsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _paymentIdMeta = const VerificationMeta(
+    'paymentId',
+  );
+  @override
+  late final GeneratedColumn<String> paymentId = GeneratedColumn<String>(
+    'payment_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES payments (id)',
+    ),
+  );
+  static const VerificationMeta _receiptNumberMeta = const VerificationMeta(
+    'receiptNumber',
+  );
+  @override
+  late final GeneratedColumn<String> receiptNumber = GeneratedColumn<String>(
+    'receipt_number',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _templateVersionMeta = const VerificationMeta(
+    'templateVersion',
+  );
+  @override
+  late final GeneratedColumn<int> templateVersion = GeneratedColumn<int>(
+    'template_version',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _snapshotJsonMeta = const VerificationMeta(
+    'snapshotJson',
+  );
+  @override
+  late final GeneratedColumn<String> snapshotJson = GeneratedColumn<String>(
+    'snapshot_json',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    paymentId,
+    receiptNumber,
+    templateVersion,
+    snapshotJson,
+    createdAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'receipts';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<Receipt> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('payment_id')) {
+      context.handle(
+        _paymentIdMeta,
+        paymentId.isAcceptableOrUnknown(data['payment_id']!, _paymentIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_paymentIdMeta);
+    }
+    if (data.containsKey('receipt_number')) {
+      context.handle(
+        _receiptNumberMeta,
+        receiptNumber.isAcceptableOrUnknown(
+          data['receipt_number']!,
+          _receiptNumberMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_receiptNumberMeta);
+    }
+    if (data.containsKey('template_version')) {
+      context.handle(
+        _templateVersionMeta,
+        templateVersion.isAcceptableOrUnknown(
+          data['template_version']!,
+          _templateVersionMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_templateVersionMeta);
+    }
+    if (data.containsKey('snapshot_json')) {
+      context.handle(
+        _snapshotJsonMeta,
+        snapshotJson.isAcceptableOrUnknown(
+          data['snapshot_json']!,
+          _snapshotJsonMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_snapshotJsonMeta);
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  List<Set<GeneratedColumn>> get uniqueKeys => [
+    {paymentId},
+    {receiptNumber},
+  ];
+  @override
+  Receipt map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return Receipt(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      paymentId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}payment_id'],
+      )!,
+      receiptNumber: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}receipt_number'],
+      )!,
+      templateVersion: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}template_version'],
+      )!,
+      snapshotJson: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}snapshot_json'],
+      )!,
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      )!,
+    );
+  }
+
+  @override
+  $ReceiptsTable createAlias(String alias) {
+    return $ReceiptsTable(attachedDatabase, alias);
+  }
+}
+
+class Receipt extends DataClass implements Insertable<Receipt> {
+  final String id;
+  final String paymentId;
+  final String receiptNumber;
+  final int templateVersion;
+  final String snapshotJson;
+  final DateTime createdAt;
+  const Receipt({
+    required this.id,
+    required this.paymentId,
+    required this.receiptNumber,
+    required this.templateVersion,
+    required this.snapshotJson,
+    required this.createdAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['payment_id'] = Variable<String>(paymentId);
+    map['receipt_number'] = Variable<String>(receiptNumber);
+    map['template_version'] = Variable<int>(templateVersion);
+    map['snapshot_json'] = Variable<String>(snapshotJson);
+    map['created_at'] = Variable<DateTime>(createdAt);
+    return map;
+  }
+
+  ReceiptsCompanion toCompanion(bool nullToAbsent) {
+    return ReceiptsCompanion(
+      id: Value(id),
+      paymentId: Value(paymentId),
+      receiptNumber: Value(receiptNumber),
+      templateVersion: Value(templateVersion),
+      snapshotJson: Value(snapshotJson),
+      createdAt: Value(createdAt),
+    );
+  }
+
+  factory Receipt.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return Receipt(
+      id: serializer.fromJson<String>(json['id']),
+      paymentId: serializer.fromJson<String>(json['paymentId']),
+      receiptNumber: serializer.fromJson<String>(json['receiptNumber']),
+      templateVersion: serializer.fromJson<int>(json['templateVersion']),
+      snapshotJson: serializer.fromJson<String>(json['snapshotJson']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'paymentId': serializer.toJson<String>(paymentId),
+      'receiptNumber': serializer.toJson<String>(receiptNumber),
+      'templateVersion': serializer.toJson<int>(templateVersion),
+      'snapshotJson': serializer.toJson<String>(snapshotJson),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+    };
+  }
+
+  Receipt copyWith({
+    String? id,
+    String? paymentId,
+    String? receiptNumber,
+    int? templateVersion,
+    String? snapshotJson,
+    DateTime? createdAt,
+  }) => Receipt(
+    id: id ?? this.id,
+    paymentId: paymentId ?? this.paymentId,
+    receiptNumber: receiptNumber ?? this.receiptNumber,
+    templateVersion: templateVersion ?? this.templateVersion,
+    snapshotJson: snapshotJson ?? this.snapshotJson,
+    createdAt: createdAt ?? this.createdAt,
+  );
+  Receipt copyWithCompanion(ReceiptsCompanion data) {
+    return Receipt(
+      id: data.id.present ? data.id.value : this.id,
+      paymentId: data.paymentId.present ? data.paymentId.value : this.paymentId,
+      receiptNumber: data.receiptNumber.present
+          ? data.receiptNumber.value
+          : this.receiptNumber,
+      templateVersion: data.templateVersion.present
+          ? data.templateVersion.value
+          : this.templateVersion,
+      snapshotJson: data.snapshotJson.present
+          ? data.snapshotJson.value
+          : this.snapshotJson,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('Receipt(')
+          ..write('id: $id, ')
+          ..write('paymentId: $paymentId, ')
+          ..write('receiptNumber: $receiptNumber, ')
+          ..write('templateVersion: $templateVersion, ')
+          ..write('snapshotJson: $snapshotJson, ')
+          ..write('createdAt: $createdAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    paymentId,
+    receiptNumber,
+    templateVersion,
+    snapshotJson,
+    createdAt,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is Receipt &&
+          other.id == this.id &&
+          other.paymentId == this.paymentId &&
+          other.receiptNumber == this.receiptNumber &&
+          other.templateVersion == this.templateVersion &&
+          other.snapshotJson == this.snapshotJson &&
+          other.createdAt == this.createdAt);
+}
+
+class ReceiptsCompanion extends UpdateCompanion<Receipt> {
+  final Value<String> id;
+  final Value<String> paymentId;
+  final Value<String> receiptNumber;
+  final Value<int> templateVersion;
+  final Value<String> snapshotJson;
+  final Value<DateTime> createdAt;
+  final Value<int> rowid;
+  const ReceiptsCompanion({
+    this.id = const Value.absent(),
+    this.paymentId = const Value.absent(),
+    this.receiptNumber = const Value.absent(),
+    this.templateVersion = const Value.absent(),
+    this.snapshotJson = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  ReceiptsCompanion.insert({
+    required String id,
+    required String paymentId,
+    required String receiptNumber,
+    required int templateVersion,
+    required String snapshotJson,
+    this.createdAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       paymentId = Value(paymentId),
+       receiptNumber = Value(receiptNumber),
+       templateVersion = Value(templateVersion),
+       snapshotJson = Value(snapshotJson);
+  static Insertable<Receipt> custom({
+    Expression<String>? id,
+    Expression<String>? paymentId,
+    Expression<String>? receiptNumber,
+    Expression<int>? templateVersion,
+    Expression<String>? snapshotJson,
+    Expression<DateTime>? createdAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (paymentId != null) 'payment_id': paymentId,
+      if (receiptNumber != null) 'receipt_number': receiptNumber,
+      if (templateVersion != null) 'template_version': templateVersion,
+      if (snapshotJson != null) 'snapshot_json': snapshotJson,
+      if (createdAt != null) 'created_at': createdAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  ReceiptsCompanion copyWith({
+    Value<String>? id,
+    Value<String>? paymentId,
+    Value<String>? receiptNumber,
+    Value<int>? templateVersion,
+    Value<String>? snapshotJson,
+    Value<DateTime>? createdAt,
+    Value<int>? rowid,
+  }) {
+    return ReceiptsCompanion(
+      id: id ?? this.id,
+      paymentId: paymentId ?? this.paymentId,
+      receiptNumber: receiptNumber ?? this.receiptNumber,
+      templateVersion: templateVersion ?? this.templateVersion,
+      snapshotJson: snapshotJson ?? this.snapshotJson,
+      createdAt: createdAt ?? this.createdAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (paymentId.present) {
+      map['payment_id'] = Variable<String>(paymentId.value);
+    }
+    if (receiptNumber.present) {
+      map['receipt_number'] = Variable<String>(receiptNumber.value);
+    }
+    if (templateVersion.present) {
+      map['template_version'] = Variable<int>(templateVersion.value);
+    }
+    if (snapshotJson.present) {
+      map['snapshot_json'] = Variable<String>(snapshotJson.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ReceiptsCompanion(')
+          ..write('id: $id, ')
+          ..write('paymentId: $paymentId, ')
+          ..write('receiptNumber: $receiptNumber, ')
+          ..write('templateVersion: $templateVersion, ')
+          ..write('snapshotJson: $snapshotJson, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 class $DepositsTable extends Deposits with TableInfo<$DepositsTable, Deposit> {
   @override
   final GeneratedDatabase attachedDatabase;
@@ -7663,6 +8099,29 @@ class $DepositsTable extends Deposits with TableInfo<$DepositsTable, Deposit> {
     requiredDuringInsert: false,
     defaultValue: const Constant(0),
   );
+  static const VerificationMeta _expectedBalancePoishaMeta =
+      const VerificationMeta('expectedBalancePoisha');
+  @override
+  late final GeneratedColumn<int> expectedBalancePoisha = GeneratedColumn<int>(
+    'expected_balance_poisha',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _advanceRentBalancePoishaMeta =
+      const VerificationMeta('advanceRentBalancePoisha');
+  @override
+  late final GeneratedColumn<int> advanceRentBalancePoisha =
+      GeneratedColumn<int>(
+        'advance_rent_balance_poisha',
+        aliasedName,
+        false,
+        type: DriftSqlType.int,
+        requiredDuringInsert: false,
+        defaultValue: const Constant(0),
+      );
   static const VerificationMeta _currentBalancePoishaMeta =
       const VerificationMeta('currentBalancePoisha');
   @override
@@ -7703,6 +8162,8 @@ class $DepositsTable extends Deposits with TableInfo<$DepositsTable, Deposit> {
     id,
     tenancyId,
     openingBalancePoisha,
+    expectedBalancePoisha,
+    advanceRentBalancePoisha,
     currentBalancePoisha,
     createdAt,
     updatedAt,
@@ -7738,6 +8199,24 @@ class $DepositsTable extends Deposits with TableInfo<$DepositsTable, Deposit> {
         openingBalancePoisha.isAcceptableOrUnknown(
           data['opening_balance_poisha']!,
           _openingBalancePoishaMeta,
+        ),
+      );
+    }
+    if (data.containsKey('expected_balance_poisha')) {
+      context.handle(
+        _expectedBalancePoishaMeta,
+        expectedBalancePoisha.isAcceptableOrUnknown(
+          data['expected_balance_poisha']!,
+          _expectedBalancePoishaMeta,
+        ),
+      );
+    }
+    if (data.containsKey('advance_rent_balance_poisha')) {
+      context.handle(
+        _advanceRentBalancePoishaMeta,
+        advanceRentBalancePoisha.isAcceptableOrUnknown(
+          data['advance_rent_balance_poisha']!,
+          _advanceRentBalancePoishaMeta,
         ),
       );
     }
@@ -7787,6 +8266,14 @@ class $DepositsTable extends Deposits with TableInfo<$DepositsTable, Deposit> {
         DriftSqlType.int,
         data['${effectivePrefix}opening_balance_poisha'],
       )!,
+      expectedBalancePoisha: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}expected_balance_poisha'],
+      )!,
+      advanceRentBalancePoisha: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}advance_rent_balance_poisha'],
+      )!,
       currentBalancePoisha: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
         data['${effectivePrefix}current_balance_poisha'],
@@ -7812,6 +8299,8 @@ class Deposit extends DataClass implements Insertable<Deposit> {
   final String id;
   final String tenancyId;
   final int openingBalancePoisha;
+  final int expectedBalancePoisha;
+  final int advanceRentBalancePoisha;
   final int currentBalancePoisha;
   final DateTime createdAt;
   final DateTime updatedAt;
@@ -7819,6 +8308,8 @@ class Deposit extends DataClass implements Insertable<Deposit> {
     required this.id,
     required this.tenancyId,
     required this.openingBalancePoisha,
+    required this.expectedBalancePoisha,
+    required this.advanceRentBalancePoisha,
     required this.currentBalancePoisha,
     required this.createdAt,
     required this.updatedAt,
@@ -7829,6 +8320,10 @@ class Deposit extends DataClass implements Insertable<Deposit> {
     map['id'] = Variable<String>(id);
     map['tenancy_id'] = Variable<String>(tenancyId);
     map['opening_balance_poisha'] = Variable<int>(openingBalancePoisha);
+    map['expected_balance_poisha'] = Variable<int>(expectedBalancePoisha);
+    map['advance_rent_balance_poisha'] = Variable<int>(
+      advanceRentBalancePoisha,
+    );
     map['current_balance_poisha'] = Variable<int>(currentBalancePoisha);
     map['created_at'] = Variable<DateTime>(createdAt);
     map['updated_at'] = Variable<DateTime>(updatedAt);
@@ -7840,6 +8335,8 @@ class Deposit extends DataClass implements Insertable<Deposit> {
       id: Value(id),
       tenancyId: Value(tenancyId),
       openingBalancePoisha: Value(openingBalancePoisha),
+      expectedBalancePoisha: Value(expectedBalancePoisha),
+      advanceRentBalancePoisha: Value(advanceRentBalancePoisha),
       currentBalancePoisha: Value(currentBalancePoisha),
       createdAt: Value(createdAt),
       updatedAt: Value(updatedAt),
@@ -7857,6 +8354,12 @@ class Deposit extends DataClass implements Insertable<Deposit> {
       openingBalancePoisha: serializer.fromJson<int>(
         json['openingBalancePoisha'],
       ),
+      expectedBalancePoisha: serializer.fromJson<int>(
+        json['expectedBalancePoisha'],
+      ),
+      advanceRentBalancePoisha: serializer.fromJson<int>(
+        json['advanceRentBalancePoisha'],
+      ),
       currentBalancePoisha: serializer.fromJson<int>(
         json['currentBalancePoisha'],
       ),
@@ -7871,6 +8374,10 @@ class Deposit extends DataClass implements Insertable<Deposit> {
       'id': serializer.toJson<String>(id),
       'tenancyId': serializer.toJson<String>(tenancyId),
       'openingBalancePoisha': serializer.toJson<int>(openingBalancePoisha),
+      'expectedBalancePoisha': serializer.toJson<int>(expectedBalancePoisha),
+      'advanceRentBalancePoisha': serializer.toJson<int>(
+        advanceRentBalancePoisha,
+      ),
       'currentBalancePoisha': serializer.toJson<int>(currentBalancePoisha),
       'createdAt': serializer.toJson<DateTime>(createdAt),
       'updatedAt': serializer.toJson<DateTime>(updatedAt),
@@ -7881,6 +8388,8 @@ class Deposit extends DataClass implements Insertable<Deposit> {
     String? id,
     String? tenancyId,
     int? openingBalancePoisha,
+    int? expectedBalancePoisha,
+    int? advanceRentBalancePoisha,
     int? currentBalancePoisha,
     DateTime? createdAt,
     DateTime? updatedAt,
@@ -7888,6 +8397,9 @@ class Deposit extends DataClass implements Insertable<Deposit> {
     id: id ?? this.id,
     tenancyId: tenancyId ?? this.tenancyId,
     openingBalancePoisha: openingBalancePoisha ?? this.openingBalancePoisha,
+    expectedBalancePoisha: expectedBalancePoisha ?? this.expectedBalancePoisha,
+    advanceRentBalancePoisha:
+        advanceRentBalancePoisha ?? this.advanceRentBalancePoisha,
     currentBalancePoisha: currentBalancePoisha ?? this.currentBalancePoisha,
     createdAt: createdAt ?? this.createdAt,
     updatedAt: updatedAt ?? this.updatedAt,
@@ -7899,6 +8411,12 @@ class Deposit extends DataClass implements Insertable<Deposit> {
       openingBalancePoisha: data.openingBalancePoisha.present
           ? data.openingBalancePoisha.value
           : this.openingBalancePoisha,
+      expectedBalancePoisha: data.expectedBalancePoisha.present
+          ? data.expectedBalancePoisha.value
+          : this.expectedBalancePoisha,
+      advanceRentBalancePoisha: data.advanceRentBalancePoisha.present
+          ? data.advanceRentBalancePoisha.value
+          : this.advanceRentBalancePoisha,
       currentBalancePoisha: data.currentBalancePoisha.present
           ? data.currentBalancePoisha.value
           : this.currentBalancePoisha,
@@ -7913,6 +8431,8 @@ class Deposit extends DataClass implements Insertable<Deposit> {
           ..write('id: $id, ')
           ..write('tenancyId: $tenancyId, ')
           ..write('openingBalancePoisha: $openingBalancePoisha, ')
+          ..write('expectedBalancePoisha: $expectedBalancePoisha, ')
+          ..write('advanceRentBalancePoisha: $advanceRentBalancePoisha, ')
           ..write('currentBalancePoisha: $currentBalancePoisha, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt')
@@ -7925,6 +8445,8 @@ class Deposit extends DataClass implements Insertable<Deposit> {
     id,
     tenancyId,
     openingBalancePoisha,
+    expectedBalancePoisha,
+    advanceRentBalancePoisha,
     currentBalancePoisha,
     createdAt,
     updatedAt,
@@ -7936,6 +8458,8 @@ class Deposit extends DataClass implements Insertable<Deposit> {
           other.id == this.id &&
           other.tenancyId == this.tenancyId &&
           other.openingBalancePoisha == this.openingBalancePoisha &&
+          other.expectedBalancePoisha == this.expectedBalancePoisha &&
+          other.advanceRentBalancePoisha == this.advanceRentBalancePoisha &&
           other.currentBalancePoisha == this.currentBalancePoisha &&
           other.createdAt == this.createdAt &&
           other.updatedAt == this.updatedAt);
@@ -7945,6 +8469,8 @@ class DepositsCompanion extends UpdateCompanion<Deposit> {
   final Value<String> id;
   final Value<String> tenancyId;
   final Value<int> openingBalancePoisha;
+  final Value<int> expectedBalancePoisha;
+  final Value<int> advanceRentBalancePoisha;
   final Value<int> currentBalancePoisha;
   final Value<DateTime> createdAt;
   final Value<DateTime> updatedAt;
@@ -7953,6 +8479,8 @@ class DepositsCompanion extends UpdateCompanion<Deposit> {
     this.id = const Value.absent(),
     this.tenancyId = const Value.absent(),
     this.openingBalancePoisha = const Value.absent(),
+    this.expectedBalancePoisha = const Value.absent(),
+    this.advanceRentBalancePoisha = const Value.absent(),
     this.currentBalancePoisha = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
@@ -7962,6 +8490,8 @@ class DepositsCompanion extends UpdateCompanion<Deposit> {
     required String id,
     required String tenancyId,
     this.openingBalancePoisha = const Value.absent(),
+    this.expectedBalancePoisha = const Value.absent(),
+    this.advanceRentBalancePoisha = const Value.absent(),
     this.currentBalancePoisha = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
@@ -7972,6 +8502,8 @@ class DepositsCompanion extends UpdateCompanion<Deposit> {
     Expression<String>? id,
     Expression<String>? tenancyId,
     Expression<int>? openingBalancePoisha,
+    Expression<int>? expectedBalancePoisha,
+    Expression<int>? advanceRentBalancePoisha,
     Expression<int>? currentBalancePoisha,
     Expression<DateTime>? createdAt,
     Expression<DateTime>? updatedAt,
@@ -7982,6 +8514,10 @@ class DepositsCompanion extends UpdateCompanion<Deposit> {
       if (tenancyId != null) 'tenancy_id': tenancyId,
       if (openingBalancePoisha != null)
         'opening_balance_poisha': openingBalancePoisha,
+      if (expectedBalancePoisha != null)
+        'expected_balance_poisha': expectedBalancePoisha,
+      if (advanceRentBalancePoisha != null)
+        'advance_rent_balance_poisha': advanceRentBalancePoisha,
       if (currentBalancePoisha != null)
         'current_balance_poisha': currentBalancePoisha,
       if (createdAt != null) 'created_at': createdAt,
@@ -7994,6 +8530,8 @@ class DepositsCompanion extends UpdateCompanion<Deposit> {
     Value<String>? id,
     Value<String>? tenancyId,
     Value<int>? openingBalancePoisha,
+    Value<int>? expectedBalancePoisha,
+    Value<int>? advanceRentBalancePoisha,
     Value<int>? currentBalancePoisha,
     Value<DateTime>? createdAt,
     Value<DateTime>? updatedAt,
@@ -8003,6 +8541,10 @@ class DepositsCompanion extends UpdateCompanion<Deposit> {
       id: id ?? this.id,
       tenancyId: tenancyId ?? this.tenancyId,
       openingBalancePoisha: openingBalancePoisha ?? this.openingBalancePoisha,
+      expectedBalancePoisha:
+          expectedBalancePoisha ?? this.expectedBalancePoisha,
+      advanceRentBalancePoisha:
+          advanceRentBalancePoisha ?? this.advanceRentBalancePoisha,
       currentBalancePoisha: currentBalancePoisha ?? this.currentBalancePoisha,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
@@ -8021,6 +8563,16 @@ class DepositsCompanion extends UpdateCompanion<Deposit> {
     }
     if (openingBalancePoisha.present) {
       map['opening_balance_poisha'] = Variable<int>(openingBalancePoisha.value);
+    }
+    if (expectedBalancePoisha.present) {
+      map['expected_balance_poisha'] = Variable<int>(
+        expectedBalancePoisha.value,
+      );
+    }
+    if (advanceRentBalancePoisha.present) {
+      map['advance_rent_balance_poisha'] = Variable<int>(
+        advanceRentBalancePoisha.value,
+      );
     }
     if (currentBalancePoisha.present) {
       map['current_balance_poisha'] = Variable<int>(currentBalancePoisha.value);
@@ -8043,6 +8595,8 @@ class DepositsCompanion extends UpdateCompanion<Deposit> {
           ..write('id: $id, ')
           ..write('tenancyId: $tenancyId, ')
           ..write('openingBalancePoisha: $openingBalancePoisha, ')
+          ..write('expectedBalancePoisha: $expectedBalancePoisha, ')
+          ..write('advanceRentBalancePoisha: $advanceRentBalancePoisha, ')
           ..write('currentBalancePoisha: $currentBalancePoisha, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
@@ -8144,6 +8698,28 @@ class $DepositTransactionsTable extends DepositTransactions
     type: DriftSqlType.string,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _paymentMethodMeta = const VerificationMeta(
+    'paymentMethod',
+  );
+  @override
+  late final GeneratedColumn<String> paymentMethod = GeneratedColumn<String>(
+    'payment_method',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _referenceMeta = const VerificationMeta(
+    'reference',
+  );
+  @override
+  late final GeneratedColumn<String> reference = GeneratedColumn<String>(
+    'reference',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _createdAtMeta = const VerificationMeta(
     'createdAt',
   );
@@ -8166,6 +8742,8 @@ class $DepositTransactionsTable extends DepositTransactions
     referenceType,
     referenceId,
     note,
+    paymentMethod,
+    reference,
     createdAt,
   ];
   @override
@@ -8247,6 +8825,21 @@ class $DepositTransactionsTable extends DepositTransactions
         note.isAcceptableOrUnknown(data['note']!, _noteMeta),
       );
     }
+    if (data.containsKey('payment_method')) {
+      context.handle(
+        _paymentMethodMeta,
+        paymentMethod.isAcceptableOrUnknown(
+          data['payment_method']!,
+          _paymentMethodMeta,
+        ),
+      );
+    }
+    if (data.containsKey('reference')) {
+      context.handle(
+        _referenceMeta,
+        reference.isAcceptableOrUnknown(data['reference']!, _referenceMeta),
+      );
+    }
     if (data.containsKey('created_at')) {
       context.handle(
         _createdAtMeta,
@@ -8294,6 +8887,14 @@ class $DepositTransactionsTable extends DepositTransactions
         DriftSqlType.string,
         data['${effectivePrefix}note'],
       ),
+      paymentMethod: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}payment_method'],
+      ),
+      reference: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}reference'],
+      ),
       createdAt: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
         data['${effectivePrefix}created_at'],
@@ -8317,6 +8918,8 @@ class DepositTransaction extends DataClass
   final String? referenceType;
   final String? referenceId;
   final String? note;
+  final String? paymentMethod;
+  final String? reference;
   final DateTime createdAt;
   const DepositTransaction({
     required this.id,
@@ -8327,6 +8930,8 @@ class DepositTransaction extends DataClass
     this.referenceType,
     this.referenceId,
     this.note,
+    this.paymentMethod,
+    this.reference,
     required this.createdAt,
   });
   @override
@@ -8346,6 +8951,12 @@ class DepositTransaction extends DataClass
     if (!nullToAbsent || note != null) {
       map['note'] = Variable<String>(note);
     }
+    if (!nullToAbsent || paymentMethod != null) {
+      map['payment_method'] = Variable<String>(paymentMethod);
+    }
+    if (!nullToAbsent || reference != null) {
+      map['reference'] = Variable<String>(reference);
+    }
     map['created_at'] = Variable<DateTime>(createdAt);
     return map;
   }
@@ -8364,6 +8975,12 @@ class DepositTransaction extends DataClass
           ? const Value.absent()
           : Value(referenceId),
       note: note == null && nullToAbsent ? const Value.absent() : Value(note),
+      paymentMethod: paymentMethod == null && nullToAbsent
+          ? const Value.absent()
+          : Value(paymentMethod),
+      reference: reference == null && nullToAbsent
+          ? const Value.absent()
+          : Value(reference),
       createdAt: Value(createdAt),
     );
   }
@@ -8382,6 +8999,8 @@ class DepositTransaction extends DataClass
       referenceType: serializer.fromJson<String?>(json['referenceType']),
       referenceId: serializer.fromJson<String?>(json['referenceId']),
       note: serializer.fromJson<String?>(json['note']),
+      paymentMethod: serializer.fromJson<String?>(json['paymentMethod']),
+      reference: serializer.fromJson<String?>(json['reference']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
     );
   }
@@ -8397,6 +9016,8 @@ class DepositTransaction extends DataClass
       'referenceType': serializer.toJson<String?>(referenceType),
       'referenceId': serializer.toJson<String?>(referenceId),
       'note': serializer.toJson<String?>(note),
+      'paymentMethod': serializer.toJson<String?>(paymentMethod),
+      'reference': serializer.toJson<String?>(reference),
       'createdAt': serializer.toJson<DateTime>(createdAt),
     };
   }
@@ -8410,6 +9031,8 @@ class DepositTransaction extends DataClass
     Value<String?> referenceType = const Value.absent(),
     Value<String?> referenceId = const Value.absent(),
     Value<String?> note = const Value.absent(),
+    Value<String?> paymentMethod = const Value.absent(),
+    Value<String?> reference = const Value.absent(),
     DateTime? createdAt,
   }) => DepositTransaction(
     id: id ?? this.id,
@@ -8422,6 +9045,10 @@ class DepositTransaction extends DataClass
         : this.referenceType,
     referenceId: referenceId.present ? referenceId.value : this.referenceId,
     note: note.present ? note.value : this.note,
+    paymentMethod: paymentMethod.present
+        ? paymentMethod.value
+        : this.paymentMethod,
+    reference: reference.present ? reference.value : this.reference,
     createdAt: createdAt ?? this.createdAt,
   );
   DepositTransaction copyWithCompanion(DepositTransactionsCompanion data) {
@@ -8442,6 +9069,10 @@ class DepositTransaction extends DataClass
           ? data.referenceId.value
           : this.referenceId,
       note: data.note.present ? data.note.value : this.note,
+      paymentMethod: data.paymentMethod.present
+          ? data.paymentMethod.value
+          : this.paymentMethod,
+      reference: data.reference.present ? data.reference.value : this.reference,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
     );
   }
@@ -8457,6 +9088,8 @@ class DepositTransaction extends DataClass
           ..write('referenceType: $referenceType, ')
           ..write('referenceId: $referenceId, ')
           ..write('note: $note, ')
+          ..write('paymentMethod: $paymentMethod, ')
+          ..write('reference: $reference, ')
           ..write('createdAt: $createdAt')
           ..write(')'))
         .toString();
@@ -8472,6 +9105,8 @@ class DepositTransaction extends DataClass
     referenceType,
     referenceId,
     note,
+    paymentMethod,
+    reference,
     createdAt,
   );
   @override
@@ -8486,6 +9121,8 @@ class DepositTransaction extends DataClass
           other.referenceType == this.referenceType &&
           other.referenceId == this.referenceId &&
           other.note == this.note &&
+          other.paymentMethod == this.paymentMethod &&
+          other.reference == this.reference &&
           other.createdAt == this.createdAt);
 }
 
@@ -8498,6 +9135,8 @@ class DepositTransactionsCompanion extends UpdateCompanion<DepositTransaction> {
   final Value<String?> referenceType;
   final Value<String?> referenceId;
   final Value<String?> note;
+  final Value<String?> paymentMethod;
+  final Value<String?> reference;
   final Value<DateTime> createdAt;
   final Value<int> rowid;
   const DepositTransactionsCompanion({
@@ -8509,6 +9148,8 @@ class DepositTransactionsCompanion extends UpdateCompanion<DepositTransaction> {
     this.referenceType = const Value.absent(),
     this.referenceId = const Value.absent(),
     this.note = const Value.absent(),
+    this.paymentMethod = const Value.absent(),
+    this.reference = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.rowid = const Value.absent(),
   });
@@ -8521,6 +9162,8 @@ class DepositTransactionsCompanion extends UpdateCompanion<DepositTransaction> {
     this.referenceType = const Value.absent(),
     this.referenceId = const Value.absent(),
     this.note = const Value.absent(),
+    this.paymentMethod = const Value.absent(),
+    this.reference = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
@@ -8537,6 +9180,8 @@ class DepositTransactionsCompanion extends UpdateCompanion<DepositTransaction> {
     Expression<String>? referenceType,
     Expression<String>? referenceId,
     Expression<String>? note,
+    Expression<String>? paymentMethod,
+    Expression<String>? reference,
     Expression<DateTime>? createdAt,
     Expression<int>? rowid,
   }) {
@@ -8549,6 +9194,8 @@ class DepositTransactionsCompanion extends UpdateCompanion<DepositTransaction> {
       if (referenceType != null) 'reference_type': referenceType,
       if (referenceId != null) 'reference_id': referenceId,
       if (note != null) 'note': note,
+      if (paymentMethod != null) 'payment_method': paymentMethod,
+      if (reference != null) 'reference': reference,
       if (createdAt != null) 'created_at': createdAt,
       if (rowid != null) 'rowid': rowid,
     });
@@ -8563,6 +9210,8 @@ class DepositTransactionsCompanion extends UpdateCompanion<DepositTransaction> {
     Value<String?>? referenceType,
     Value<String?>? referenceId,
     Value<String?>? note,
+    Value<String?>? paymentMethod,
+    Value<String?>? reference,
     Value<DateTime>? createdAt,
     Value<int>? rowid,
   }) {
@@ -8575,6 +9224,8 @@ class DepositTransactionsCompanion extends UpdateCompanion<DepositTransaction> {
       referenceType: referenceType ?? this.referenceType,
       referenceId: referenceId ?? this.referenceId,
       note: note ?? this.note,
+      paymentMethod: paymentMethod ?? this.paymentMethod,
+      reference: reference ?? this.reference,
       createdAt: createdAt ?? this.createdAt,
       rowid: rowid ?? this.rowid,
     );
@@ -8607,6 +9258,12 @@ class DepositTransactionsCompanion extends UpdateCompanion<DepositTransaction> {
     if (note.present) {
       map['note'] = Variable<String>(note.value);
     }
+    if (paymentMethod.present) {
+      map['payment_method'] = Variable<String>(paymentMethod.value);
+    }
+    if (reference.present) {
+      map['reference'] = Variable<String>(reference.value);
+    }
     if (createdAt.present) {
       map['created_at'] = Variable<DateTime>(createdAt.value);
     }
@@ -8627,6 +9284,8 @@ class DepositTransactionsCompanion extends UpdateCompanion<DepositTransaction> {
           ..write('referenceType: $referenceType, ')
           ..write('referenceId: $referenceId, ')
           ..write('note: $note, ')
+          ..write('paymentMethod: $paymentMethod, ')
+          ..write('reference: $reference, ')
           ..write('createdAt: $createdAt, ')
           ..write('rowid: $rowid')
           ..write(')'))
@@ -11159,6 +11818,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $PaymentsTable payments = $PaymentsTable(this);
   late final $PaymentAllocationsTable paymentAllocations =
       $PaymentAllocationsTable(this);
+  late final $ReceiptsTable receipts = $ReceiptsTable(this);
   late final $DepositsTable deposits = $DepositsTable(this);
   late final $DepositTransactionsTable depositTransactions =
       $DepositTransactionsTable(this);
@@ -11224,6 +11884,10 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     'payment_allocations_bill_id_idx',
     'CREATE INDEX payment_allocations_bill_id_idx ON payment_allocations (bill_id)',
   );
+  late final Index receiptsPaymentIdIdx = Index(
+    'receipts_payment_id_idx',
+    'CREATE INDEX receipts_payment_id_idx ON receipts (payment_id)',
+  );
   late final Index depositsTenancyIdIdx = Index(
     'deposits_tenancy_id_idx',
     'CREATE INDEX deposits_tenancy_id_idx ON deposits (tenancy_id)',
@@ -11263,6 +11927,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     billLineItems,
     payments,
     paymentAllocations,
+    receipts,
     deposits,
     depositTransactions,
     repairs,
@@ -11284,6 +11949,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     paymentsDateIdx,
     paymentAllocationsPaymentIdIdx,
     paymentAllocationsBillIdIdx,
+    receiptsPaymentIdIdx,
     depositsTenancyIdIdx,
     depositTransactionsDepositIdIdx,
     repairsPropertyIdIdx,
@@ -16897,6 +17563,25 @@ final class $$PaymentsTableReferences
       manager.$state.copyWith(prefetchedData: cache),
     );
   }
+
+  static MultiTypedResultKey<$ReceiptsTable, List<Receipt>> _receiptsRefsTable(
+    _$AppDatabase db,
+  ) => MultiTypedResultKey.fromTable(
+    db.receipts,
+    aliasName: 'payments__id__receipts__payment_id',
+  );
+
+  $$ReceiptsTableProcessedTableManager get receiptsRefs {
+    final manager = $$ReceiptsTableTableManager(
+      $_db,
+      $_db.receipts,
+    ).filter((f) => f.paymentId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_receiptsRefsTable($_db));
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
 }
 
 class $$PaymentsTableFilterComposer
@@ -17030,6 +17715,31 @@ class $$PaymentsTableFilterComposer
           }) => $$PaymentAllocationsTableFilterComposer(
             $db: $db,
             $table: $db.paymentAllocations,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
+  Expression<bool> receiptsRefs(
+    Expression<bool> Function($$ReceiptsTableFilterComposer f) f,
+  ) {
+    final $$ReceiptsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.receipts,
+      getReferencedColumn: (t) => t.paymentId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ReceiptsTableFilterComposer(
+            $db: $db,
+            $table: $db.receipts,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
             $removeJoinBuilderFromRootComposer:
@@ -17284,6 +17994,31 @@ class $$PaymentsTableAnnotationComposer
         );
     return f(composer);
   }
+
+  Expression<T> receiptsRefs<T extends Object>(
+    Expression<T> Function($$ReceiptsTableAnnotationComposer a) f,
+  ) {
+    final $$ReceiptsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.receipts,
+      getReferencedColumn: (t) => t.paymentId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ReceiptsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.receipts,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
 }
 
 class $$PaymentsTableTableManager
@@ -17303,6 +18038,7 @@ class $$PaymentsTableTableManager
             bool tenancyId,
             bool tenantId,
             bool paymentAllocationsRefs,
+            bool receiptsRefs,
           })
         > {
   $$PaymentsTableTableManager(_$AppDatabase db, $PaymentsTable table)
@@ -17397,11 +18133,13 @@ class $$PaymentsTableTableManager
                 tenancyId = false,
                 tenantId = false,
                 paymentAllocationsRefs = false,
+                receiptsRefs = false,
               }) {
                 return PrefetchHooks(
                   db: db,
                   explicitlyWatchedTables: [
                     if (paymentAllocationsRefs) db.paymentAllocations,
+                    if (receiptsRefs) db.receipts,
                   ],
                   addJoins:
                       <
@@ -17467,6 +18205,27 @@ class $$PaymentsTableTableManager
                               ),
                           typedResults: items,
                         ),
+                      if (receiptsRefs)
+                        await $_getPrefetchedData<
+                          Payment,
+                          $PaymentsTable,
+                          Receipt
+                        >(
+                          currentTable: table,
+                          referencedTable: $$PaymentsTableReferences
+                              ._receiptsRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$PaymentsTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).receiptsRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.paymentId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
                     ];
                   },
                 );
@@ -17491,6 +18250,7 @@ typedef $$PaymentsTableProcessedTableManager =
         bool tenancyId,
         bool tenantId,
         bool paymentAllocationsRefs,
+        bool receiptsRefs,
       })
     >;
 typedef $$PaymentAllocationsTableCreateCompanionBuilder =
@@ -17910,10 +18670,350 @@ typedef $$PaymentAllocationsTableProcessedTableManager =
       PaymentAllocation,
       PrefetchHooks Function({bool paymentId, bool billId})
     >;
+typedef $$ReceiptsTableCreateCompanionBuilder = ReceiptsCompanion Function({
+  required String id,
+  required String paymentId,
+  required String receiptNumber,
+  required int templateVersion,
+  required String snapshotJson,
+  Value<DateTime> createdAt,
+  Value<int> rowid,
+});
+typedef $$ReceiptsTableUpdateCompanionBuilder = ReceiptsCompanion Function({
+  Value<String> id,
+  Value<String> paymentId,
+  Value<String> receiptNumber,
+  Value<int> templateVersion,
+  Value<String> snapshotJson,
+  Value<DateTime> createdAt,
+  Value<int> rowid,
+});
+
+final class $$ReceiptsTableReferences
+    extends BaseReferences<_$AppDatabase, $ReceiptsTable, Receipt> {
+  $$ReceiptsTableReferences(super.$_db, super.$_table, super.$_typedResult);
+
+  static $PaymentsTable _paymentIdTable(_$AppDatabase db) =>
+      db.payments.createAlias('receipts__payment_id__payments__id');
+
+  $$PaymentsTableProcessedTableManager get paymentId {
+    final $_column = $_itemColumn<String>('payment_id')!;
+
+    final manager = $$PaymentsTableTableManager(
+      $_db,
+      $_db.payments,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_paymentIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+}
+
+class $$ReceiptsTableFilterComposer
+    extends Composer<_$AppDatabase, $ReceiptsTable> {
+  $$ReceiptsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get receiptNumber => $composableBuilder(
+    column: $table.receiptNumber,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get templateVersion => $composableBuilder(
+    column: $table.templateVersion,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get snapshotJson => $composableBuilder(
+    column: $table.snapshotJson,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  $$PaymentsTableFilterComposer get paymentId {
+    final $$PaymentsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.paymentId,
+      referencedTable: $db.payments,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$PaymentsTableFilterComposer(
+            $db: $db,
+            $table: $db.payments,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$ReceiptsTableOrderingComposer
+    extends Composer<_$AppDatabase, $ReceiptsTable> {
+  $$ReceiptsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get receiptNumber => $composableBuilder(
+    column: $table.receiptNumber,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get templateVersion => $composableBuilder(
+    column: $table.templateVersion,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get snapshotJson => $composableBuilder(
+    column: $table.snapshotJson,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  $$PaymentsTableOrderingComposer get paymentId {
+    final $$PaymentsTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.paymentId,
+      referencedTable: $db.payments,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$PaymentsTableOrderingComposer(
+            $db: $db,
+            $table: $db.payments,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$ReceiptsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $ReceiptsTable> {
+  $$ReceiptsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get receiptNumber => $composableBuilder(
+    column: $table.receiptNumber,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get templateVersion => $composableBuilder(
+    column: $table.templateVersion,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get snapshotJson => $composableBuilder(
+    column: $table.snapshotJson,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  $$PaymentsTableAnnotationComposer get paymentId {
+    final $$PaymentsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.paymentId,
+      referencedTable: $db.payments,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$PaymentsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.payments,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$ReceiptsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $ReceiptsTable,
+          Receipt,
+          $$ReceiptsTableFilterComposer,
+          $$ReceiptsTableOrderingComposer,
+          $$ReceiptsTableAnnotationComposer,
+          $$ReceiptsTableCreateCompanionBuilder,
+          $$ReceiptsTableUpdateCompanionBuilder,
+          (Receipt, $$ReceiptsTableReferences),
+          Receipt,
+          PrefetchHooks Function({bool paymentId})
+        > {
+  $$ReceiptsTableTableManager(_$AppDatabase db, $ReceiptsTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$ReceiptsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$ReceiptsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$ReceiptsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> paymentId = const Value.absent(),
+                Value<String> receiptNumber = const Value.absent(),
+                Value<int> templateVersion = const Value.absent(),
+                Value<String> snapshotJson = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => ReceiptsCompanion(
+                id: id,
+                paymentId: paymentId,
+                receiptNumber: receiptNumber,
+                templateVersion: templateVersion,
+                snapshotJson: snapshotJson,
+                createdAt: createdAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String paymentId,
+                required String receiptNumber,
+                required int templateVersion,
+                required String snapshotJson,
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => ReceiptsCompanion.insert(
+                id: id,
+                paymentId: paymentId,
+                receiptNumber: receiptNumber,
+                templateVersion: templateVersion,
+                snapshotJson: snapshotJson,
+                createdAt: createdAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$ReceiptsTable, Receipt>(table),
+                  $$ReceiptsTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: ({paymentId = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [],
+              addJoins:
+                  <
+                    T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic
+                    >
+                  >(state) {
+                    if (paymentId) {
+                      state = state.withJoin(
+                        currentTable: table,
+                        currentColumn: table.paymentId,
+                        referencedTable: $$ReceiptsTableReferences
+                            ._paymentIdTable(db),
+                        referencedColumn: $$ReceiptsTableReferences
+                            ._paymentIdTable(db)
+                            .id,
+                      ) as T;
+                    }
+
+                    return state;
+                  },
+              getPrefetchedDataCallback: (items) async {
+                return [];
+              },
+            );
+          },
+        ),
+      );
+}
+
+typedef $$ReceiptsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $ReceiptsTable,
+      Receipt,
+      $$ReceiptsTableFilterComposer,
+      $$ReceiptsTableOrderingComposer,
+      $$ReceiptsTableAnnotationComposer,
+      $$ReceiptsTableCreateCompanionBuilder,
+      $$ReceiptsTableUpdateCompanionBuilder,
+      (Receipt, $$ReceiptsTableReferences),
+      Receipt,
+      PrefetchHooks Function({bool paymentId})
+    >;
 typedef $$DepositsTableCreateCompanionBuilder = DepositsCompanion Function({
   required String id,
   required String tenancyId,
   Value<int> openingBalancePoisha,
+  Value<int> expectedBalancePoisha,
+  Value<int> advanceRentBalancePoisha,
   Value<int> currentBalancePoisha,
   Value<DateTime> createdAt,
   Value<DateTime> updatedAt,
@@ -17923,6 +19023,8 @@ typedef $$DepositsTableUpdateCompanionBuilder = DepositsCompanion Function({
   Value<String> id,
   Value<String> tenancyId,
   Value<int> openingBalancePoisha,
+  Value<int> expectedBalancePoisha,
+  Value<int> advanceRentBalancePoisha,
   Value<int> currentBalancePoisha,
   Value<DateTime> createdAt,
   Value<DateTime> updatedAt,
@@ -17991,6 +19093,16 @@ class $$DepositsTableFilterComposer
 
   ColumnFilters<int> get openingBalancePoisha => $composableBuilder(
     column: $table.openingBalancePoisha,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get expectedBalancePoisha => $composableBuilder(
+    column: $table.expectedBalancePoisha,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get advanceRentBalancePoisha => $composableBuilder(
+    column: $table.advanceRentBalancePoisha,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -18077,6 +19189,16 @@ class $$DepositsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<int> get expectedBalancePoisha => $composableBuilder(
+    column: $table.expectedBalancePoisha,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get advanceRentBalancePoisha => $composableBuilder(
+    column: $table.advanceRentBalancePoisha,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<int> get currentBalancePoisha => $composableBuilder(
     column: $table.currentBalancePoisha,
     builder: (column) => ColumnOrderings(column),
@@ -18130,6 +19252,16 @@ class $$DepositsTableAnnotationComposer
 
   GeneratedColumn<int> get openingBalancePoisha => $composableBuilder(
     column: $table.openingBalancePoisha,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get expectedBalancePoisha => $composableBuilder(
+    column: $table.expectedBalancePoisha,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get advanceRentBalancePoisha => $composableBuilder(
+    column: $table.advanceRentBalancePoisha,
     builder: (column) => column,
   );
 
@@ -18225,6 +19357,8 @@ class $$DepositsTableTableManager
                 Value<String> id = const Value.absent(),
                 Value<String> tenancyId = const Value.absent(),
                 Value<int> openingBalancePoisha = const Value.absent(),
+                Value<int> expectedBalancePoisha = const Value.absent(),
+                Value<int> advanceRentBalancePoisha = const Value.absent(),
                 Value<int> currentBalancePoisha = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<DateTime> updatedAt = const Value.absent(),
@@ -18233,6 +19367,8 @@ class $$DepositsTableTableManager
                 id: id,
                 tenancyId: tenancyId,
                 openingBalancePoisha: openingBalancePoisha,
+                expectedBalancePoisha: expectedBalancePoisha,
+                advanceRentBalancePoisha: advanceRentBalancePoisha,
                 currentBalancePoisha: currentBalancePoisha,
                 createdAt: createdAt,
                 updatedAt: updatedAt,
@@ -18243,6 +19379,8 @@ class $$DepositsTableTableManager
                 required String id,
                 required String tenancyId,
                 Value<int> openingBalancePoisha = const Value.absent(),
+                Value<int> expectedBalancePoisha = const Value.absent(),
+                Value<int> advanceRentBalancePoisha = const Value.absent(),
                 Value<int> currentBalancePoisha = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<DateTime> updatedAt = const Value.absent(),
@@ -18251,6 +19389,8 @@ class $$DepositsTableTableManager
                 id: id,
                 tenancyId: tenancyId,
                 openingBalancePoisha: openingBalancePoisha,
+                expectedBalancePoisha: expectedBalancePoisha,
+                advanceRentBalancePoisha: advanceRentBalancePoisha,
                 currentBalancePoisha: currentBalancePoisha,
                 createdAt: createdAt,
                 updatedAt: updatedAt,
@@ -18356,6 +19496,8 @@ typedef $$DepositTransactionsTableCreateCompanionBuilder =
       Value<String?> referenceType,
       Value<String?> referenceId,
       Value<String?> note,
+      Value<String?> paymentMethod,
+      Value<String?> reference,
       Value<DateTime> createdAt,
       Value<int> rowid,
     });
@@ -18369,6 +19511,8 @@ typedef $$DepositTransactionsTableUpdateCompanionBuilder =
       Value<String?> referenceType,
       Value<String?> referenceId,
       Value<String?> note,
+      Value<String?> paymentMethod,
+      Value<String?> reference,
       Value<DateTime> createdAt,
       Value<int> rowid,
     });
@@ -18448,6 +19592,16 @@ class $$DepositTransactionsTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
+  ColumnFilters<String> get paymentMethod => $composableBuilder(
+    column: $table.paymentMethod,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get reference => $composableBuilder(
+    column: $table.reference,
+    builder: (column) => ColumnFilters(column),
+  );
+
   ColumnFilters<DateTime> get createdAt => $composableBuilder(
     column: $table.createdAt,
     builder: (column) => ColumnFilters(column),
@@ -18521,6 +19675,16 @@ class $$DepositTransactionsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get paymentMethod => $composableBuilder(
+    column: $table.paymentMethod,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get reference => $composableBuilder(
+    column: $table.reference,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<DateTime> get createdAt => $composableBuilder(
     column: $table.createdAt,
     builder: (column) => ColumnOrderings(column),
@@ -18587,6 +19751,14 @@ class $$DepositTransactionsTableAnnotationComposer
 
   GeneratedColumn<String> get note =>
       $composableBuilder(column: $table.note, builder: (column) => column);
+
+  GeneratedColumn<String> get paymentMethod => $composableBuilder(
+    column: $table.paymentMethod,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get reference =>
+      $composableBuilder(column: $table.reference, builder: (column) => column);
 
   GeneratedColumn<DateTime> get createdAt =>
       $composableBuilder(column: $table.createdAt, builder: (column) => column);
@@ -18659,6 +19831,8 @@ class $$DepositTransactionsTableTableManager
                 Value<String?> referenceType = const Value.absent(),
                 Value<String?> referenceId = const Value.absent(),
                 Value<String?> note = const Value.absent(),
+                Value<String?> paymentMethod = const Value.absent(),
+                Value<String?> reference = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => DepositTransactionsCompanion(
@@ -18670,6 +19844,8 @@ class $$DepositTransactionsTableTableManager
                 referenceType: referenceType,
                 referenceId: referenceId,
                 note: note,
+                paymentMethod: paymentMethod,
+                reference: reference,
                 createdAt: createdAt,
                 rowid: rowid,
               ),
@@ -18683,6 +19859,8 @@ class $$DepositTransactionsTableTableManager
                 Value<String?> referenceType = const Value.absent(),
                 Value<String?> referenceId = const Value.absent(),
                 Value<String?> note = const Value.absent(),
+                Value<String?> paymentMethod = const Value.absent(),
+                Value<String?> reference = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => DepositTransactionsCompanion.insert(
@@ -18694,6 +19872,8 @@ class $$DepositTransactionsTableTableManager
                 referenceType: referenceType,
                 referenceId: referenceId,
                 note: note,
+                paymentMethod: paymentMethod,
+                reference: reference,
                 createdAt: createdAt,
                 rowid: rowid,
               ),
@@ -20612,6 +21792,8 @@ class $AppDatabaseManager {
       $$PaymentsTableTableManager(_db, _db.payments);
   $$PaymentAllocationsTableTableManager get paymentAllocations =>
       $$PaymentAllocationsTableTableManager(_db, _db.paymentAllocations);
+  $$ReceiptsTableTableManager get receipts =>
+      $$ReceiptsTableTableManager(_db, _db.receipts);
   $$DepositsTableTableManager get deposits =>
       $$DepositsTableTableManager(_db, _db.deposits);
   $$DepositTransactionsTableTableManager get depositTransactions =>

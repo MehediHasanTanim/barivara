@@ -59,6 +59,7 @@ class NoopDatabaseMigrationObserver implements DatabaseMigrationObserver {
     BillLineItems,
     Payments,
     PaymentAllocations,
+    Receipts,
     Deposits,
     DepositTransactions,
     Repairs,
@@ -148,6 +149,27 @@ class AppDatabase extends _$AppDatabase {
                 )
                 WHERE tenant_id IS NULL
               ''');
+            }
+            if (from < 6) {
+              await migrator.addColumn(
+                deposits,
+                deposits.expectedBalancePoisha,
+              );
+              await migrator.addColumn(
+                deposits,
+                deposits.advanceRentBalancePoisha,
+              );
+              await migrator.addColumn(
+                depositTransactions,
+                depositTransactions.paymentMethod,
+              );
+              await migrator.addColumn(
+                depositTransactions,
+                depositTransactions.reference,
+              );
+            }
+            if (from < 7) {
+              await migrator.createTable(receipts);
             }
           },
         );

@@ -5,6 +5,7 @@ import 'package:barivara/core/domain/value_types.dart';
 import 'package:barivara/core/localization/bari_vara_formatters.dart';
 import 'package:barivara/core/result/result.dart';
 import 'package:barivara/features/payments/application/payment_use_cases.dart';
+import 'package:barivara/features/receipts/presentation/receipt_preview_screen.dart';
 import 'package:barivara/features/settings/application/settings_controller.dart';
 import 'package:barivara/features/settings/domain/app_settings.dart';
 import 'package:barivara/features/tenants/application/tenant_tenancy_use_cases.dart';
@@ -112,10 +113,20 @@ class _PaymentsDuesScreenState extends ConsumerState<PaymentsDuesScreen> {
                             '${payment.method.name} · ${payment.paymentDate.toIso8601String().substring(0, 10)}',
                           ),
                           trailing: payment.status == PaymentStatus.posted
-                              ? IconButton(
-                                  icon: const Icon(Icons.undo_rounded),
-                                  tooltip: text.reversePayment,
-                                  onPressed: () => _reverse(payment),
+                              ? Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: <Widget>[
+                                    IconButton(
+                                      icon: const Icon(Icons.receipt_long_outlined),
+                                      tooltip: 'View receipt',
+                                      onPressed: () => _openReceipt(payment),
+                                    ),
+                                    IconButton(
+                                      icon: const Icon(Icons.undo_rounded),
+                                      tooltip: text.reversePayment,
+                                      onPressed: () => _reverse(payment),
+                                    ),
+                                  ],
                                 )
                               : Text(payment.status.name),
                         ),
@@ -161,6 +172,30 @@ class _PaymentsDuesScreenState extends ConsumerState<PaymentsDuesScreen> {
     ).reverse(payment.id, reason);
     if (!mounted) return;
     if (result.isSuccess) setState(_reload);
+  }
+
+  Future<void> _openReceipt(Payment payment) async {
+    final result = await DriftReceiptRepository(
+      ref.read(appServicesProvider).database,
+    ).createForPayment(payment.id);
+    if (!mounted) return;
+    if (result case Success<ReceiptSnapshot>(:final value)) {
+      final settings = ref.read(settingsControllerProvider);
+      await Navigator.of(context).push<void>(
+        MaterialPageRoute<void>(
+          builder: (_) => ReceiptPreviewScreen(
+            receipt: value,
+            initialLanguage: settings.receiptLanguage == AppLanguage.bengali
+                ? ReceiptLanguage.bengali
+                : ReceiptLanguage.english,
+          ),
+        ),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Receipt could not be prepared.')),
+      );
+    }
   }
 }
 
@@ -271,9 +306,27 @@ class _PaymentEntryScreenState extends ConsumerState<PaymentEntryScreen> {
     );
     if (!mounted) return;
     setState(() => _saving = false);
-    if (result.isSuccess) {
+    if (result case Success<PaymentPosting>(:final value)) {
       ScaffoldMessenger.of(context)
           .showSnackBar(SnackBar(content: Text(text.paymentPosted)));
+      final receipt = await DriftReceiptRepository(
+        ref.read(appServicesProvider).database,
+      ).createForPayment(value.payment.id);
+      if (!mounted) return;
+      if (receipt case Success<ReceiptSnapshot>(:final value)) {
+        final settings = ref.read(settingsControllerProvider);
+        await Navigator.of(context).push<void>(
+          MaterialPageRoute<void>(
+            builder: (_) => ReceiptPreviewScreen(
+              receipt: value,
+              initialLanguage: settings.receiptLanguage == AppLanguage.bengali
+                  ? ReceiptLanguage.bengali
+                  : ReceiptLanguage.english,
+            ),
+          ),
+        );
+      }
+      if (!mounted) return;
       Navigator.of(context).pop(true);
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
