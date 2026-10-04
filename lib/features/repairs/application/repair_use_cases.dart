@@ -116,7 +116,7 @@ class RepairUseCases {
     final BillLineItem adjustment = BillLineItem(
       id: EntityId(_uuid.v4()),
       billId: chargeBill.id,
-      type: ChargeType.other,
+      type: ChargeType.repairCharge,
       description: 'Repair charge: ${repair.title}',
       amount: repair.cost,
       sourceRuleId: repair.id,

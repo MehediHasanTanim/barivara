@@ -3,6 +3,7 @@ import 'package:barivara/features/billing/presentation/bills_screens.dart';
 import 'package:barivara/features/payments/presentation/payments_screens.dart';
 import 'package:barivara/features/properties/presentation/property_screens.dart';
 import 'package:barivara/features/repairs/presentation/repairs_screen.dart';
+import 'package:barivara/features/reports/presentation/reports_screens.dart';
 import 'package:barivara/features/settings/application/settings_controller.dart';
 import 'package:barivara/features/settings/domain/app_settings.dart';
 import 'package:barivara/features/settings/presentation/settings_screen.dart';
@@ -55,7 +56,7 @@ class _ApplicationShellState extends State<_ApplicationShell> {
   Widget build(BuildContext context) {
     final AppLocalizations text = AppLocalizations.of(context)!;
     final Widget page = switch (_selectedIndex) {
-      0 => const _HomeScreen(),
+      0 => const DashboardHomeScreen(),
       1 => const TenantListScreen(),
       2 => const BillsDashboardScreen(),
       3 => const PaymentsDuesScreen(),
@@ -100,63 +101,6 @@ class _ApplicationShellState extends State<_ApplicationShell> {
   }
 }
 
-class _HomeScreen extends StatelessWidget {
-  const _HomeScreen();
-
-  @override
-  Widget build(BuildContext context) {
-    final AppLocalizations text = AppLocalizations.of(context)!;
-    final ColorScheme colors = Theme.of(context).colorScheme;
-    return Scaffold(
-      appBar: AppBar(title: Text(text.appTitle)),
-      body: SafeArea(
-        top: false,
-        child: Center(
-          child: Padding(
-            padding: const EdgeInsets.all(24),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                DecoratedBox(
-                  decoration: BoxDecoration(
-                    color: colors.primaryContainer,
-                    borderRadius: BorderRadius.circular(28),
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(24),
-                    child: Icon(
-                      Icons.home_rounded,
-                      color: colors.primary,
-                      size: 64,
-                      semanticLabel: text.appTitle,
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 24),
-                Text(
-                  text.appTitle,
-                  style: Theme.of(context).textTheme.headlineMedium,
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  text.appSubtitle,
-                  style: Theme.of(context).textTheme.titleMedium,
-                ),
-                const SizedBox(height: 16),
-                Text(
-                  text.offlineRecords,
-                  textAlign: TextAlign.center,
-                  style: Theme.of(context).textTheme.bodyLarge,
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
 class _MoreScreen extends StatelessWidget {
   const _MoreScreen();
 
@@ -181,6 +125,17 @@ class _MoreScreen extends StatelessWidget {
                   ),
                 );
               },
+            ),
+          ),
+          const SizedBox(height: 8),
+          Card(
+            child: ListTile(
+              leading: const Icon(Icons.insights_rounded),
+              title: const Text('Reports'),
+              trailing: const Icon(Icons.chevron_right_rounded),
+              onTap: () => Navigator.of(context).push<void>(
+                MaterialPageRoute<void>(builder: (_) => const ReportsScreen()),
+              ),
             ),
           ),
           const SizedBox(height: 8),
