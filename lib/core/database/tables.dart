@@ -73,6 +73,10 @@ class Tenants extends Table {
   TextColumn get alternativePhone => text().nullable()();
   TextColumn get email => text().nullable()();
   TextColumn get nidNumber => text().nullable()();
+  TextColumn get permanentAddress => text().nullable()();
+  TextColumn get emergencyContactName => text().nullable()();
+  TextColumn get emergencyContactPhone => text().nullable()();
+  TextColumn get photoPath => text().nullable()();
   TextColumn get status => text().withDefault(const Constant('active'))();
   TextColumn get notes => text().nullable()();
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
@@ -95,6 +99,12 @@ class Tenancies extends Table {
   DateTimeColumn get moveInDate => dateTime()();
   DateTimeColumn get expectedMoveOutDate => dateTime().nullable()();
   DateTimeColumn get actualMoveOutDate => dateTime().nullable()();
+  IntColumn get agreedRentPoisha => integer().withDefault(const Constant(0))();
+  IntColumn get billingDay => integer().withDefault(const Constant(5))();
+  IntColumn get securityDepositTargetPoisha =>
+      integer().withDefault(const Constant(0))();
+  IntColumn get advanceRentPoisha => integer().withDefault(const Constant(0))();
+  TextColumn get agreementNotes => text().nullable()();
   TextColumn get status => text().withDefault(const Constant('active'))();
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
   DateTimeColumn get updatedAt => dateTime().withDefault(currentDateAndTime)();

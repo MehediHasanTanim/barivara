@@ -3,6 +3,7 @@ import 'package:barivara/features/properties/presentation/property_screens.dart'
 import 'package:barivara/features/settings/application/settings_controller.dart';
 import 'package:barivara/features/settings/domain/app_settings.dart';
 import 'package:barivara/features/settings/presentation/settings_screen.dart';
+import 'package:barivara/features/tenants/presentation/tenant_screens.dart';
 import 'package:barivara/l10n/generated/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -50,15 +51,15 @@ class _ApplicationShellState extends State<_ApplicationShell> {
   @override
   Widget build(BuildContext context) {
     final AppLocalizations text = AppLocalizations.of(context)!;
-    final List<Widget> pages = <Widget>[
-      const _HomeScreen(),
-      _PlaceholderScreen(title: text.tenants),
-      _PlaceholderScreen(title: text.bills),
-      _PlaceholderScreen(title: text.payments),
-      const _MoreScreen(),
-    ];
+    final Widget page = switch (_selectedIndex) {
+      0 => const _HomeScreen(),
+      1 => const TenantListScreen(),
+      2 => _PlaceholderScreen(title: text.bills),
+      3 => _PlaceholderScreen(title: text.payments),
+      _ => const _MoreScreen(),
+    };
     return Scaffold(
-      body: IndexedStack(index: _selectedIndex, children: pages),
+      body: page,
       bottomNavigationBar: NavigationBar(
         selectedIndex: _selectedIndex,
         onDestinationSelected: (int value) {

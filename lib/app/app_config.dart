@@ -5,8 +5,8 @@ abstract final class AppConfig {
   /// Name of the local SQLite database introduced in Phase 1.
   static const String databaseName = 'bari_vara.sqlite';
 
-  /// Local schema version, including property and unit detail fields.
-  static const int databaseVersion = 2;
+  /// Local schema version, including tenant profiles and tenancy terms.
+  static const int databaseVersion = 3;
 
   /// Current portable-backup package version.
   static const int backupFormatVersion = 1;

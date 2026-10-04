@@ -118,14 +118,33 @@ class Tenant {
     required this.phone,
     required this.createdAt,
     required this.updatedAt,
+    this.alternativePhone,
+    this.nidNumber,
+    this.permanentAddress,
+    this.emergencyContactName,
+    this.emergencyContactPhone,
+    this.notes,
+    this.photoPath,
+    this.isArchived = false,
   });
 
   final EntityId id;
   final String fullName;
   final PhoneNumber phone;
+  final PhoneNumber? alternativePhone;
+  final String? nidNumber;
+  final String? permanentAddress;
+  final String? emergencyContactName;
+  final PhoneNumber? emergencyContactPhone;
+  final String? notes;
+  final String? photoPath;
   final DateTime createdAt;
   final DateTime updatedAt;
+  final bool isArchived;
 }
+
+/// Tenancy lifecycle states retained as part of permanent occupancy history.
+enum TenancyStatus { active, movedOut }
 
 /// A tenant's occupancy period in a specific unit.
 class Tenancy {
@@ -135,14 +154,44 @@ class Tenancy {
     required this.tenantId,
     required this.unitId,
     required this.moveInDate,
-    required this.status,
+    required this.agreedRent,
+    required this.billingDay,
+    this.expectedMoveOutDate,
+    this.actualMoveOutDate,
+    this.securityDepositTarget = Money.zero,
+    this.advanceRent = Money.zero,
+    this.agreementNotes,
+    this.status = TenancyStatus.active,
   });
 
   final EntityId id;
   final EntityId tenantId;
   final EntityId unitId;
   final DateTime moveInDate;
-  final String status;
+  final DateTime? expectedMoveOutDate;
+  final DateTime? actualMoveOutDate;
+  final Money agreedRent;
+  final int billingDay;
+  final Money securityDepositTarget;
+  final Money advanceRent;
+  final String? agreementNotes;
+  final TenancyStatus status;
+}
+
+/// Tenant-list information with derived current unit and non-financial status.
+class TenantSummary {
+  /// Creates a tenant-list summary.
+  const TenantSummary({
+    required this.tenant,
+    this.currentTenancy,
+    this.unitName,
+    this.propertyName,
+  });
+
+  final Tenant tenant;
+  final Tenancy? currentTenancy;
+  final String? unitName;
+  final String? propertyName;
 }
 
 /// A monthly billing snapshot.

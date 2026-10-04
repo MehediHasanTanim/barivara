@@ -331,4 +331,122 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get office => 'Office';
+
+  @override
+  String get addTenant => 'Add tenant';
+
+  @override
+  String get editTenant => 'Edit tenant';
+
+  @override
+  String get archiveTenant => 'Archive tenant';
+
+  @override
+  String get fullName => 'Full name';
+
+  @override
+  String get mobileNumber => 'Mobile number';
+
+  @override
+  String get alternateMobile => 'Alternate mobile (optional)';
+
+  @override
+  String get nationalId => 'National ID / reference (optional)';
+
+  @override
+  String get permanentAddress => 'Permanent address (optional)';
+
+  @override
+  String get emergencyContact => 'Emergency contact (optional)';
+
+  @override
+  String get emergencyPhone => 'Emergency phone (optional)';
+
+  @override
+  String get tenantNotes => 'Notes (optional)';
+
+  @override
+  String get selectProperty => 'Select property';
+
+  @override
+  String get selectUnit => 'Select vacant unit';
+
+  @override
+  String get moveInDate => 'Move-in date';
+
+  @override
+  String get billingDay => 'Rent due day';
+
+  @override
+  String get securityDeposit => 'Security deposit';
+
+  @override
+  String get advanceRent => 'Advance rent';
+
+  @override
+  String get agreementNotes => 'Agreement notes (optional)';
+
+  @override
+  String get confirmTenancy => 'Confirm tenancy';
+
+  @override
+  String get tenantSaved => 'Tenant saved';
+
+  @override
+  String get noTenantsYet => 'No tenants have been added yet.';
+
+  @override
+  String get searchTenants => 'Search tenant, phone, unit or property';
+
+  @override
+  String get activeTenant => 'Active tenant';
+
+  @override
+  String get formerTenant => 'Former tenant';
+
+  @override
+  String get currentUnit => 'Current unit';
+
+  @override
+  String get contactInfo => 'Contact information';
+
+  @override
+  String get rentalTerms => 'Rental terms';
+
+  @override
+  String get tenancyHistory => 'Tenancy history';
+
+  @override
+  String get moveOut => 'Move out';
+
+  @override
+  String get effectiveMoveOutDate => 'Effective move-out date';
+
+  @override
+  String get moveOutMessage =>
+      'Future recurring charges will stop. Billing and deposit settlement remain available for review.';
+
+  @override
+  String get confirmMoveOut => 'Confirm move-out';
+
+  @override
+  String get currentBalance => 'Current balance';
+
+  @override
+  String get depositBalance => 'Deposit balance';
+
+  @override
+  String get noActiveTenancy => 'No active tenancy';
+
+  @override
+  String get requiredSelection => 'Please select an option';
+
+  @override
+  String get stepBasicInfo => 'Basic information';
+
+  @override
+  String get stepTenancy => 'Unit & tenancy';
+
+  @override
+  String get stepDeposit => 'Deposit & advance';
 }

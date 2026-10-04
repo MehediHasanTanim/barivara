@@ -733,6 +733,240 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Office'**
   String get office;
+
+  /// No description provided for @addTenant.
+  ///
+  /// In en, this message translates to:
+  /// **'Add tenant'**
+  String get addTenant;
+
+  /// No description provided for @editTenant.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit tenant'**
+  String get editTenant;
+
+  /// No description provided for @archiveTenant.
+  ///
+  /// In en, this message translates to:
+  /// **'Archive tenant'**
+  String get archiveTenant;
+
+  /// No description provided for @fullName.
+  ///
+  /// In en, this message translates to:
+  /// **'Full name'**
+  String get fullName;
+
+  /// No description provided for @mobileNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Mobile number'**
+  String get mobileNumber;
+
+  /// No description provided for @alternateMobile.
+  ///
+  /// In en, this message translates to:
+  /// **'Alternate mobile (optional)'**
+  String get alternateMobile;
+
+  /// No description provided for @nationalId.
+  ///
+  /// In en, this message translates to:
+  /// **'National ID / reference (optional)'**
+  String get nationalId;
+
+  /// No description provided for @permanentAddress.
+  ///
+  /// In en, this message translates to:
+  /// **'Permanent address (optional)'**
+  String get permanentAddress;
+
+  /// No description provided for @emergencyContact.
+  ///
+  /// In en, this message translates to:
+  /// **'Emergency contact (optional)'**
+  String get emergencyContact;
+
+  /// No description provided for @emergencyPhone.
+  ///
+  /// In en, this message translates to:
+  /// **'Emergency phone (optional)'**
+  String get emergencyPhone;
+
+  /// No description provided for @tenantNotes.
+  ///
+  /// In en, this message translates to:
+  /// **'Notes (optional)'**
+  String get tenantNotes;
+
+  /// No description provided for @selectProperty.
+  ///
+  /// In en, this message translates to:
+  /// **'Select property'**
+  String get selectProperty;
+
+  /// No description provided for @selectUnit.
+  ///
+  /// In en, this message translates to:
+  /// **'Select vacant unit'**
+  String get selectUnit;
+
+  /// No description provided for @moveInDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Move-in date'**
+  String get moveInDate;
+
+  /// No description provided for @billingDay.
+  ///
+  /// In en, this message translates to:
+  /// **'Rent due day'**
+  String get billingDay;
+
+  /// No description provided for @securityDeposit.
+  ///
+  /// In en, this message translates to:
+  /// **'Security deposit'**
+  String get securityDeposit;
+
+  /// No description provided for @advanceRent.
+  ///
+  /// In en, this message translates to:
+  /// **'Advance rent'**
+  String get advanceRent;
+
+  /// No description provided for @agreementNotes.
+  ///
+  /// In en, this message translates to:
+  /// **'Agreement notes (optional)'**
+  String get agreementNotes;
+
+  /// No description provided for @confirmTenancy.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm tenancy'**
+  String get confirmTenancy;
+
+  /// No description provided for @tenantSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Tenant saved'**
+  String get tenantSaved;
+
+  /// No description provided for @noTenantsYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No tenants have been added yet.'**
+  String get noTenantsYet;
+
+  /// No description provided for @searchTenants.
+  ///
+  /// In en, this message translates to:
+  /// **'Search tenant, phone, unit or property'**
+  String get searchTenants;
+
+  /// No description provided for @activeTenant.
+  ///
+  /// In en, this message translates to:
+  /// **'Active tenant'**
+  String get activeTenant;
+
+  /// No description provided for @formerTenant.
+  ///
+  /// In en, this message translates to:
+  /// **'Former tenant'**
+  String get formerTenant;
+
+  /// No description provided for @currentUnit.
+  ///
+  /// In en, this message translates to:
+  /// **'Current unit'**
+  String get currentUnit;
+
+  /// No description provided for @contactInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'Contact information'**
+  String get contactInfo;
+
+  /// No description provided for @rentalTerms.
+  ///
+  /// In en, this message translates to:
+  /// **'Rental terms'**
+  String get rentalTerms;
+
+  /// No description provided for @tenancyHistory.
+  ///
+  /// In en, this message translates to:
+  /// **'Tenancy history'**
+  String get tenancyHistory;
+
+  /// No description provided for @moveOut.
+  ///
+  /// In en, this message translates to:
+  /// **'Move out'**
+  String get moveOut;
+
+  /// No description provided for @effectiveMoveOutDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Effective move-out date'**
+  String get effectiveMoveOutDate;
+
+  /// No description provided for @moveOutMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Future recurring charges will stop. Billing and deposit settlement remain available for review.'**
+  String get moveOutMessage;
+
+  /// No description provided for @confirmMoveOut.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm move-out'**
+  String get confirmMoveOut;
+
+  /// No description provided for @currentBalance.
+  ///
+  /// In en, this message translates to:
+  /// **'Current balance'**
+  String get currentBalance;
+
+  /// No description provided for @depositBalance.
+  ///
+  /// In en, this message translates to:
+  /// **'Deposit balance'**
+  String get depositBalance;
+
+  /// No description provided for @noActiveTenancy.
+  ///
+  /// In en, this message translates to:
+  /// **'No active tenancy'**
+  String get noActiveTenancy;
+
+  /// No description provided for @requiredSelection.
+  ///
+  /// In en, this message translates to:
+  /// **'Please select an option'**
+  String get requiredSelection;
+
+  /// No description provided for @stepBasicInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'Basic information'**
+  String get stepBasicInfo;
+
+  /// No description provided for @stepTenancy.
+  ///
+  /// In en, this message translates to:
+  /// **'Unit & tenancy'**
+  String get stepTenancy;
+
+  /// No description provided for @stepDeposit.
+  ///
+  /// In en, this message translates to:
+  /// **'Deposit & advance'**
+  String get stepDeposit;
 }
 
 class _AppLocalizationsDelegate

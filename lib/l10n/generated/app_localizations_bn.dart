@@ -333,4 +333,122 @@ class AppLocalizationsBn extends AppLocalizations {
 
   @override
   String get office => 'অফিস';
+
+  @override
+  String get addTenant => 'নতুন ভাড়াটিয়া যোগ করুন';
+
+  @override
+  String get editTenant => 'ভাড়াটিয়া সম্পাদনা';
+
+  @override
+  String get archiveTenant => 'ভাড়াটিয়া আর্কাইভ করুন';
+
+  @override
+  String get fullName => 'পুরো নাম';
+
+  @override
+  String get mobileNumber => 'মোবাইল নম্বর';
+
+  @override
+  String get alternateMobile => 'বিকল্প মোবাইল (ঐচ্ছিক)';
+
+  @override
+  String get nationalId => 'জাতীয় পরিচয়পত্র / রেফারেন্স (ঐচ্ছিক)';
+
+  @override
+  String get permanentAddress => 'স্থায়ী ঠিকানা (ঐচ্ছিক)';
+
+  @override
+  String get emergencyContact => 'জরুরি যোগাযোগ (ঐচ্ছিক)';
+
+  @override
+  String get emergencyPhone => 'জরুরি ফোন (ঐচ্ছিক)';
+
+  @override
+  String get tenantNotes => 'নোট (ঐচ্ছিক)';
+
+  @override
+  String get selectProperty => 'প্রপার্টি নির্বাচন করুন';
+
+  @override
+  String get selectUnit => 'খালি ইউনিট নির্বাচন করুন';
+
+  @override
+  String get moveInDate => 'উঠে আসার তারিখ';
+
+  @override
+  String get billingDay => 'ভাড়া দেওয়ার দিন';
+
+  @override
+  String get securityDeposit => 'জামানত';
+
+  @override
+  String get advanceRent => 'অগ্রিম ভাড়া';
+
+  @override
+  String get agreementNotes => 'চুক্তির নোট (ঐচ্ছিক)';
+
+  @override
+  String get confirmTenancy => 'টেন্যান্সি নিশ্চিত করুন';
+
+  @override
+  String get tenantSaved => 'ভাড়াটিয়া সংরক্ষণ করা হয়েছে';
+
+  @override
+  String get noTenantsYet => 'এখনও কোনো ভাড়াটিয়া যোগ করা হয়নি।';
+
+  @override
+  String get searchTenants => 'ভাড়াটিয়া, ফোন, ইউনিট বা প্রপার্টি খুঁজুন';
+
+  @override
+  String get activeTenant => 'সক্রিয় ভাড়াটিয়া';
+
+  @override
+  String get formerTenant => 'পূর্বের ভাড়াটিয়া';
+
+  @override
+  String get currentUnit => 'বর্তমান ইউনিট';
+
+  @override
+  String get contactInfo => 'যোগাযোগের তথ্য';
+
+  @override
+  String get rentalTerms => 'ভাড়ার শর্ত';
+
+  @override
+  String get tenancyHistory => 'টেন্যান্সির ইতিহাস';
+
+  @override
+  String get moveOut => 'চলে গেছেন';
+
+  @override
+  String get effectiveMoveOutDate => 'কার্যকর চলে যাওয়ার তারিখ';
+
+  @override
+  String get moveOutMessage =>
+      'ভবিষ্যতের নিয়মিত চার্জ বন্ধ হবে। বিল ও জামানত নিষ্পত্তি পরে পর্যালোচনা করা যাবে।';
+
+  @override
+  String get confirmMoveOut => 'চলে যাওয়া নিশ্চিত করুন';
+
+  @override
+  String get currentBalance => 'বর্তমান বকেয়া';
+
+  @override
+  String get depositBalance => 'জামানতের ব্যালেন্স';
+
+  @override
+  String get noActiveTenancy => 'কোনো সক্রিয় টেন্যান্সি নেই';
+
+  @override
+  String get requiredSelection => 'একটি অপশন নির্বাচন করুন';
+
+  @override
+  String get stepBasicInfo => 'মূল তথ্য';
+
+  @override
+  String get stepTenancy => 'ইউনিট ও টেন্যান্সি';
+
+  @override
+  String get stepDeposit => 'জামানত ও অগ্রিম';
 }

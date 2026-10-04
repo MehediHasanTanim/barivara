@@ -454,6 +454,16 @@ class DriftTenantRepository extends DriftRepository
             id: tenant.id.value,
             fullName: tenant.fullName,
             phone: tenant.phone.value,
+            alternativePhone: Value<String?>(tenant.alternativePhone?.value),
+            nidNumber: Value<String?>(tenant.nidNumber),
+            permanentAddress: Value<String?>(tenant.permanentAddress),
+            emergencyContactName: Value<String?>(tenant.emergencyContactName),
+            emergencyContactPhone: Value<String?>(
+              tenant.emergencyContactPhone?.value,
+            ),
+            notes: Value<String?>(tenant.notes),
+            photoPath: Value<String?>(tenant.photoPath),
+            status: Value<String>(tenant.isArchived ? 'archived' : 'active'),
             createdAt: Value<DateTime>(tenant.createdAt.toUtc()),
             updatedAt: Value<DateTime>(tenant.updatedAt.toUtc()),
           ),
@@ -468,7 +478,8 @@ class DriftTenantRepository extends DriftRepository
             await (database.select(database.tenants)
                   ..where(
                     (Tenants table) =>
-                        table.fullName.like(term) | table.phone.like(term),
+                        (table.fullName.like(term) | table.phone.like(term)) &
+                        table.status.equals('active'),
                   )
                   ..orderBy(<OrderingTerm Function(Tenants)>[
                     (Tenants table) => OrderingTerm.asc(table.fullName),
@@ -477,11 +488,225 @@ class DriftTenantRepository extends DriftRepository
         return rows.map(_map).toList(growable: false);
       });
 
+  @override
+  Future<Result<void>> archive(EntityId id) => guard<void>(() async {
+    await (database.update(
+      database.tenants,
+    )..where((Tenants table) => table.id.equals(id.value))).write(
+      db.TenantsCompanion(
+        status: const Value<String>('archived'),
+        updatedAt: Value<DateTime>(DateTime.now().toUtc()),
+      ),
+    );
+  });
+
+  @override
+  Future<Result<List<domain.TenantSummary>>> searchSummaries(String query) =>
+      guard<List<domain.TenantSummary>>(() async {
+        final String term = '%${query.trim()}%';
+        final join = database.select(database.tenants).join([
+          leftOuterJoin(
+            database.tenancies,
+            database.tenancies.tenantId.equalsExp(database.tenants.id) &
+                database.tenancies.status.equals('active'),
+          ),
+          leftOuterJoin(
+            database.units,
+            database.units.id.equalsExp(database.tenancies.unitId),
+          ),
+          leftOuterJoin(
+            database.properties,
+            database.properties.id.equalsExp(database.units.propertyId),
+          ),
+        ]);
+        join.where(
+          database.tenants.status.equals('active') &
+              (database.tenants.fullName.like(term) |
+                  database.tenants.phone.like(term) |
+                  database.units.name.like(term) |
+                  database.properties.name.like(term)),
+        );
+        final List<TypedResult> rows = await join.get();
+        return rows
+            .map((TypedResult row) {
+              final db.Tenant tenant = row.readTable(database.tenants);
+              final db.Tenancy? tenancy = row.readTableOrNull(
+                database.tenancies,
+              );
+              final db.Unit? unit = row.readTableOrNull(database.units);
+              final db.Property? property = row.readTableOrNull(
+                database.properties,
+              );
+              return domain.TenantSummary(
+                tenant: _map(tenant),
+                currentTenancy: tenancy == null ? null : _tenancy(tenancy),
+                unitName: unit?.name,
+                propertyName: property?.name,
+              );
+            })
+            .toList(growable: false);
+      });
+
   domain.Tenant _map(db.Tenant row) => domain.Tenant(
     id: EntityId(row.id),
     fullName: row.fullName,
     phone: PhoneNumber(row.phone),
+    alternativePhone: _phone(row.alternativePhone),
+    nidNumber: row.nidNumber,
+    permanentAddress: row.permanentAddress,
+    emergencyContactName: row.emergencyContactName,
+    emergencyContactPhone: _phone(row.emergencyContactPhone),
+    notes: row.notes,
+    photoPath: row.photoPath,
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,
+    isArchived: row.status == 'archived',
   );
+
+  PhoneNumber? _phone(String? value) =>
+      value == null || value.isEmpty ? null : PhoneNumber(value);
+
+  domain.Tenancy _tenancy(db.Tenancy row) => _mapTenancy(row);
 }
+
+/// Drift implementation of tenancy history and move-out state transitions.
+class DriftTenancyRepository extends DriftRepository
+    implements TenancyRepository {
+  /// Creates a tenancy repository.
+  const DriftTenancyRepository(super.database);
+
+  @override
+  Future<Result<domain.Tenancy?>> findActiveByUnit(EntityId unitId) =>
+      _findActive((Tenancies table) => table.unitId.equals(unitId.value));
+
+  @override
+  Future<Result<domain.Tenancy?>> findActiveByTenant(EntityId tenantId) =>
+      _findActive((Tenancies table) => table.tenantId.equals(tenantId.value));
+
+  Future<Result<domain.Tenancy?>> _findActive(
+    Expression<bool> Function(Tenancies table) condition,
+  ) => guard<domain.Tenancy?>(() async {
+    final db.Tenancy? row =
+        await (database.select(database.tenancies)..where(
+              (Tenancies table) =>
+                  condition(table) & table.status.equals('active'),
+            ))
+            .getSingleOrNull();
+    return row == null ? null : _map(row);
+  });
+
+  @override
+  Future<Result<List<domain.Tenancy>>> listByTenant(EntityId tenantId) =>
+      guard<List<domain.Tenancy>>(() async {
+        final List<db.Tenancy> rows =
+            await (database.select(database.tenancies)
+                  ..where(
+                    (Tenancies table) => table.tenantId.equals(tenantId.value),
+                  )
+                  ..orderBy(<OrderingTerm Function(Tenancies)>[
+                    (Tenancies table) => OrderingTerm.desc(table.moveInDate),
+                  ]))
+                .get();
+        return rows.map(_map).toList(growable: false);
+      });
+
+  @override
+  Future<Result<List<domain.Tenancy>>> listByUnit(
+    EntityId unitId, {
+    DateRange? range,
+  }) => guard<List<domain.Tenancy>>(() async {
+    final List<db.Tenancy> rows =
+        await (database.select(database.tenancies)
+              ..where((Tenancies table) {
+                Expression<bool> where = table.unitId.equals(unitId.value);
+                if (range != null) {
+                  where =
+                      where &
+                      table.moveInDate.isBiggerOrEqualValue(range.start);
+                  where =
+                      where & table.moveInDate.isSmallerOrEqualValue(range.end);
+                }
+                return where;
+              })
+              ..orderBy(<OrderingTerm Function(Tenancies)>[
+                (Tenancies table) => OrderingTerm.desc(table.moveInDate),
+              ]))
+            .get();
+    return rows.map(_map).toList(growable: false);
+  });
+
+  @override
+  Future<Result<void>> moveOut(EntityId tenancyId, DateTime effectiveDate) =>
+      inTransaction<void>(() async {
+        await (database.update(
+          database.tenancies,
+        )..where((Tenancies table) => table.id.equals(tenancyId.value))).write(
+          db.TenanciesCompanion(
+            status: const Value<String>('movedOut'),
+            actualMoveOutDate: Value<DateTime>(effectiveDate.toUtc()),
+            updatedAt: Value<DateTime>(DateTime.now().toUtc()),
+          ),
+        );
+        await (database.update(database.recurringChargeRules)..where(
+              (RecurringChargeRules table) =>
+                  table.tenancyId.equals(tenancyId.value) &
+                  table.isActive.equals(true),
+            ))
+            .write(
+              db.RecurringChargeRulesCompanion(
+                isActive: const Value<bool>(false),
+                effectiveTo: Value<DateTime>(effectiveDate.toUtc()),
+                updatedAt: Value<DateTime>(DateTime.now().toUtc()),
+              ),
+            );
+      });
+
+  @override
+  Future<Result<void>> save(domain.Tenancy tenancy) => guard<void>(() async {
+    await database
+        .into(database.tenancies)
+        .insertOnConflictUpdate(
+          db.TenanciesCompanion.insert(
+            id: tenancy.id.value,
+            tenantId: tenancy.tenantId.value,
+            unitId: tenancy.unitId.value,
+            moveInDate: tenancy.moveInDate.toUtc(),
+            expectedMoveOutDate: Value<DateTime?>(
+              tenancy.expectedMoveOutDate?.toUtc(),
+            ),
+            actualMoveOutDate: Value<DateTime?>(
+              tenancy.actualMoveOutDate?.toUtc(),
+            ),
+            agreedRentPoisha: Value<int>(tenancy.agreedRent.poisha),
+            billingDay: Value<int>(tenancy.billingDay),
+            securityDepositTargetPoisha: Value<int>(
+              tenancy.securityDepositTarget.poisha,
+            ),
+            advanceRentPoisha: Value<int>(tenancy.advanceRent.poisha),
+            agreementNotes: Value<String?>(tenancy.agreementNotes),
+            status: Value<String>(tenancy.status.name),
+            createdAt: Value<DateTime>(DateTime.now().toUtc()),
+            updatedAt: Value<DateTime>(DateTime.now().toUtc()),
+          ),
+        );
+  });
+
+  domain.Tenancy _map(db.Tenancy row) => _mapTenancy(row);
+}
+
+domain.Tenancy _mapTenancy(db.Tenancy row) => domain.Tenancy(
+  id: EntityId(row.id),
+  tenantId: EntityId(row.tenantId),
+  unitId: EntityId(row.unitId),
+  moveInDate: row.moveInDate,
+  expectedMoveOutDate: row.expectedMoveOutDate,
+  actualMoveOutDate: row.actualMoveOutDate,
+  agreedRent: Money.fromPoisha(row.agreedRentPoisha),
+  billingDay: row.billingDay,
+  securityDepositTarget: Money.fromPoisha(row.securityDepositTargetPoisha),
+  advanceRent: Money.fromPoisha(row.advanceRentPoisha),
+  agreementNotes: row.agreementNotes,
+  status: row.status == 'active'
+      ? domain.TenancyStatus.active
+      : domain.TenancyStatus.movedOut,
+);

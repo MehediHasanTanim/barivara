@@ -28,14 +28,20 @@ abstract interface class UnitRepository {
 /// Application-facing tenant persistence contract.
 abstract interface class TenantRepository {
   Future<Result<List<Tenant>>> search(String query);
+  Future<Result<List<TenantSummary>>> searchSummaries(String query);
   Future<Result<Tenant?>> findById(EntityId id);
   Future<Result<void>> save(Tenant tenant);
+  Future<Result<void>> archive(EntityId id);
 }
 
 /// Application-facing tenancy persistence contract.
 abstract interface class TenancyRepository {
   Future<Result<Tenancy?>> findActiveByUnit(EntityId unitId);
+  Future<Result<Tenancy?>> findActiveByTenant(EntityId tenantId);
+  Future<Result<List<Tenancy>>> listByTenant(EntityId tenantId);
+  Future<Result<List<Tenancy>>> listByUnit(EntityId unitId, {DateRange? range});
   Future<Result<void>> save(Tenancy tenancy);
+  Future<Result<void>> moveOut(EntityId tenancyId, DateTime effectiveDate);
 }
 
 /// Application-facing billing persistence contract.

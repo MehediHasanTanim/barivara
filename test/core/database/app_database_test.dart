@@ -33,7 +33,7 @@ void main() {
           .run();
 
       expect(health.isHealthy, isTrue);
-      expect(health.schemaVersion, 2);
+      expect(health.schemaVersion, 3);
     });
 
     test('prevents an orphan unit through the SQLite foreign key', () async {

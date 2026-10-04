@@ -114,6 +114,20 @@ class AppDatabase extends _$AppDatabase {
               await migrator.addColumn(units, units.bedrooms);
               await migrator.addColumn(units, units.notes);
             }
+            if (from < 3) {
+              await migrator.addColumn(tenants, tenants.permanentAddress);
+              await migrator.addColumn(tenants, tenants.emergencyContactName);
+              await migrator.addColumn(tenants, tenants.emergencyContactPhone);
+              await migrator.addColumn(tenants, tenants.photoPath);
+              await migrator.addColumn(tenancies, tenancies.agreedRentPoisha);
+              await migrator.addColumn(tenancies, tenancies.billingDay);
+              await migrator.addColumn(
+                tenancies,
+                tenancies.securityDepositTargetPoisha,
+              );
+              await migrator.addColumn(tenancies, tenancies.advanceRentPoisha);
+              await migrator.addColumn(tenancies, tenancies.agreementNotes);
+            }
           },
         );
       },

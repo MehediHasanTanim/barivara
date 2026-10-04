@@ -46,7 +46,9 @@ abstract final class Fixtures {
     tenantId: EntityId(tenantId),
     unitId: EntityId(unitId),
     moveInDate: createdAt,
-    status: 'active',
+    agreedRent: Money.fromTaka(15000),
+    billingDay: 5,
+    status: TenancyStatus.active,
   );
 
   /// Creates a monthly-bill fixture.

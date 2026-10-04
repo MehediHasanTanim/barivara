@@ -1783,6 +1783,50 @@ class $TenantsTable extends Tenants with TableInfo<$TenantsTable, Tenant> {
     type: DriftSqlType.string,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _permanentAddressMeta = const VerificationMeta(
+    'permanentAddress',
+  );
+  @override
+  late final GeneratedColumn<String> permanentAddress = GeneratedColumn<String>(
+    'permanent_address',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _emergencyContactNameMeta =
+      const VerificationMeta('emergencyContactName');
+  @override
+  late final GeneratedColumn<String> emergencyContactName =
+      GeneratedColumn<String>(
+        'emergency_contact_name',
+        aliasedName,
+        true,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+      );
+  static const VerificationMeta _emergencyContactPhoneMeta =
+      const VerificationMeta('emergencyContactPhone');
+  @override
+  late final GeneratedColumn<String> emergencyContactPhone =
+      GeneratedColumn<String>(
+        'emergency_contact_phone',
+        aliasedName,
+        true,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+      );
+  static const VerificationMeta _photoPathMeta = const VerificationMeta(
+    'photoPath',
+  );
+  @override
+  late final GeneratedColumn<String> photoPath = GeneratedColumn<String>(
+    'photo_path',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _statusMeta = const VerificationMeta('status');
   @override
   late final GeneratedColumn<String> status = GeneratedColumn<String>(
@@ -1835,6 +1879,10 @@ class $TenantsTable extends Tenants with TableInfo<$TenantsTable, Tenant> {
     alternativePhone,
     email,
     nidNumber,
+    permanentAddress,
+    emergencyContactName,
+    emergencyContactPhone,
+    photoPath,
     status,
     notes,
     createdAt,
@@ -1900,6 +1948,39 @@ class $TenantsTable extends Tenants with TableInfo<$TenantsTable, Tenant> {
         nidNumber.isAcceptableOrUnknown(data['nid_number']!, _nidNumberMeta),
       );
     }
+    if (data.containsKey('permanent_address')) {
+      context.handle(
+        _permanentAddressMeta,
+        permanentAddress.isAcceptableOrUnknown(
+          data['permanent_address']!,
+          _permanentAddressMeta,
+        ),
+      );
+    }
+    if (data.containsKey('emergency_contact_name')) {
+      context.handle(
+        _emergencyContactNameMeta,
+        emergencyContactName.isAcceptableOrUnknown(
+          data['emergency_contact_name']!,
+          _emergencyContactNameMeta,
+        ),
+      );
+    }
+    if (data.containsKey('emergency_contact_phone')) {
+      context.handle(
+        _emergencyContactPhoneMeta,
+        emergencyContactPhone.isAcceptableOrUnknown(
+          data['emergency_contact_phone']!,
+          _emergencyContactPhoneMeta,
+        ),
+      );
+    }
+    if (data.containsKey('photo_path')) {
+      context.handle(
+        _photoPathMeta,
+        photoPath.isAcceptableOrUnknown(data['photo_path']!, _photoPathMeta),
+      );
+    }
     if (data.containsKey('status')) {
       context.handle(
         _statusMeta,
@@ -1961,6 +2042,22 @@ class $TenantsTable extends Tenants with TableInfo<$TenantsTable, Tenant> {
         DriftSqlType.string,
         data['${effectivePrefix}nid_number'],
       ),
+      permanentAddress: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}permanent_address'],
+      ),
+      emergencyContactName: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}emergency_contact_name'],
+      ),
+      emergencyContactPhone: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}emergency_contact_phone'],
+      ),
+      photoPath: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}photo_path'],
+      ),
       status: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}status'],
@@ -1994,6 +2091,10 @@ class Tenant extends DataClass implements Insertable<Tenant> {
   final String? alternativePhone;
   final String? email;
   final String? nidNumber;
+  final String? permanentAddress;
+  final String? emergencyContactName;
+  final String? emergencyContactPhone;
+  final String? photoPath;
   final String status;
   final String? notes;
   final DateTime createdAt;
@@ -2006,6 +2107,10 @@ class Tenant extends DataClass implements Insertable<Tenant> {
     this.alternativePhone,
     this.email,
     this.nidNumber,
+    this.permanentAddress,
+    this.emergencyContactName,
+    this.emergencyContactPhone,
+    this.photoPath,
     required this.status,
     this.notes,
     required this.createdAt,
@@ -2028,6 +2133,18 @@ class Tenant extends DataClass implements Insertable<Tenant> {
     }
     if (!nullToAbsent || nidNumber != null) {
       map['nid_number'] = Variable<String>(nidNumber);
+    }
+    if (!nullToAbsent || permanentAddress != null) {
+      map['permanent_address'] = Variable<String>(permanentAddress);
+    }
+    if (!nullToAbsent || emergencyContactName != null) {
+      map['emergency_contact_name'] = Variable<String>(emergencyContactName);
+    }
+    if (!nullToAbsent || emergencyContactPhone != null) {
+      map['emergency_contact_phone'] = Variable<String>(emergencyContactPhone);
+    }
+    if (!nullToAbsent || photoPath != null) {
+      map['photo_path'] = Variable<String>(photoPath);
     }
     map['status'] = Variable<String>(status);
     if (!nullToAbsent || notes != null) {
@@ -2055,6 +2172,18 @@ class Tenant extends DataClass implements Insertable<Tenant> {
       nidNumber: nidNumber == null && nullToAbsent
           ? const Value.absent()
           : Value(nidNumber),
+      permanentAddress: permanentAddress == null && nullToAbsent
+          ? const Value.absent()
+          : Value(permanentAddress),
+      emergencyContactName: emergencyContactName == null && nullToAbsent
+          ? const Value.absent()
+          : Value(emergencyContactName),
+      emergencyContactPhone: emergencyContactPhone == null && nullToAbsent
+          ? const Value.absent()
+          : Value(emergencyContactPhone),
+      photoPath: photoPath == null && nullToAbsent
+          ? const Value.absent()
+          : Value(photoPath),
       status: Value(status),
       notes: notes == null && nullToAbsent
           ? const Value.absent()
@@ -2077,6 +2206,14 @@ class Tenant extends DataClass implements Insertable<Tenant> {
       alternativePhone: serializer.fromJson<String?>(json['alternativePhone']),
       email: serializer.fromJson<String?>(json['email']),
       nidNumber: serializer.fromJson<String?>(json['nidNumber']),
+      permanentAddress: serializer.fromJson<String?>(json['permanentAddress']),
+      emergencyContactName: serializer.fromJson<String?>(
+        json['emergencyContactName'],
+      ),
+      emergencyContactPhone: serializer.fromJson<String?>(
+        json['emergencyContactPhone'],
+      ),
+      photoPath: serializer.fromJson<String?>(json['photoPath']),
       status: serializer.fromJson<String>(json['status']),
       notes: serializer.fromJson<String?>(json['notes']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
@@ -2094,6 +2231,12 @@ class Tenant extends DataClass implements Insertable<Tenant> {
       'alternativePhone': serializer.toJson<String?>(alternativePhone),
       'email': serializer.toJson<String?>(email),
       'nidNumber': serializer.toJson<String?>(nidNumber),
+      'permanentAddress': serializer.toJson<String?>(permanentAddress),
+      'emergencyContactName': serializer.toJson<String?>(emergencyContactName),
+      'emergencyContactPhone': serializer.toJson<String?>(
+        emergencyContactPhone,
+      ),
+      'photoPath': serializer.toJson<String?>(photoPath),
       'status': serializer.toJson<String>(status),
       'notes': serializer.toJson<String?>(notes),
       'createdAt': serializer.toJson<DateTime>(createdAt),
@@ -2109,6 +2252,10 @@ class Tenant extends DataClass implements Insertable<Tenant> {
     Value<String?> alternativePhone = const Value.absent(),
     Value<String?> email = const Value.absent(),
     Value<String?> nidNumber = const Value.absent(),
+    Value<String?> permanentAddress = const Value.absent(),
+    Value<String?> emergencyContactName = const Value.absent(),
+    Value<String?> emergencyContactPhone = const Value.absent(),
+    Value<String?> photoPath = const Value.absent(),
     String? status,
     Value<String?> notes = const Value.absent(),
     DateTime? createdAt,
@@ -2123,6 +2270,16 @@ class Tenant extends DataClass implements Insertable<Tenant> {
         : this.alternativePhone,
     email: email.present ? email.value : this.email,
     nidNumber: nidNumber.present ? nidNumber.value : this.nidNumber,
+    permanentAddress: permanentAddress.present
+        ? permanentAddress.value
+        : this.permanentAddress,
+    emergencyContactName: emergencyContactName.present
+        ? emergencyContactName.value
+        : this.emergencyContactName,
+    emergencyContactPhone: emergencyContactPhone.present
+        ? emergencyContactPhone.value
+        : this.emergencyContactPhone,
+    photoPath: photoPath.present ? photoPath.value : this.photoPath,
     status: status ?? this.status,
     notes: notes.present ? notes.value : this.notes,
     createdAt: createdAt ?? this.createdAt,
@@ -2141,6 +2298,16 @@ class Tenant extends DataClass implements Insertable<Tenant> {
           : this.alternativePhone,
       email: data.email.present ? data.email.value : this.email,
       nidNumber: data.nidNumber.present ? data.nidNumber.value : this.nidNumber,
+      permanentAddress: data.permanentAddress.present
+          ? data.permanentAddress.value
+          : this.permanentAddress,
+      emergencyContactName: data.emergencyContactName.present
+          ? data.emergencyContactName.value
+          : this.emergencyContactName,
+      emergencyContactPhone: data.emergencyContactPhone.present
+          ? data.emergencyContactPhone.value
+          : this.emergencyContactPhone,
+      photoPath: data.photoPath.present ? data.photoPath.value : this.photoPath,
       status: data.status.present ? data.status.value : this.status,
       notes: data.notes.present ? data.notes.value : this.notes,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
@@ -2158,6 +2325,10 @@ class Tenant extends DataClass implements Insertable<Tenant> {
           ..write('alternativePhone: $alternativePhone, ')
           ..write('email: $email, ')
           ..write('nidNumber: $nidNumber, ')
+          ..write('permanentAddress: $permanentAddress, ')
+          ..write('emergencyContactName: $emergencyContactName, ')
+          ..write('emergencyContactPhone: $emergencyContactPhone, ')
+          ..write('photoPath: $photoPath, ')
           ..write('status: $status, ')
           ..write('notes: $notes, ')
           ..write('createdAt: $createdAt, ')
@@ -2175,6 +2346,10 @@ class Tenant extends DataClass implements Insertable<Tenant> {
     alternativePhone,
     email,
     nidNumber,
+    permanentAddress,
+    emergencyContactName,
+    emergencyContactPhone,
+    photoPath,
     status,
     notes,
     createdAt,
@@ -2191,6 +2366,10 @@ class Tenant extends DataClass implements Insertable<Tenant> {
           other.alternativePhone == this.alternativePhone &&
           other.email == this.email &&
           other.nidNumber == this.nidNumber &&
+          other.permanentAddress == this.permanentAddress &&
+          other.emergencyContactName == this.emergencyContactName &&
+          other.emergencyContactPhone == this.emergencyContactPhone &&
+          other.photoPath == this.photoPath &&
           other.status == this.status &&
           other.notes == this.notes &&
           other.createdAt == this.createdAt &&
@@ -2205,6 +2384,10 @@ class TenantsCompanion extends UpdateCompanion<Tenant> {
   final Value<String?> alternativePhone;
   final Value<String?> email;
   final Value<String?> nidNumber;
+  final Value<String?> permanentAddress;
+  final Value<String?> emergencyContactName;
+  final Value<String?> emergencyContactPhone;
+  final Value<String?> photoPath;
   final Value<String> status;
   final Value<String?> notes;
   final Value<DateTime> createdAt;
@@ -2218,6 +2401,10 @@ class TenantsCompanion extends UpdateCompanion<Tenant> {
     this.alternativePhone = const Value.absent(),
     this.email = const Value.absent(),
     this.nidNumber = const Value.absent(),
+    this.permanentAddress = const Value.absent(),
+    this.emergencyContactName = const Value.absent(),
+    this.emergencyContactPhone = const Value.absent(),
+    this.photoPath = const Value.absent(),
     this.status = const Value.absent(),
     this.notes = const Value.absent(),
     this.createdAt = const Value.absent(),
@@ -2232,6 +2419,10 @@ class TenantsCompanion extends UpdateCompanion<Tenant> {
     this.alternativePhone = const Value.absent(),
     this.email = const Value.absent(),
     this.nidNumber = const Value.absent(),
+    this.permanentAddress = const Value.absent(),
+    this.emergencyContactName = const Value.absent(),
+    this.emergencyContactPhone = const Value.absent(),
+    this.photoPath = const Value.absent(),
     this.status = const Value.absent(),
     this.notes = const Value.absent(),
     this.createdAt = const Value.absent(),
@@ -2248,6 +2439,10 @@ class TenantsCompanion extends UpdateCompanion<Tenant> {
     Expression<String>? alternativePhone,
     Expression<String>? email,
     Expression<String>? nidNumber,
+    Expression<String>? permanentAddress,
+    Expression<String>? emergencyContactName,
+    Expression<String>? emergencyContactPhone,
+    Expression<String>? photoPath,
     Expression<String>? status,
     Expression<String>? notes,
     Expression<DateTime>? createdAt,
@@ -2262,6 +2457,12 @@ class TenantsCompanion extends UpdateCompanion<Tenant> {
       if (alternativePhone != null) 'alternative_phone': alternativePhone,
       if (email != null) 'email': email,
       if (nidNumber != null) 'nid_number': nidNumber,
+      if (permanentAddress != null) 'permanent_address': permanentAddress,
+      if (emergencyContactName != null)
+        'emergency_contact_name': emergencyContactName,
+      if (emergencyContactPhone != null)
+        'emergency_contact_phone': emergencyContactPhone,
+      if (photoPath != null) 'photo_path': photoPath,
       if (status != null) 'status': status,
       if (notes != null) 'notes': notes,
       if (createdAt != null) 'created_at': createdAt,
@@ -2278,6 +2479,10 @@ class TenantsCompanion extends UpdateCompanion<Tenant> {
     Value<String?>? alternativePhone,
     Value<String?>? email,
     Value<String?>? nidNumber,
+    Value<String?>? permanentAddress,
+    Value<String?>? emergencyContactName,
+    Value<String?>? emergencyContactPhone,
+    Value<String?>? photoPath,
     Value<String>? status,
     Value<String?>? notes,
     Value<DateTime>? createdAt,
@@ -2292,6 +2497,11 @@ class TenantsCompanion extends UpdateCompanion<Tenant> {
       alternativePhone: alternativePhone ?? this.alternativePhone,
       email: email ?? this.email,
       nidNumber: nidNumber ?? this.nidNumber,
+      permanentAddress: permanentAddress ?? this.permanentAddress,
+      emergencyContactName: emergencyContactName ?? this.emergencyContactName,
+      emergencyContactPhone:
+          emergencyContactPhone ?? this.emergencyContactPhone,
+      photoPath: photoPath ?? this.photoPath,
       status: status ?? this.status,
       notes: notes ?? this.notes,
       createdAt: createdAt ?? this.createdAt,
@@ -2324,6 +2534,22 @@ class TenantsCompanion extends UpdateCompanion<Tenant> {
     if (nidNumber.present) {
       map['nid_number'] = Variable<String>(nidNumber.value);
     }
+    if (permanentAddress.present) {
+      map['permanent_address'] = Variable<String>(permanentAddress.value);
+    }
+    if (emergencyContactName.present) {
+      map['emergency_contact_name'] = Variable<String>(
+        emergencyContactName.value,
+      );
+    }
+    if (emergencyContactPhone.present) {
+      map['emergency_contact_phone'] = Variable<String>(
+        emergencyContactPhone.value,
+      );
+    }
+    if (photoPath.present) {
+      map['photo_path'] = Variable<String>(photoPath.value);
+    }
     if (status.present) {
       map['status'] = Variable<String>(status.value);
     }
@@ -2352,6 +2578,10 @@ class TenantsCompanion extends UpdateCompanion<Tenant> {
           ..write('alternativePhone: $alternativePhone, ')
           ..write('email: $email, ')
           ..write('nidNumber: $nidNumber, ')
+          ..write('permanentAddress: $permanentAddress, ')
+          ..write('emergencyContactName: $emergencyContactName, ')
+          ..write('emergencyContactPhone: $emergencyContactPhone, ')
+          ..write('photoPath: $photoPath, ')
           ..write('status: $status, ')
           ..write('notes: $notes, ')
           ..write('createdAt: $createdAt, ')
@@ -2437,6 +2667,65 @@ class $TenanciesTable extends Tenancies
         type: DriftSqlType.dateTime,
         requiredDuringInsert: false,
       );
+  static const VerificationMeta _agreedRentPoishaMeta = const VerificationMeta(
+    'agreedRentPoisha',
+  );
+  @override
+  late final GeneratedColumn<int> agreedRentPoisha = GeneratedColumn<int>(
+    'agreed_rent_poisha',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _billingDayMeta = const VerificationMeta(
+    'billingDay',
+  );
+  @override
+  late final GeneratedColumn<int> billingDay = GeneratedColumn<int>(
+    'billing_day',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(5),
+  );
+  static const VerificationMeta _securityDepositTargetPoishaMeta =
+      const VerificationMeta('securityDepositTargetPoisha');
+  @override
+  late final GeneratedColumn<int> securityDepositTargetPoisha =
+      GeneratedColumn<int>(
+        'security_deposit_target_poisha',
+        aliasedName,
+        false,
+        type: DriftSqlType.int,
+        requiredDuringInsert: false,
+        defaultValue: const Constant(0),
+      );
+  static const VerificationMeta _advanceRentPoishaMeta = const VerificationMeta(
+    'advanceRentPoisha',
+  );
+  @override
+  late final GeneratedColumn<int> advanceRentPoisha = GeneratedColumn<int>(
+    'advance_rent_poisha',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _agreementNotesMeta = const VerificationMeta(
+    'agreementNotes',
+  );
+  @override
+  late final GeneratedColumn<String> agreementNotes = GeneratedColumn<String>(
+    'agreement_notes',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _statusMeta = const VerificationMeta('status');
   @override
   late final GeneratedColumn<String> status = GeneratedColumn<String>(
@@ -2479,6 +2768,11 @@ class $TenanciesTable extends Tenancies
     moveInDate,
     expectedMoveOutDate,
     actualMoveOutDate,
+    agreedRentPoisha,
+    billingDay,
+    securityDepositTargetPoisha,
+    advanceRentPoisha,
+    agreementNotes,
     status,
     createdAt,
     updatedAt,
@@ -2545,6 +2839,48 @@ class $TenanciesTable extends Tenancies
         ),
       );
     }
+    if (data.containsKey('agreed_rent_poisha')) {
+      context.handle(
+        _agreedRentPoishaMeta,
+        agreedRentPoisha.isAcceptableOrUnknown(
+          data['agreed_rent_poisha']!,
+          _agreedRentPoishaMeta,
+        ),
+      );
+    }
+    if (data.containsKey('billing_day')) {
+      context.handle(
+        _billingDayMeta,
+        billingDay.isAcceptableOrUnknown(data['billing_day']!, _billingDayMeta),
+      );
+    }
+    if (data.containsKey('security_deposit_target_poisha')) {
+      context.handle(
+        _securityDepositTargetPoishaMeta,
+        securityDepositTargetPoisha.isAcceptableOrUnknown(
+          data['security_deposit_target_poisha']!,
+          _securityDepositTargetPoishaMeta,
+        ),
+      );
+    }
+    if (data.containsKey('advance_rent_poisha')) {
+      context.handle(
+        _advanceRentPoishaMeta,
+        advanceRentPoisha.isAcceptableOrUnknown(
+          data['advance_rent_poisha']!,
+          _advanceRentPoishaMeta,
+        ),
+      );
+    }
+    if (data.containsKey('agreement_notes')) {
+      context.handle(
+        _agreementNotesMeta,
+        agreementNotes.isAcceptableOrUnknown(
+          data['agreement_notes']!,
+          _agreementNotesMeta,
+        ),
+      );
+    }
     if (data.containsKey('status')) {
       context.handle(
         _statusMeta,
@@ -2596,6 +2932,26 @@ class $TenanciesTable extends Tenancies
         DriftSqlType.dateTime,
         data['${effectivePrefix}actual_move_out_date'],
       ),
+      agreedRentPoisha: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}agreed_rent_poisha'],
+      )!,
+      billingDay: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}billing_day'],
+      )!,
+      securityDepositTargetPoisha: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}security_deposit_target_poisha'],
+      )!,
+      advanceRentPoisha: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}advance_rent_poisha'],
+      )!,
+      agreementNotes: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}agreement_notes'],
+      ),
       status: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}status'],
@@ -2624,6 +2980,11 @@ class Tenancy extends DataClass implements Insertable<Tenancy> {
   final DateTime moveInDate;
   final DateTime? expectedMoveOutDate;
   final DateTime? actualMoveOutDate;
+  final int agreedRentPoisha;
+  final int billingDay;
+  final int securityDepositTargetPoisha;
+  final int advanceRentPoisha;
+  final String? agreementNotes;
   final String status;
   final DateTime createdAt;
   final DateTime updatedAt;
@@ -2634,6 +2995,11 @@ class Tenancy extends DataClass implements Insertable<Tenancy> {
     required this.moveInDate,
     this.expectedMoveOutDate,
     this.actualMoveOutDate,
+    required this.agreedRentPoisha,
+    required this.billingDay,
+    required this.securityDepositTargetPoisha,
+    required this.advanceRentPoisha,
+    this.agreementNotes,
     required this.status,
     required this.createdAt,
     required this.updatedAt,
@@ -2650,6 +3016,15 @@ class Tenancy extends DataClass implements Insertable<Tenancy> {
     }
     if (!nullToAbsent || actualMoveOutDate != null) {
       map['actual_move_out_date'] = Variable<DateTime>(actualMoveOutDate);
+    }
+    map['agreed_rent_poisha'] = Variable<int>(agreedRentPoisha);
+    map['billing_day'] = Variable<int>(billingDay);
+    map['security_deposit_target_poisha'] = Variable<int>(
+      securityDepositTargetPoisha,
+    );
+    map['advance_rent_poisha'] = Variable<int>(advanceRentPoisha);
+    if (!nullToAbsent || agreementNotes != null) {
+      map['agreement_notes'] = Variable<String>(agreementNotes);
     }
     map['status'] = Variable<String>(status);
     map['created_at'] = Variable<DateTime>(createdAt);
@@ -2669,6 +3044,13 @@ class Tenancy extends DataClass implements Insertable<Tenancy> {
       actualMoveOutDate: actualMoveOutDate == null && nullToAbsent
           ? const Value.absent()
           : Value(actualMoveOutDate),
+      agreedRentPoisha: Value(agreedRentPoisha),
+      billingDay: Value(billingDay),
+      securityDepositTargetPoisha: Value(securityDepositTargetPoisha),
+      advanceRentPoisha: Value(advanceRentPoisha),
+      agreementNotes: agreementNotes == null && nullToAbsent
+          ? const Value.absent()
+          : Value(agreementNotes),
       status: Value(status),
       createdAt: Value(createdAt),
       updatedAt: Value(updatedAt),
@@ -2691,6 +3073,13 @@ class Tenancy extends DataClass implements Insertable<Tenancy> {
       actualMoveOutDate: serializer.fromJson<DateTime?>(
         json['actualMoveOutDate'],
       ),
+      agreedRentPoisha: serializer.fromJson<int>(json['agreedRentPoisha']),
+      billingDay: serializer.fromJson<int>(json['billingDay']),
+      securityDepositTargetPoisha: serializer.fromJson<int>(
+        json['securityDepositTargetPoisha'],
+      ),
+      advanceRentPoisha: serializer.fromJson<int>(json['advanceRentPoisha']),
+      agreementNotes: serializer.fromJson<String?>(json['agreementNotes']),
       status: serializer.fromJson<String>(json['status']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
       updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
@@ -2706,6 +3095,13 @@ class Tenancy extends DataClass implements Insertable<Tenancy> {
       'moveInDate': serializer.toJson<DateTime>(moveInDate),
       'expectedMoveOutDate': serializer.toJson<DateTime?>(expectedMoveOutDate),
       'actualMoveOutDate': serializer.toJson<DateTime?>(actualMoveOutDate),
+      'agreedRentPoisha': serializer.toJson<int>(agreedRentPoisha),
+      'billingDay': serializer.toJson<int>(billingDay),
+      'securityDepositTargetPoisha': serializer.toJson<int>(
+        securityDepositTargetPoisha,
+      ),
+      'advanceRentPoisha': serializer.toJson<int>(advanceRentPoisha),
+      'agreementNotes': serializer.toJson<String?>(agreementNotes),
       'status': serializer.toJson<String>(status),
       'createdAt': serializer.toJson<DateTime>(createdAt),
       'updatedAt': serializer.toJson<DateTime>(updatedAt),
@@ -2719,6 +3115,11 @@ class Tenancy extends DataClass implements Insertable<Tenancy> {
     DateTime? moveInDate,
     Value<DateTime?> expectedMoveOutDate = const Value.absent(),
     Value<DateTime?> actualMoveOutDate = const Value.absent(),
+    int? agreedRentPoisha,
+    int? billingDay,
+    int? securityDepositTargetPoisha,
+    int? advanceRentPoisha,
+    Value<String?> agreementNotes = const Value.absent(),
     String? status,
     DateTime? createdAt,
     DateTime? updatedAt,
@@ -2733,6 +3134,14 @@ class Tenancy extends DataClass implements Insertable<Tenancy> {
     actualMoveOutDate: actualMoveOutDate.present
         ? actualMoveOutDate.value
         : this.actualMoveOutDate,
+    agreedRentPoisha: agreedRentPoisha ?? this.agreedRentPoisha,
+    billingDay: billingDay ?? this.billingDay,
+    securityDepositTargetPoisha:
+        securityDepositTargetPoisha ?? this.securityDepositTargetPoisha,
+    advanceRentPoisha: advanceRentPoisha ?? this.advanceRentPoisha,
+    agreementNotes: agreementNotes.present
+        ? agreementNotes.value
+        : this.agreementNotes,
     status: status ?? this.status,
     createdAt: createdAt ?? this.createdAt,
     updatedAt: updatedAt ?? this.updatedAt,
@@ -2751,6 +3160,21 @@ class Tenancy extends DataClass implements Insertable<Tenancy> {
       actualMoveOutDate: data.actualMoveOutDate.present
           ? data.actualMoveOutDate.value
           : this.actualMoveOutDate,
+      agreedRentPoisha: data.agreedRentPoisha.present
+          ? data.agreedRentPoisha.value
+          : this.agreedRentPoisha,
+      billingDay: data.billingDay.present
+          ? data.billingDay.value
+          : this.billingDay,
+      securityDepositTargetPoisha: data.securityDepositTargetPoisha.present
+          ? data.securityDepositTargetPoisha.value
+          : this.securityDepositTargetPoisha,
+      advanceRentPoisha: data.advanceRentPoisha.present
+          ? data.advanceRentPoisha.value
+          : this.advanceRentPoisha,
+      agreementNotes: data.agreementNotes.present
+          ? data.agreementNotes.value
+          : this.agreementNotes,
       status: data.status.present ? data.status.value : this.status,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
@@ -2766,6 +3190,11 @@ class Tenancy extends DataClass implements Insertable<Tenancy> {
           ..write('moveInDate: $moveInDate, ')
           ..write('expectedMoveOutDate: $expectedMoveOutDate, ')
           ..write('actualMoveOutDate: $actualMoveOutDate, ')
+          ..write('agreedRentPoisha: $agreedRentPoisha, ')
+          ..write('billingDay: $billingDay, ')
+          ..write('securityDepositTargetPoisha: $securityDepositTargetPoisha, ')
+          ..write('advanceRentPoisha: $advanceRentPoisha, ')
+          ..write('agreementNotes: $agreementNotes, ')
           ..write('status: $status, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt')
@@ -2781,6 +3210,11 @@ class Tenancy extends DataClass implements Insertable<Tenancy> {
     moveInDate,
     expectedMoveOutDate,
     actualMoveOutDate,
+    agreedRentPoisha,
+    billingDay,
+    securityDepositTargetPoisha,
+    advanceRentPoisha,
+    agreementNotes,
     status,
     createdAt,
     updatedAt,
@@ -2795,6 +3229,12 @@ class Tenancy extends DataClass implements Insertable<Tenancy> {
           other.moveInDate == this.moveInDate &&
           other.expectedMoveOutDate == this.expectedMoveOutDate &&
           other.actualMoveOutDate == this.actualMoveOutDate &&
+          other.agreedRentPoisha == this.agreedRentPoisha &&
+          other.billingDay == this.billingDay &&
+          other.securityDepositTargetPoisha ==
+              this.securityDepositTargetPoisha &&
+          other.advanceRentPoisha == this.advanceRentPoisha &&
+          other.agreementNotes == this.agreementNotes &&
           other.status == this.status &&
           other.createdAt == this.createdAt &&
           other.updatedAt == this.updatedAt);
@@ -2807,6 +3247,11 @@ class TenanciesCompanion extends UpdateCompanion<Tenancy> {
   final Value<DateTime> moveInDate;
   final Value<DateTime?> expectedMoveOutDate;
   final Value<DateTime?> actualMoveOutDate;
+  final Value<int> agreedRentPoisha;
+  final Value<int> billingDay;
+  final Value<int> securityDepositTargetPoisha;
+  final Value<int> advanceRentPoisha;
+  final Value<String?> agreementNotes;
   final Value<String> status;
   final Value<DateTime> createdAt;
   final Value<DateTime> updatedAt;
@@ -2818,6 +3263,11 @@ class TenanciesCompanion extends UpdateCompanion<Tenancy> {
     this.moveInDate = const Value.absent(),
     this.expectedMoveOutDate = const Value.absent(),
     this.actualMoveOutDate = const Value.absent(),
+    this.agreedRentPoisha = const Value.absent(),
+    this.billingDay = const Value.absent(),
+    this.securityDepositTargetPoisha = const Value.absent(),
+    this.advanceRentPoisha = const Value.absent(),
+    this.agreementNotes = const Value.absent(),
     this.status = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
@@ -2830,6 +3280,11 @@ class TenanciesCompanion extends UpdateCompanion<Tenancy> {
     required DateTime moveInDate,
     this.expectedMoveOutDate = const Value.absent(),
     this.actualMoveOutDate = const Value.absent(),
+    this.agreedRentPoisha = const Value.absent(),
+    this.billingDay = const Value.absent(),
+    this.securityDepositTargetPoisha = const Value.absent(),
+    this.advanceRentPoisha = const Value.absent(),
+    this.agreementNotes = const Value.absent(),
     this.status = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
@@ -2845,6 +3300,11 @@ class TenanciesCompanion extends UpdateCompanion<Tenancy> {
     Expression<DateTime>? moveInDate,
     Expression<DateTime>? expectedMoveOutDate,
     Expression<DateTime>? actualMoveOutDate,
+    Expression<int>? agreedRentPoisha,
+    Expression<int>? billingDay,
+    Expression<int>? securityDepositTargetPoisha,
+    Expression<int>? advanceRentPoisha,
+    Expression<String>? agreementNotes,
     Expression<String>? status,
     Expression<DateTime>? createdAt,
     Expression<DateTime>? updatedAt,
@@ -2858,6 +3318,12 @@ class TenanciesCompanion extends UpdateCompanion<Tenancy> {
       if (expectedMoveOutDate != null)
         'expected_move_out_date': expectedMoveOutDate,
       if (actualMoveOutDate != null) 'actual_move_out_date': actualMoveOutDate,
+      if (agreedRentPoisha != null) 'agreed_rent_poisha': agreedRentPoisha,
+      if (billingDay != null) 'billing_day': billingDay,
+      if (securityDepositTargetPoisha != null)
+        'security_deposit_target_poisha': securityDepositTargetPoisha,
+      if (advanceRentPoisha != null) 'advance_rent_poisha': advanceRentPoisha,
+      if (agreementNotes != null) 'agreement_notes': agreementNotes,
       if (status != null) 'status': status,
       if (createdAt != null) 'created_at': createdAt,
       if (updatedAt != null) 'updated_at': updatedAt,
@@ -2872,6 +3338,11 @@ class TenanciesCompanion extends UpdateCompanion<Tenancy> {
     Value<DateTime>? moveInDate,
     Value<DateTime?>? expectedMoveOutDate,
     Value<DateTime?>? actualMoveOutDate,
+    Value<int>? agreedRentPoisha,
+    Value<int>? billingDay,
+    Value<int>? securityDepositTargetPoisha,
+    Value<int>? advanceRentPoisha,
+    Value<String?>? agreementNotes,
     Value<String>? status,
     Value<DateTime>? createdAt,
     Value<DateTime>? updatedAt,
@@ -2884,6 +3355,12 @@ class TenanciesCompanion extends UpdateCompanion<Tenancy> {
       moveInDate: moveInDate ?? this.moveInDate,
       expectedMoveOutDate: expectedMoveOutDate ?? this.expectedMoveOutDate,
       actualMoveOutDate: actualMoveOutDate ?? this.actualMoveOutDate,
+      agreedRentPoisha: agreedRentPoisha ?? this.agreedRentPoisha,
+      billingDay: billingDay ?? this.billingDay,
+      securityDepositTargetPoisha:
+          securityDepositTargetPoisha ?? this.securityDepositTargetPoisha,
+      advanceRentPoisha: advanceRentPoisha ?? this.advanceRentPoisha,
+      agreementNotes: agreementNotes ?? this.agreementNotes,
       status: status ?? this.status,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
@@ -2914,6 +3391,23 @@ class TenanciesCompanion extends UpdateCompanion<Tenancy> {
     if (actualMoveOutDate.present) {
       map['actual_move_out_date'] = Variable<DateTime>(actualMoveOutDate.value);
     }
+    if (agreedRentPoisha.present) {
+      map['agreed_rent_poisha'] = Variable<int>(agreedRentPoisha.value);
+    }
+    if (billingDay.present) {
+      map['billing_day'] = Variable<int>(billingDay.value);
+    }
+    if (securityDepositTargetPoisha.present) {
+      map['security_deposit_target_poisha'] = Variable<int>(
+        securityDepositTargetPoisha.value,
+      );
+    }
+    if (advanceRentPoisha.present) {
+      map['advance_rent_poisha'] = Variable<int>(advanceRentPoisha.value);
+    }
+    if (agreementNotes.present) {
+      map['agreement_notes'] = Variable<String>(agreementNotes.value);
+    }
     if (status.present) {
       map['status'] = Variable<String>(status.value);
     }
@@ -2938,6 +3432,11 @@ class TenanciesCompanion extends UpdateCompanion<Tenancy> {
           ..write('moveInDate: $moveInDate, ')
           ..write('expectedMoveOutDate: $expectedMoveOutDate, ')
           ..write('actualMoveOutDate: $actualMoveOutDate, ')
+          ..write('agreedRentPoisha: $agreedRentPoisha, ')
+          ..write('billingDay: $billingDay, ')
+          ..write('securityDepositTargetPoisha: $securityDepositTargetPoisha, ')
+          ..write('advanceRentPoisha: $advanceRentPoisha, ')
+          ..write('agreementNotes: $agreementNotes, ')
           ..write('status: $status, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
@@ -12061,6 +12560,10 @@ typedef $$TenantsTableCreateCompanionBuilder = TenantsCompanion Function({
   Value<String?> alternativePhone,
   Value<String?> email,
   Value<String?> nidNumber,
+  Value<String?> permanentAddress,
+  Value<String?> emergencyContactName,
+  Value<String?> emergencyContactPhone,
+  Value<String?> photoPath,
   Value<String> status,
   Value<String?> notes,
   Value<DateTime> createdAt,
@@ -12075,6 +12578,10 @@ typedef $$TenantsTableUpdateCompanionBuilder = TenantsCompanion Function({
   Value<String?> alternativePhone,
   Value<String?> email,
   Value<String?> nidNumber,
+  Value<String?> permanentAddress,
+  Value<String?> emergencyContactName,
+  Value<String?> emergencyContactPhone,
+  Value<String?> photoPath,
   Value<String> status,
   Value<String?> notes,
   Value<DateTime> createdAt,
@@ -12146,6 +12653,26 @@ class $$TenantsTableFilterComposer
 
   ColumnFilters<String> get nidNumber => $composableBuilder(
     column: $table.nidNumber,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get permanentAddress => $composableBuilder(
+    column: $table.permanentAddress,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get emergencyContactName => $composableBuilder(
+    column: $table.emergencyContactName,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get emergencyContactPhone => $composableBuilder(
+    column: $table.emergencyContactPhone,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get photoPath => $composableBuilder(
+    column: $table.photoPath,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -12239,6 +12766,26 @@ class $$TenantsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get permanentAddress => $composableBuilder(
+    column: $table.permanentAddress,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get emergencyContactName => $composableBuilder(
+    column: $table.emergencyContactName,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get emergencyContactPhone => $composableBuilder(
+    column: $table.emergencyContactPhone,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get photoPath => $composableBuilder(
+    column: $table.photoPath,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<String> get status => $composableBuilder(
     column: $table.status,
     builder: (column) => ColumnOrderings(column),
@@ -12293,6 +12840,24 @@ class $$TenantsTableAnnotationComposer
 
   GeneratedColumn<String> get nidNumber =>
       $composableBuilder(column: $table.nidNumber, builder: (column) => column);
+
+  GeneratedColumn<String> get permanentAddress => $composableBuilder(
+    column: $table.permanentAddress,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get emergencyContactName => $composableBuilder(
+    column: $table.emergencyContactName,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get emergencyContactPhone => $composableBuilder(
+    column: $table.emergencyContactPhone,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get photoPath =>
+      $composableBuilder(column: $table.photoPath, builder: (column) => column);
 
   GeneratedColumn<String> get status =>
       $composableBuilder(column: $table.status, builder: (column) => column);
@@ -12367,6 +12932,10 @@ class $$TenantsTableTableManager
                 Value<String?> alternativePhone = const Value.absent(),
                 Value<String?> email = const Value.absent(),
                 Value<String?> nidNumber = const Value.absent(),
+                Value<String?> permanentAddress = const Value.absent(),
+                Value<String?> emergencyContactName = const Value.absent(),
+                Value<String?> emergencyContactPhone = const Value.absent(),
+                Value<String?> photoPath = const Value.absent(),
                 Value<String> status = const Value.absent(),
                 Value<String?> notes = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
@@ -12380,6 +12949,10 @@ class $$TenantsTableTableManager
                 alternativePhone: alternativePhone,
                 email: email,
                 nidNumber: nidNumber,
+                permanentAddress: permanentAddress,
+                emergencyContactName: emergencyContactName,
+                emergencyContactPhone: emergencyContactPhone,
+                photoPath: photoPath,
                 status: status,
                 notes: notes,
                 createdAt: createdAt,
@@ -12395,6 +12968,10 @@ class $$TenantsTableTableManager
                 Value<String?> alternativePhone = const Value.absent(),
                 Value<String?> email = const Value.absent(),
                 Value<String?> nidNumber = const Value.absent(),
+                Value<String?> permanentAddress = const Value.absent(),
+                Value<String?> emergencyContactName = const Value.absent(),
+                Value<String?> emergencyContactPhone = const Value.absent(),
+                Value<String?> photoPath = const Value.absent(),
                 Value<String> status = const Value.absent(),
                 Value<String?> notes = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
@@ -12408,6 +12985,10 @@ class $$TenantsTableTableManager
                 alternativePhone: alternativePhone,
                 email: email,
                 nidNumber: nidNumber,
+                permanentAddress: permanentAddress,
+                emergencyContactName: emergencyContactName,
+                emergencyContactPhone: emergencyContactPhone,
+                photoPath: photoPath,
                 status: status,
                 notes: notes,
                 createdAt: createdAt,
@@ -12469,6 +13050,11 @@ typedef $$TenanciesTableCreateCompanionBuilder = TenanciesCompanion Function({
   required DateTime moveInDate,
   Value<DateTime?> expectedMoveOutDate,
   Value<DateTime?> actualMoveOutDate,
+  Value<int> agreedRentPoisha,
+  Value<int> billingDay,
+  Value<int> securityDepositTargetPoisha,
+  Value<int> advanceRentPoisha,
+  Value<String?> agreementNotes,
   Value<String> status,
   Value<DateTime> createdAt,
   Value<DateTime> updatedAt,
@@ -12481,6 +13067,11 @@ typedef $$TenanciesTableUpdateCompanionBuilder = TenanciesCompanion Function({
   Value<DateTime> moveInDate,
   Value<DateTime?> expectedMoveOutDate,
   Value<DateTime?> actualMoveOutDate,
+  Value<int> agreedRentPoisha,
+  Value<int> billingDay,
+  Value<int> securityDepositTargetPoisha,
+  Value<int> advanceRentPoisha,
+  Value<String?> agreementNotes,
   Value<String> status,
   Value<DateTime> createdAt,
   Value<DateTime> updatedAt,
@@ -12652,6 +13243,31 @@ class $$TenanciesTableFilterComposer
 
   ColumnFilters<DateTime> get actualMoveOutDate => $composableBuilder(
     column: $table.actualMoveOutDate,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get agreedRentPoisha => $composableBuilder(
+    column: $table.agreedRentPoisha,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get billingDay => $composableBuilder(
+    column: $table.billingDay,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get securityDepositTargetPoisha => $composableBuilder(
+    column: $table.securityDepositTargetPoisha,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get advanceRentPoisha => $composableBuilder(
+    column: $table.advanceRentPoisha,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get agreementNotes => $composableBuilder(
+    column: $table.agreementNotes,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -12871,6 +13487,31 @@ class $$TenanciesTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<int> get agreedRentPoisha => $composableBuilder(
+    column: $table.agreedRentPoisha,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get billingDay => $composableBuilder(
+    column: $table.billingDay,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get securityDepositTargetPoisha => $composableBuilder(
+    column: $table.securityDepositTargetPoisha,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get advanceRentPoisha => $composableBuilder(
+    column: $table.advanceRentPoisha,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get agreementNotes => $composableBuilder(
+    column: $table.agreementNotes,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<String> get status => $composableBuilder(
     column: $table.status,
     builder: (column) => ColumnOrderings(column),
@@ -12957,6 +13598,31 @@ class $$TenanciesTableAnnotationComposer
 
   GeneratedColumn<DateTime> get actualMoveOutDate => $composableBuilder(
     column: $table.actualMoveOutDate,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get agreedRentPoisha => $composableBuilder(
+    column: $table.agreedRentPoisha,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get billingDay => $composableBuilder(
+    column: $table.billingDay,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get securityDepositTargetPoisha => $composableBuilder(
+    column: $table.securityDepositTargetPoisha,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get advanceRentPoisha => $composableBuilder(
+    column: $table.advanceRentPoisha,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get agreementNotes => $composableBuilder(
+    column: $table.agreementNotes,
     builder: (column) => column,
   );
 
@@ -13184,6 +13850,11 @@ class $$TenanciesTableTableManager
                 Value<DateTime> moveInDate = const Value.absent(),
                 Value<DateTime?> expectedMoveOutDate = const Value.absent(),
                 Value<DateTime?> actualMoveOutDate = const Value.absent(),
+                Value<int> agreedRentPoisha = const Value.absent(),
+                Value<int> billingDay = const Value.absent(),
+                Value<int> securityDepositTargetPoisha = const Value.absent(),
+                Value<int> advanceRentPoisha = const Value.absent(),
+                Value<String?> agreementNotes = const Value.absent(),
                 Value<String> status = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<DateTime> updatedAt = const Value.absent(),
@@ -13195,6 +13866,11 @@ class $$TenanciesTableTableManager
                 moveInDate: moveInDate,
                 expectedMoveOutDate: expectedMoveOutDate,
                 actualMoveOutDate: actualMoveOutDate,
+                agreedRentPoisha: agreedRentPoisha,
+                billingDay: billingDay,
+                securityDepositTargetPoisha: securityDepositTargetPoisha,
+                advanceRentPoisha: advanceRentPoisha,
+                agreementNotes: agreementNotes,
                 status: status,
                 createdAt: createdAt,
                 updatedAt: updatedAt,
@@ -13208,6 +13884,11 @@ class $$TenanciesTableTableManager
                 required DateTime moveInDate,
                 Value<DateTime?> expectedMoveOutDate = const Value.absent(),
                 Value<DateTime?> actualMoveOutDate = const Value.absent(),
+                Value<int> agreedRentPoisha = const Value.absent(),
+                Value<int> billingDay = const Value.absent(),
+                Value<int> securityDepositTargetPoisha = const Value.absent(),
+                Value<int> advanceRentPoisha = const Value.absent(),
+                Value<String?> agreementNotes = const Value.absent(),
                 Value<String> status = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<DateTime> updatedAt = const Value.absent(),
@@ -13219,6 +13900,11 @@ class $$TenanciesTableTableManager
                 moveInDate: moveInDate,
                 expectedMoveOutDate: expectedMoveOutDate,
                 actualMoveOutDate: actualMoveOutDate,
+                agreedRentPoisha: agreedRentPoisha,
+                billingDay: billingDay,
+                securityDepositTargetPoisha: securityDepositTargetPoisha,
+                advanceRentPoisha: advanceRentPoisha,
+                agreementNotes: agreementNotes,
                 status: status,
                 createdAt: createdAt,
                 updatedAt: updatedAt,
