@@ -1,9 +1,14 @@
+import 'dart:async';
+
+import 'package:barivara/app/app_services.dart';
+import 'package:barivara/core/notifications/local_notification_service.dart';
 import 'package:barivara/core/result/result.dart';
 import 'package:barivara/features/settings/application/settings_controller.dart';
 import 'package:barivara/features/settings/domain/app_settings.dart';
 import 'package:barivara/l10n/generated/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:uuid/uuid.dart';
 
 /// First-run language selection specified by the Bari Vara mobile UX guide.
 class LanguageSelectionScreen extends ConsumerWidget {
@@ -390,29 +395,265 @@ class ReminderSettingsScreen extends ConsumerWidget {
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: <Widget>[
+          const Card(
+            child: Padding(
+              padding: EdgeInsets.all(16),
+              child: Text(
+                'Reminders are created only on this device. We ask for notification permission when you turn one on.',
+              ),
+            ),
+          ),
+          const SizedBox(height: 12),
+          SwitchListTile.adaptive(
+            title: const Text('Monthly bill generation'),
+            subtitle: const Text('Remind me to generate this month\'s bills.'),
+            value: settings.reminders.billGenerationEnabled,
+            onChanged: (bool enabled) => _updateReminders(
+              context,
+              ref,
+              settings,
+              settings.reminders.copyWith(billGenerationEnabled: enabled),
+              requestPermission: enabled,
+            ),
+          ),
           SwitchListTile.adaptive(
             title: Text(text.rentDueReminder),
+            subtitle: const Text(
+              'Remind me before or after the monthly due date.',
+            ),
             value: settings.reminders.rentDueEnabled,
-            onChanged: (bool enabled) => _update(
+            onChanged: (bool enabled) => _updateReminders(
               context,
               ref,
-              settings.copyWith(
-                reminders: settings.reminders.copyWith(rentDueEnabled: enabled),
-              ),
+              settings,
+              settings.reminders.copyWith(rentDueEnabled: enabled),
+              requestPermission: enabled,
             ),
           ),
           SwitchListTile.adaptive(
-            title: Text(text.backupReminder),
-            value: settings.reminders.backupEnabled,
-            onChanged: (bool enabled) => _update(
+            title: const Text('Unpaid rent follow-up'),
+            subtitle: const Text('Review unpaid tenants after the due date.'),
+            value: settings.reminders.unpaidFollowUpEnabled,
+            onChanged: (bool enabled) => _updateReminders(
               context,
               ref,
-              settings.copyWith(
-                reminders: settings.reminders.copyWith(backupEnabled: enabled),
+              settings,
+              settings.reminders.copyWith(unpaidFollowUpEnabled: enabled),
+              requestPermission: enabled,
+            ),
+          ),
+          const Divider(height: 28),
+          DropdownButtonFormField<int>(
+            initialValue: settings.reminders.billGenerationDay,
+            decoration: const InputDecoration(labelText: 'Bill generation day'),
+            items: List<DropdownMenuItem<int>>.generate(
+              31,
+              (int index) => DropdownMenuItem<int>(
+                value: index + 1,
+                child: Text('${index + 1}'),
+              ),
+            ),
+            onChanged: (int? value) {
+              if (value != null) {
+                unawaited(
+                  _updateReminders(
+                    context,
+                    ref,
+                    settings,
+                    settings.reminders.copyWith(billGenerationDay: value),
+                  ),
+                );
+              }
+            },
+          ),
+          DropdownButtonFormField<int>(
+            initialValue: settings.reminders.rentDueDay,
+            decoration: const InputDecoration(labelText: 'Rent due day'),
+            items: List<DropdownMenuItem<int>>.generate(
+              31,
+              (int index) => DropdownMenuItem<int>(
+                value: index + 1,
+                child: Text('${index + 1}'),
+              ),
+            ),
+            onChanged: (int? value) {
+              if (value != null) {
+                unawaited(
+                  _updateReminders(
+                    context,
+                    ref,
+                    settings,
+                    settings.reminders.copyWith(rentDueDay: value),
+                  ),
+                );
+              }
+            },
+          ),
+          ListTile(
+            contentPadding: EdgeInsets.zero,
+            title: const Text('Reminder time'),
+            subtitle: Text(
+              TimeOfDay(
+                hour: settings.reminders.hour,
+                minute: settings.reminders.minute,
+              ).format(context),
+            ),
+            trailing: const Icon(Icons.schedule_rounded),
+            onTap: () async {
+              final TimeOfDay? time = await showTimePicker(
+                context: context,
+                initialTime: TimeOfDay(
+                  hour: settings.reminders.hour,
+                  minute: settings.reminders.minute,
+                ),
+              );
+              if (time != null && context.mounted) {
+                await _updateReminders(
+                  context,
+                  ref,
+                  settings,
+                  settings.reminders.copyWith(
+                    hour: time.hour,
+                    minute: time.minute,
+                  ),
+                );
+              }
+            },
+          ),
+          DropdownButtonFormField<int>(
+            initialValue: settings.reminders.rentDueOffsetDays,
+            decoration: const InputDecoration(labelText: 'Due reminder timing'),
+            items: const <DropdownMenuItem<int>>[
+              DropdownMenuItem<int>(
+                value: -3,
+                child: Text('3 days before due date'),
+              ),
+              DropdownMenuItem<int>(
+                value: -1,
+                child: Text('1 day before due date'),
+              ),
+              DropdownMenuItem<int>(value: 0, child: Text('On due date')),
+              DropdownMenuItem<int>(
+                value: 1,
+                child: Text('1 day after due date'),
+              ),
+              DropdownMenuItem<int>(
+                value: 3,
+                child: Text('3 days after due date'),
+              ),
+            ],
+            onChanged: (int? value) {
+              if (value != null) {
+                unawaited(
+                  _updateReminders(
+                    context,
+                    ref,
+                    settings,
+                    settings.reminders.copyWith(rentDueOffsetDays: value),
+                  ),
+                );
+              }
+            },
+          ),
+          DropdownButtonFormField<int>(
+            initialValue: settings.reminders.unpaidFollowUpDays,
+            decoration: const InputDecoration(
+              labelText: 'Unpaid follow-up after due date',
+            ),
+            items: List<DropdownMenuItem<int>>.generate(
+              14,
+              (int index) => DropdownMenuItem<int>(
+                value: index + 1,
+                child: Text('${index + 1} day(s)'),
+              ),
+            ),
+            onChanged: (int? value) {
+              if (value != null) {
+                unawaited(
+                  _updateReminders(
+                    context,
+                    ref,
+                    settings,
+                    settings.reminders.copyWith(unpaidFollowUpDays: value),
+                  ),
+                );
+              }
+            },
+          ),
+          const Divider(height: 28),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: <Widget>[
+              const Text('Custom landlord reminders'),
+              TextButton.icon(
+                icon: const Icon(Icons.add_alert_rounded),
+                label: const Text('Add'),
+                onPressed: () => _addCustomReminder(context, ref, settings),
+              ),
+            ],
+          ),
+          ...settings.reminders.customReminders.map(
+            (CustomReminder item) => ListTile(
+              leading: const Icon(Icons.notifications_active_outlined),
+              title: Text(item.title),
+              subtitle: Text(
+                'Day ${item.dayOfMonth} at ${item.hour.toString().padLeft(2, '0')}:${item.minute.toString().padLeft(2, '0')}',
+              ),
+              trailing: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  Switch.adaptive(
+                    value: item.enabled,
+                    onChanged: (bool enabled) {
+                      unawaited(
+                        _updateReminders(
+                          context,
+                          ref,
+                          settings,
+                          settings.reminders.copyWith(
+                            customReminders: settings.reminders.customReminders
+                                .map(
+                                  (CustomReminder current) =>
+                                      current.id == item.id
+                                      ? CustomReminder(
+                                          id: current.id,
+                                          title: current.title,
+                                          dayOfMonth: current.dayOfMonth,
+                                          hour: current.hour,
+                                          minute: current.minute,
+                                          enabled: enabled,
+                                        )
+                                      : current,
+                                )
+                                .toList(),
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.delete_outline_rounded),
+                    onPressed: () => unawaited(
+                      _updateReminders(
+                        context,
+                        ref,
+                        settings,
+                        settings.reminders.copyWith(
+                          customReminders: settings.reminders.customReminders
+                              .where(
+                                (CustomReminder current) =>
+                                    current.id != item.id,
+                              )
+                              .toList(),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 8),
           Card(
             child: Padding(
               padding: const EdgeInsets.all(16),
@@ -423,6 +664,89 @@ class ReminderSettingsScreen extends ConsumerWidget {
       ),
     );
   }
+}
+
+Future<void> _updateReminders(
+  BuildContext context,
+  WidgetRef ref,
+  AppSettingsState settings,
+  ReminderPreferences reminders, {
+  bool requestPermission = false,
+}) async {
+  final LocalNotificationService notifications = ref
+      .read(appServicesProvider)
+      .notifications;
+  if (requestPermission && !await notifications.requestPermission()) {
+    if (context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Notification permission was not granted.'),
+        ),
+      );
+    }
+    return;
+  }
+  final AppSettingsState next = settings.copyWith(reminders: reminders);
+  final Result<void> result = await ref
+      .read(settingsControllerProvider.notifier)
+      .update(next);
+  if (result.isSuccess) {
+    await notifications.reschedule(reminders);
+  }
+  if (context.mounted && result is Failure<void>) {
+    ScaffoldMessenger.of(context)
+        .showSnackBar(SnackBar(content: Text(result.failure.message)));
+  }
+}
+
+Future<void> _addCustomReminder(
+  BuildContext context,
+  WidgetRef ref,
+  AppSettingsState settings,
+) async {
+  final TextEditingController title = TextEditingController();
+  final String? value = await showDialog<String>(
+    context: context,
+    builder: (BuildContext context) => AlertDialog(
+      title: const Text('Custom reminder'),
+      content: TextField(
+        controller: title,
+        autofocus: true,
+        decoration: const InputDecoration(labelText: 'Reminder title'),
+      ),
+      actions: <Widget>[
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text('Cancel'),
+        ),
+        FilledButton(
+          onPressed: () => Navigator.pop(context, title.text),
+          child: const Text('Add'),
+        ),
+      ],
+    ),
+  );
+  title.dispose();
+  if (value == null || value.trim().isEmpty || !context.mounted) return;
+  final CustomReminder reminder = CustomReminder(
+    id: Uuid().v4(),
+    title: value.trim(),
+    dayOfMonth: settings.reminders.rentDueDay,
+    hour: settings.reminders.hour,
+    minute: settings.reminders.minute,
+  );
+  await _updateReminders(
+    context,
+    ref,
+    settings,
+    settings.reminders.copyWith(
+      customReminders: <CustomReminder>[
+        ...settings.reminders.customReminders,
+        reminder,
+      ],
+    ),
+    requestPermission: true,
+  );
 }
 
 class _LanguageCard extends StatelessWidget {

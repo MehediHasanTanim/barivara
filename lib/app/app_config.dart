@@ -26,7 +26,7 @@ class FeatureFlags {
   /// Creates the default set of disabled pre-release capabilities.
   const FeatureFlags({
     this.enableAppLock = false,
-    this.enableLocalNotifications = false,
+    this.enableLocalNotifications = true,
     this.enableBackupEncryption = false,
   });
 

@@ -67,6 +67,9 @@ Future<void> _initializeAndRun(
 
   try {
     await notifications.initialize();
+    // Recreate the next local occurrence after app restart. Android's boot
+    // receiver preserves already scheduled notifications between launches.
+    await notifications.reschedule(settings.reminders);
   } on Object catch (error, stackTrace) {
     logger.error(
       'Local notification initialization failed.',

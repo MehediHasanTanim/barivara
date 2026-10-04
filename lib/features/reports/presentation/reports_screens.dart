@@ -1,8 +1,11 @@
+import 'dart:async';
+
 import 'package:barivara/app/app_services.dart';
 import 'package:barivara/core/database/drift_repositories.dart';
 import 'package:barivara/core/domain/models.dart';
 import 'package:barivara/core/domain/value_types.dart';
 import 'package:barivara/core/localization/bari_vara_formatters.dart';
+import 'package:barivara/core/notifications/local_notification_service.dart';
 import 'package:barivara/core/result/result.dart';
 import 'package:barivara/features/billing/presentation/bills_screens.dart';
 import 'package:barivara/features/payments/presentation/payments_screens.dart';
@@ -392,6 +395,7 @@ class DashboardHomeScreen extends ConsumerStatefulWidget {
 class _DashboardHomeScreenState extends ConsumerState<DashboardHomeScreen> {
   DashboardQueryService? _service;
   Future<Result<DashboardData>>? _dashboard;
+  StreamSubscription<NotificationRoute>? _notificationRoutes;
 
   @override
   void initState() {
@@ -399,8 +403,40 @@ class _DashboardHomeScreenState extends ConsumerState<DashboardHomeScreen> {
     try {
       _service = DashboardQueryService(ref.read(appServicesProvider).database);
       _dashboard = _service!.dashboard();
+      final LocalNotificationService notifications = ref
+          .read(appServicesProvider)
+          .notifications;
+      _notificationRoutes = notifications.routes.listen(_openNotificationRoute);
+      final NotificationRoute? initialRoute = notifications.takeInitialRoute();
+      if (initialRoute != null) {
+        WidgetsBinding.instance.addPostFrameCallback(
+          (_) => _openNotificationRoute(initialRoute),
+        );
+      }
     } on Object {
       // Widget-only contexts can render a harmless shell without bootstrap.
+    }
+  }
+
+  @override
+  void dispose() {
+    _notificationRoutes?.cancel();
+    super.dispose();
+  }
+
+  void _openNotificationRoute(NotificationRoute route) {
+    if (!mounted) return;
+    switch (route) {
+      case NotificationRoute.bills:
+        Navigator.of(context).push<void>(
+          MaterialPageRoute<void>(builder: (_) => const BillsDashboardScreen()),
+        );
+      case NotificationRoute.dues:
+        Navigator.of(context).push<void>(
+          MaterialPageRoute<void>(builder: (_) => const PaymentsDuesScreen()),
+        );
+      case NotificationRoute.dashboard:
+        break;
     }
   }
 
