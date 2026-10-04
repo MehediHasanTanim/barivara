@@ -5,6 +5,7 @@ import 'package:barivara/app/app_services.dart';
 import 'package:barivara/core/notifications/local_notification_service.dart';
 import 'package:barivara/core/result/result.dart';
 import 'package:barivara/features/backup/application/backup_archive_service.dart';
+import 'package:barivara/features/security/presentation/security_screens.dart';
 import 'package:barivara/features/settings/application/settings_controller.dart';
 import 'package:barivara/features/settings/domain/app_settings.dart';
 import 'package:barivara/l10n/generated/app_localizations.dart';
@@ -177,8 +178,8 @@ class SettingsScreen extends ConsumerWidget {
               _SettingTile(
                 icon: Icons.lock_outline_rounded,
                 title: text.security,
-                subtitle: text.securityPlaceholder,
-                onTap: () => _placeholder(context, text.security),
+                subtitle: 'App lock and local privacy',
+                onTap: () => _open(context, const SecuritySettingsScreen()),
               ),
             ],
           ),
@@ -236,7 +237,9 @@ class _BackupRestoreScreenState extends ConsumerState<BackupRestoreScreen> {
             padding: EdgeInsets.all(16),
             child: Text(
               'Backups stay entirely under your control. Save or share the '
-              '.bvbackup archive with any installed storage app.',
+              '.bvbackup archive with any installed storage app. Backups are '
+              'currently unencrypted and can contain tenant information, so '
+              'share only with people and storage providers you trust.',
             ),
           ),
         ),
@@ -1104,10 +1107,6 @@ void _open(BuildContext context, Widget screen) {
   Navigator.of(context).push<void>(
     MaterialPageRoute<void>(builder: (BuildContext context) => screen),
   );
-}
-
-void _placeholder(BuildContext context, String title) {
-  ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(title)));
 }
 
 Future<void> _update(

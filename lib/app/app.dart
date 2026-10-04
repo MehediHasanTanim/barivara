@@ -4,6 +4,7 @@ import 'package:barivara/features/payments/presentation/payments_screens.dart';
 import 'package:barivara/features/properties/presentation/property_screens.dart';
 import 'package:barivara/features/repairs/presentation/repairs_screen.dart';
 import 'package:barivara/features/reports/presentation/reports_screens.dart';
+import 'package:barivara/features/security/presentation/security_screens.dart';
 import 'package:barivara/features/settings/application/settings_controller.dart';
 import 'package:barivara/features/settings/domain/app_settings.dart';
 import 'package:barivara/features/settings/presentation/settings_screen.dart';
@@ -36,7 +37,7 @@ class BariVaraApp extends ConsumerWidget {
       darkTheme: BariVaraTheme.dark(),
       themeMode: _themeMode(settings.theme),
       home: settings.onboardingComplete
-          ? const _ApplicationShell()
+          ? const AppLockGate(child: _ApplicationShell())
           : const LanguageSelectionScreen(),
     );
   }

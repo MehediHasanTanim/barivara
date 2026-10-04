@@ -30,6 +30,7 @@ class BackupManifest {
     required this.createdAt,
     required this.fileHashes,
     required this.platform,
+    this.encrypted = false,
   });
 
   final int formatVersion;
@@ -38,6 +39,7 @@ class BackupManifest {
   final DateTime createdAt;
   final Map<String, String> fileHashes;
   final String platform;
+  final bool encrypted;
 
   Map<String, Object> toJson() => <String, Object>{
     'formatVersion': formatVersion,
@@ -45,6 +47,7 @@ class BackupManifest {
     'databaseSchemaVersion': databaseSchemaVersion,
     'createdAt': createdAt.toUtc().toIso8601String(),
     'platform': platform,
+    'encrypted': encrypted,
     'fileHashes': fileHashes,
   };
 
@@ -57,6 +60,7 @@ class BackupManifest {
       databaseSchemaVersion: json['databaseSchemaVersion']! as int,
       createdAt: DateTime.parse(json['createdAt']! as String).toUtc(),
       platform: json['platform']! as String,
+      encrypted: json['encrypted'] as bool? ?? false,
       fileHashes: hashes.map(
         (String key, dynamic value) =>
             MapEntry<String, String>(key, value as String),
@@ -138,6 +142,7 @@ class BackupArchiveService {
       }
       final DateTime createdAt = _clock().toUtc();
       final Directory temporary = await _temporaryDirectory();
+      await _cleanTemporaryArtifacts(temporary);
       staging = Directory(
         '${temporary.path}/bv-backup-${createdAt.microsecondsSinceEpoch}',
       );
@@ -171,6 +176,7 @@ class BackupArchiveService {
         createdAt: createdAt,
         fileHashes: hashes,
         platform: Platform.operatingSystem,
+        encrypted: false,
       );
       await File('${staging.path}/$_manifestEntry')
           .writeAsString(jsonEncode(manifest.toJson()), flush: true);
@@ -602,6 +608,33 @@ class BackupArchiveService {
       _lastFormatKey,
       AppConfig.backupFormatVersion.toString(),
     );
+  }
+
+  /// Removes stale app-created exports without touching unrelated cache files.
+  Future<void> _cleanTemporaryArtifacts(Directory temporary) async {
+    if (!await temporary.exists()) {
+      return;
+    }
+    final DateTime cutoff = _clock().toUtc().subtract(const Duration(days: 7));
+    await for (final FileSystemEntity entity in temporary.list()) {
+      final String name = entity.uri.pathSegments.isEmpty
+          ? ''
+          : entity.uri.pathSegments.last;
+      final bool owned =
+          name.startsWith('bari_vara_') ||
+          name.startsWith('bv-backup-') ||
+          name.startsWith('bv-restore-');
+      if (!owned) {
+        continue;
+      }
+      try {
+        if ((await entity.stat()).modified.toUtc().isBefore(cutoff)) {
+          await entity.delete(recursive: entity is Directory);
+        }
+      } on FileSystemException {
+        // Best effort: cache cleanup must not block a new backup.
+      }
+    }
   }
 
   static Future<void> _copyDirectory(

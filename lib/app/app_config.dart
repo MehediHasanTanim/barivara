@@ -28,7 +28,7 @@ abstract final class AppConfig {
 class FeatureFlags {
   /// Creates the default set of disabled pre-release capabilities.
   const FeatureFlags({
-    this.enableAppLock = false,
+    this.enableAppLock = true,
     this.enableLocalNotifications = true,
     this.enableBackupEncryption = false,
   });
