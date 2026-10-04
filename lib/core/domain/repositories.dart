@@ -73,6 +73,10 @@ abstract interface class BillingRepository {
   Future<Result<void>> saveDraft(BillDraft draft);
   Future<Result<MonthlyBill>> finalize(EntityId billId);
   Future<Result<MonthlyBill>> cancel(EntityId billId);
+  Future<Result<MonthlyBill>> addAdjustment(
+    EntityId billId,
+    BillLineItem adjustment,
+  );
 }
 
 /// Application-facing payment persistence contract.
@@ -98,8 +102,17 @@ abstract interface class DepositRepository {
 
 /// Application-facing repair persistence contract.
 abstract interface class RepairRepository {
+  Future<Result<Repair?>> findById(EntityId id);
+  Future<Result<List<Repair>>> list(RepairFilter filter);
   Future<Result<List<Repair>>> listByProperty(EntityId propertyId);
   Future<Result<void>> save(Repair repair);
+  Future<Result<void>> linkTenantCharge(EntityId repairId, EntityId billId);
+  Future<Result<List<RepairAttachment>>> attachments(EntityId repairId);
+  Future<Result<void>> saveAttachment(RepairAttachment attachment);
+  Future<Result<RepairExpenseSummary>> expenseSummary(
+    EntityId propertyId,
+    DateRange range,
+  );
 }
 
 /// Application-facing settings persistence contract.

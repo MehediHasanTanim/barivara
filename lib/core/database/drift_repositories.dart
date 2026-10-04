@@ -1111,6 +1111,72 @@ class DriftBillingRepository extends DriftRepository
       });
 
   @override
+  Future<Result<domain.MonthlyBill>> addAdjustment(
+    EntityId billId,
+    domain.BillLineItem adjustment,
+  ) => inTransaction<domain.MonthlyBill>(() async {
+    if (adjustment.billId != billId || adjustment.amount.poisha <= 0) {
+      throw StateError('Invalid bill adjustment.');
+    }
+    final db.MonthlyBill? bill =
+        await (database.select(database.monthlyBills)
+              ..where((MonthlyBills table) => table.id.equals(billId.value)))
+            .getSingleOrNull();
+    if (bill == null || bill.status != domain.BillStatus.draft.name) {
+      throw StateError('A repair charge can only be added to a draft bill.');
+    }
+    final DateTime now = DateTime.now().toUtc();
+    await database
+        .into(database.billLineItems)
+        .insert(
+          db.BillLineItemsCompanion.insert(
+            id: adjustment.id.value,
+            billId: billId.value,
+            itemType: adjustment.type.name,
+            description: adjustment.description,
+            quantity: Value<int?>(adjustment.quantity),
+            unitRatePoisha: Value<int?>(adjustment.unitRate?.poisha),
+            amountPoisha: adjustment.amount.poisha,
+            sourceRuleId: Value<String?>(adjustment.sourceRuleId?.value),
+            sortOrder: Value<int>(adjustment.displayOrder),
+            metadataJson: const Value<String?>(null),
+            createdAt: Value<DateTime>(now),
+          ),
+        );
+    final int subtotal = bill.subtotalPoisha + adjustment.amount.poisha;
+    final int total = bill.totalPoisha + adjustment.amount.poisha;
+    final int balance = bill.balancePoisha + adjustment.amount.poisha;
+    await (database.update(
+      database.monthlyBills,
+    )..where((MonthlyBills table) => table.id.equals(billId.value))).write(
+      db.MonthlyBillsCompanion(
+        subtotalPoisha: Value<int>(subtotal),
+        totalPoisha: Value<int>(total),
+        balancePoisha: Value<int>(balance),
+        updatedAt: Value<DateTime>(now),
+      ),
+    );
+    final domain.MonthlyBill previous = _bill(bill);
+    return domain.MonthlyBill(
+      id: previous.id,
+      tenancyId: previous.tenancyId,
+      propertyId: previous.propertyId,
+      unitId: previous.unitId,
+      period: previous.period,
+      issueDate: previous.issueDate,
+      dueDate: previous.dueDate,
+      openingDue: previous.openingDue,
+      currentCharges: Money.fromPoisha(subtotal),
+      total: Money.fromPoisha(total),
+      paidAmount: previous.paidAmount,
+      outstandingAmount: Money.fromPoisha(balance),
+      status: previous.status,
+      generatedAt: previous.generatedAt,
+      finalizedAt: previous.finalizedAt,
+    );
+  });
+
+  @override
   Future<Result<void>> saveDraft(domain.BillDraft draft) =>
       inTransaction<void>(() async {
         final db.MonthlyBill? existing =
@@ -1721,4 +1787,256 @@ class DriftDepositRepository extends DriftRepository
     expected: Money.fromPoisha(row.expectedBalancePoisha),
     advanceRentBalance: Money.fromPoisha(row.advanceRentBalancePoisha),
   );
+}
+
+/// Drift persistence for maintenance history and app-controlled attachments.
+class DriftRepairRepository extends DriftRepository
+    implements RepairRepository {
+  const DriftRepairRepository(super.database);
+
+  @override
+  Future<Result<domain.Repair?>> findById(EntityId id) => guard(() async {
+    final db.Repair? row = await (database.select(
+      database.repairs,
+    )..where((Repairs table) => table.id.equals(id.value))).getSingleOrNull();
+    return row == null ? null : _repair(row);
+  });
+
+  @override
+  Future<Result<List<domain.Repair>>> list(
+    domain.RepairFilter filter,
+  ) => guard(() async {
+    final query = database.select(database.repairs)
+      ..orderBy(<OrderingTerm Function(Repairs)>[
+        (Repairs table) => OrderingTerm.desc(table.reportedDate),
+      ]);
+    if (filter.propertyId != null) {
+      query.where(
+        (Repairs table) => table.propertyId.equals(filter.propertyId!.value),
+      );
+    }
+    if (filter.unitId != null) {
+      query.where((Repairs table) => table.unitId.equals(filter.unitId!.value));
+    }
+    if (filter.status != null) {
+      query.where((Repairs table) => table.status.equals(filter.status!.name));
+    }
+    if (filter.category != null) {
+      query.where(
+        (Repairs table) => table.category.equals(filter.category!.name),
+      );
+    }
+    if (filter.dateRange != null) {
+      query.where(
+        (Repairs table) =>
+            table.reportedDate.isBiggerOrEqualValue(
+              filter.dateRange!.start.toUtc(),
+            ) &
+            table.reportedDate.isSmallerOrEqualValue(
+              filter.dateRange!.end.toUtc(),
+            ),
+      );
+    }
+    return (await query.get()).map(_repair).toList(growable: false);
+  });
+
+  @override
+  Future<Result<List<domain.Repair>>> listByProperty(EntityId propertyId) =>
+      list(domain.RepairFilter(propertyId: propertyId));
+
+  @override
+  Future<Result<void>> save(domain.Repair repair) => inTransaction(() async {
+    if (repair.title.trim().isEmpty || repair.cost.poisha < 0) {
+      throw StateError('A repair title and valid cost are required.');
+    }
+    if (repair.unitId != null) {
+      final db.Unit? unit =
+          await (database.select(database.units)
+                ..where((Units table) => table.id.equals(repair.unitId!.value)))
+              .getSingleOrNull();
+      if (unit == null || unit.propertyId != repair.propertyId.value) {
+        throw StateError('The selected unit does not belong to this property.');
+      }
+    }
+    if (repair.tenancyId != null) {
+      final db.Tenancy? tenancy =
+          await (database.select(database.tenancies)..where(
+                (Tenancies table) => table.id.equals(repair.tenancyId!.value),
+              ))
+              .getSingleOrNull();
+      if (tenancy == null ||
+          (repair.unitId != null && tenancy.unitId != repair.unitId!.value)) {
+        throw StateError('The selected tenancy does not match this repair.');
+      }
+    }
+    final db.Repair? existing =
+        await (database.select(database.repairs)
+              ..where((Repairs table) => table.id.equals(repair.id.value)))
+            .getSingleOrNull();
+    final DateTime now = DateTime.now().toUtc();
+    final db.RepairsCompanion values = db.RepairsCompanion(
+      propertyId: Value<String>(repair.propertyId.value),
+      unitId: Value<String?>(repair.unitId?.value),
+      tenancyId: Value<String?>(repair.tenancyId?.value),
+      category: Value<String>(repair.category.name),
+      title: Value<String>(repair.title.trim()),
+      description: Value<String?>(_optional(repair.description)),
+      reportedDate: Value<DateTime>(repair.reportedDate.toUtc()),
+      completedDate: Value<DateTime?>(repair.completedDate?.toUtc()),
+      estimatedCostPoisha: Value<int?>(repair.estimatedCost?.poisha),
+      costPoisha: Value<int>(repair.cost.poisha),
+      responsibility: Value<String>(repair.responsibility.name),
+      recoverableFromTenant: Value<bool>(repair.recoverableFromTenant),
+      tenantChargeBillId: Value<String?>(repair.tenantChargeBillId?.value),
+      status: Value<String>(repair.status.name),
+      notes: Value<String?>(_optional(repair.notes)),
+      updatedAt: Value<DateTime>(now),
+    );
+    if (existing == null) {
+      await database
+          .into(database.repairs)
+          .insert(
+            values.copyWith(
+              id: Value<String>(repair.id.value),
+              createdAt: Value<DateTime>(now),
+            ),
+          );
+    } else {
+      await (database.update(database.repairs)
+            ..where((Repairs table) => table.id.equals(repair.id.value)))
+          .write(values);
+    }
+  });
+
+  @override
+  Future<Result<void>> linkTenantCharge(EntityId repairId, EntityId billId) =>
+      guard(() async {
+        final int changed =
+            await (database.update(
+              database.repairs,
+            )..where((Repairs table) => table.id.equals(repairId.value))).write(
+              db.RepairsCompanion(
+                tenantChargeBillId: Value<String>(billId.value),
+                updatedAt: Value<DateTime>(DateTime.now().toUtc()),
+              ),
+            );
+        if (changed != 1) throw StateError('Repair not found.');
+      });
+
+  @override
+  Future<Result<List<domain.RepairAttachment>>> attachments(
+    EntityId repairId,
+  ) => guard(() async {
+    final rows =
+        await (database.select(database.repairAttachments)
+              ..where(
+                (RepairAttachments table) =>
+                    table.repairId.equals(repairId.value),
+              )
+              ..orderBy(<OrderingTerm Function(RepairAttachments)>[
+                (RepairAttachments table) => OrderingTerm.asc(table.createdAt),
+              ]))
+            .get();
+    return rows.map(_attachment).toList(growable: false);
+  });
+
+  @override
+  Future<Result<void>> saveAttachment(domain.RepairAttachment attachment) =>
+      guard(() async {
+        await database
+            .into(database.repairAttachments)
+            .insert(
+              db.RepairAttachmentsCompanion.insert(
+                id: attachment.id.value,
+                repairId: attachment.repairId.value,
+                fileName: attachment.fileName,
+                relativePath: attachment.relativePath,
+                mimeType: Value<String?>(attachment.mimeType),
+                fileSize: Value<int?>(attachment.fileSize),
+                checksum: Value<String?>(attachment.checksum),
+                createdAt: Value<DateTime>(attachment.createdAt.toUtc()),
+              ),
+            );
+      });
+
+  @override
+  Future<Result<domain.RepairExpenseSummary>> expenseSummary(
+    EntityId propertyId,
+    DateRange range,
+  ) => guard(() async {
+    final Result<List<domain.Repair>> result = await list(
+      domain.RepairFilter(propertyId: propertyId, dateRange: range),
+    );
+    if (result case Failure<List<domain.Repair>>()) {
+      throw StateError('Repair expenses could not be calculated.');
+    }
+    final List<domain.Repair> repairs =
+        (result as Success<List<domain.Repair>>).value;
+    final List<domain.Repair> landlordPaid = repairs
+        .where(
+          (domain.Repair repair) =>
+              repair.responsibility == domain.RepairResponsibility.landlord,
+        )
+        .toList(growable: false);
+    return domain.RepairExpenseSummary(
+      propertyId: propertyId,
+      range: range,
+      total: Money.fromPoisha(
+        landlordPaid.fold<int>(
+          0,
+          (int total, domain.Repair repair) => total + repair.cost.poisha,
+        ),
+      ),
+      repairCount: landlordPaid.length,
+    );
+  });
+
+  domain.Repair _repair(db.Repair row) => domain.Repair(
+    id: EntityId(row.id),
+    propertyId: EntityId(row.propertyId),
+    unitId: row.unitId == null ? null : EntityId(row.unitId!),
+    tenancyId: row.tenancyId == null ? null : EntityId(row.tenancyId!),
+    category: domain.RepairCategory.values.firstWhere(
+      (domain.RepairCategory value) => value.name == row.category,
+      orElse: () => domain.RepairCategory.other,
+    ),
+    title: row.title,
+    description: row.description,
+    reportedDate: row.reportedDate,
+    completedDate: row.completedDate,
+    estimatedCost: row.estimatedCostPoisha == null
+        ? null
+        : Money.fromPoisha(row.estimatedCostPoisha!),
+    cost: Money.fromPoisha(row.costPoisha),
+    responsibility: domain.RepairResponsibility.values.firstWhere(
+      (domain.RepairResponsibility value) => value.name == row.responsibility,
+      orElse: () => domain.RepairResponsibility.landlord,
+    ),
+    recoverableFromTenant: row.recoverableFromTenant,
+    tenantChargeBillId: row.tenantChargeBillId == null
+        ? null
+        : EntityId(row.tenantChargeBillId!),
+    status: domain.RepairStatus.values.firstWhere(
+      (domain.RepairStatus value) => value.name == row.status,
+      orElse: () => domain.RepairStatus.open,
+    ),
+    notes: row.notes,
+  );
+
+  domain.RepairAttachment _attachment(db.RepairAttachment row) =>
+      domain.RepairAttachment(
+        id: EntityId(row.id),
+        repairId: EntityId(row.repairId),
+        fileName: row.fileName,
+        relativePath: row.relativePath,
+        mimeType: row.mimeType,
+        fileSize: row.fileSize,
+        checksum: row.checksum,
+        createdAt: row.createdAt,
+      );
+
+  static String? _optional(String? value) {
+    final String? trimmed = value?.trim();
+    return trimmed == null || trimmed.isEmpty ? null : trimmed;
+  }
 }

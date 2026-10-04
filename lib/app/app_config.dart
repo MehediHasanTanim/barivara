@@ -6,7 +6,7 @@ abstract final class AppConfig {
   static const String databaseName = 'bari_vara.sqlite';
 
   /// Local schema version, including receipt snapshots.
-  static const int databaseVersion = 7;
+  static const int databaseVersion = 8;
 
   /// Current portable-backup package version.
   static const int backupFormatVersion = 1;

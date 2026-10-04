@@ -171,6 +171,11 @@ class AppDatabase extends _$AppDatabase {
             if (from < 7) {
               await migrator.createTable(receipts);
             }
+            if (from < 8) {
+              await migrator.addColumn(repairs, repairs.estimatedCostPoisha);
+              await migrator.addColumn(repairs, repairs.recoverableFromTenant);
+              await migrator.addColumn(repairs, repairs.tenantChargeBillId);
+            }
           },
         );
       },

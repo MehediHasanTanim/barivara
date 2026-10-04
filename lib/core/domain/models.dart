@@ -462,10 +462,12 @@ class ReceiptSnapshot {
     'tenantName': tenantName,
     'unitName': unitName,
     'billingMonths': billingMonths
-        .map((BillingMonth value) => <String, int>{
-              'year': value.year,
-              'month': value.month,
-            })
+        .map(
+          (BillingMonth value) => <String, int>{
+            'year': value.year,
+            'month': value.month,
+          },
+        )
         .toList(growable: false),
     'chargeBreakdown': chargeBreakdown
         .map((ReceiptLineItem value) => value.toJson())
@@ -492,15 +494,18 @@ class ReceiptSnapshot {
       tenantName: json['tenantName']! as String,
       unitName: json['unitName']! as String,
       billingMonths: months
-          .map((dynamic value) => BillingMonth(
-                (value as Map<String, dynamic>)['year']! as int,
-                value['month']! as int,
-              ))
+          .map(
+            (dynamic value) => BillingMonth(
+              (value as Map<String, dynamic>)['year']! as int,
+              value['month']! as int,
+            ),
+          )
           .toList(growable: false),
       chargeBreakdown: lines
-          .map((dynamic value) => ReceiptLineItem.fromJson(
-                value as Map<String, dynamic>,
-              ))
+          .map(
+            (dynamic value) =>
+                ReceiptLineItem.fromJson(value as Map<String, dynamic>),
+          )
           .toList(growable: false),
       paymentAmount: Money.fromPoisha(json['paymentAmountPoisha']! as int),
       remainingDue: Money.fromPoisha(json['remainingDuePoisha']! as int),
@@ -591,7 +596,24 @@ class MoveOutSettlement {
   final Money finalPayable;
 }
 
-/// A property maintenance record.
+/// Categories used to group landlord maintenance work.
+enum RepairCategory {
+  plumbing,
+  electrical,
+  appliance,
+  painting,
+  structural,
+  cleaning,
+  other,
+}
+
+/// Lifecycle states retained for a repair record.
+enum RepairStatus { open, inProgress, completed, cancelled }
+
+/// The party that actually paid the maintenance cost.
+enum RepairResponsibility { landlord, tenant }
+
+/// A property maintenance record, retained even after a related tenancy ends.
 class Repair {
   /// Creates a repair record.
   const Repair({
@@ -600,13 +622,92 @@ class Repair {
     required this.title,
     required this.reportedDate,
     required this.cost,
+    this.category = RepairCategory.other,
+    this.status = RepairStatus.open,
+    this.responsibility = RepairResponsibility.landlord,
+    this.unitId,
+    this.tenancyId,
+    this.description,
+    this.completedDate,
+    this.estimatedCost,
+    this.recoverableFromTenant = false,
+    this.tenantChargeBillId,
+    this.notes,
   });
 
   final EntityId id;
   final EntityId propertyId;
+  final EntityId? unitId;
+  final EntityId? tenancyId;
+  final RepairCategory category;
   final String title;
+  final String? description;
   final DateTime reportedDate;
+  final DateTime? completedDate;
+  final Money? estimatedCost;
   final Money cost;
+  final RepairResponsibility responsibility;
+  final bool recoverableFromTenant;
+
+  /// The draft bill that received the explicit tenant repair adjustment.
+  final EntityId? tenantChargeBillId;
+  final RepairStatus status;
+  final String? notes;
+}
+
+/// A copied local repair attachment; its path never points to the import source.
+class RepairAttachment {
+  const RepairAttachment({
+    required this.id,
+    required this.repairId,
+    required this.fileName,
+    required this.relativePath,
+    required this.createdAt,
+    this.mimeType,
+    this.fileSize,
+    this.checksum,
+  });
+
+  final EntityId id;
+  final EntityId repairId;
+  final String fileName;
+  final String relativePath;
+  final String? mimeType;
+  final int? fileSize;
+  final String? checksum;
+  final DateTime createdAt;
+}
+
+/// Local filters applied to the repair list.
+class RepairFilter {
+  const RepairFilter({
+    this.propertyId,
+    this.unitId,
+    this.status,
+    this.category,
+    this.dateRange,
+  });
+
+  final EntityId? propertyId;
+  final EntityId? unitId;
+  final RepairStatus? status;
+  final RepairCategory? category;
+  final DateRange? dateRange;
+}
+
+/// Landlord-paid maintenance cost for a property over an inclusive date range.
+class RepairExpenseSummary {
+  const RepairExpenseSummary({
+    required this.propertyId,
+    required this.range,
+    required this.total,
+    required this.repairCount,
+  });
+
+  final EntityId propertyId;
+  final DateRange range;
+  final Money total;
+  final int repairCount;
 }
 
 /// Metadata for a portable backup. Actual archive handling is introduced later.

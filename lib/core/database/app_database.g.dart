@@ -9401,6 +9401,16 @@ class $RepairsTable extends Repairs with TableInfo<$RepairsTable, Repair> {
         type: DriftSqlType.dateTime,
         requiredDuringInsert: false,
       );
+  static const VerificationMeta _estimatedCostPoishaMeta =
+      const VerificationMeta('estimatedCostPoisha');
+  @override
+  late final GeneratedColumn<int> estimatedCostPoisha = GeneratedColumn<int>(
+    'estimated_cost_poisha',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _costPoishaMeta = const VerificationMeta(
     'costPoisha',
   );
@@ -9424,6 +9434,35 @@ class $RepairsTable extends Repairs with TableInfo<$RepairsTable, Repair> {
     type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _recoverableFromTenantMeta =
+      const VerificationMeta('recoverableFromTenant');
+  @override
+  late final GeneratedColumn<bool> recoverableFromTenant =
+      GeneratedColumn<bool>(
+        'recoverable_from_tenant',
+        aliasedName,
+        false,
+        type: DriftSqlType.bool,
+        requiredDuringInsert: false,
+        defaultConstraints: GeneratedColumn.constraintIsAlways(
+          'CHECK ("recoverable_from_tenant" IN (0, 1))',
+        ),
+        defaultValue: const Constant(false),
+      );
+  static const VerificationMeta _tenantChargeBillIdMeta =
+      const VerificationMeta('tenantChargeBillId');
+  @override
+  late final GeneratedColumn<String> tenantChargeBillId =
+      GeneratedColumn<String>(
+        'tenant_charge_bill_id',
+        aliasedName,
+        true,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+        defaultConstraints: GeneratedColumn.constraintIsAlways(
+          'REFERENCES monthly_bills (id)',
+        ),
+      );
   static const VerificationMeta _statusMeta = const VerificationMeta('status');
   @override
   late final GeneratedColumn<String> status = GeneratedColumn<String>(
@@ -9478,8 +9517,11 @@ class $RepairsTable extends Repairs with TableInfo<$RepairsTable, Repair> {
     description,
     reportedDate,
     completedDate,
+    estimatedCostPoisha,
     costPoisha,
     responsibility,
+    recoverableFromTenant,
+    tenantChargeBillId,
     status,
     notes,
     createdAt,
@@ -9567,6 +9609,15 @@ class $RepairsTable extends Repairs with TableInfo<$RepairsTable, Repair> {
         ),
       );
     }
+    if (data.containsKey('estimated_cost_poisha')) {
+      context.handle(
+        _estimatedCostPoishaMeta,
+        estimatedCostPoisha.isAcceptableOrUnknown(
+          data['estimated_cost_poisha']!,
+          _estimatedCostPoishaMeta,
+        ),
+      );
+    }
     if (data.containsKey('cost_poisha')) {
       context.handle(
         _costPoishaMeta,
@@ -9583,6 +9634,24 @@ class $RepairsTable extends Repairs with TableInfo<$RepairsTable, Repair> {
       );
     } else if (isInserting) {
       context.missing(_responsibilityMeta);
+    }
+    if (data.containsKey('recoverable_from_tenant')) {
+      context.handle(
+        _recoverableFromTenantMeta,
+        recoverableFromTenant.isAcceptableOrUnknown(
+          data['recoverable_from_tenant']!,
+          _recoverableFromTenantMeta,
+        ),
+      );
+    }
+    if (data.containsKey('tenant_charge_bill_id')) {
+      context.handle(
+        _tenantChargeBillIdMeta,
+        tenantChargeBillId.isAcceptableOrUnknown(
+          data['tenant_charge_bill_id']!,
+          _tenantChargeBillIdMeta,
+        ),
+      );
     }
     if (data.containsKey('status')) {
       context.handle(
@@ -9653,6 +9722,10 @@ class $RepairsTable extends Repairs with TableInfo<$RepairsTable, Repair> {
         DriftSqlType.dateTime,
         data['${effectivePrefix}completed_date'],
       ),
+      estimatedCostPoisha: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}estimated_cost_poisha'],
+      ),
       costPoisha: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
         data['${effectivePrefix}cost_poisha'],
@@ -9661,6 +9734,14 @@ class $RepairsTable extends Repairs with TableInfo<$RepairsTable, Repair> {
         DriftSqlType.string,
         data['${effectivePrefix}responsibility'],
       )!,
+      recoverableFromTenant: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}recoverable_from_tenant'],
+      )!,
+      tenantChargeBillId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}tenant_charge_bill_id'],
+      ),
       status: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}status'],
@@ -9696,8 +9777,11 @@ class Repair extends DataClass implements Insertable<Repair> {
   final String? description;
   final DateTime reportedDate;
   final DateTime? completedDate;
+  final int? estimatedCostPoisha;
   final int costPoisha;
   final String responsibility;
+  final bool recoverableFromTenant;
+  final String? tenantChargeBillId;
   final String status;
   final String? notes;
   final DateTime createdAt;
@@ -9712,8 +9796,11 @@ class Repair extends DataClass implements Insertable<Repair> {
     this.description,
     required this.reportedDate,
     this.completedDate,
+    this.estimatedCostPoisha,
     required this.costPoisha,
     required this.responsibility,
+    required this.recoverableFromTenant,
+    this.tenantChargeBillId,
     required this.status,
     this.notes,
     required this.createdAt,
@@ -9739,8 +9826,15 @@ class Repair extends DataClass implements Insertable<Repair> {
     if (!nullToAbsent || completedDate != null) {
       map['completed_date'] = Variable<DateTime>(completedDate);
     }
+    if (!nullToAbsent || estimatedCostPoisha != null) {
+      map['estimated_cost_poisha'] = Variable<int>(estimatedCostPoisha);
+    }
     map['cost_poisha'] = Variable<int>(costPoisha);
     map['responsibility'] = Variable<String>(responsibility);
+    map['recoverable_from_tenant'] = Variable<bool>(recoverableFromTenant);
+    if (!nullToAbsent || tenantChargeBillId != null) {
+      map['tenant_charge_bill_id'] = Variable<String>(tenantChargeBillId);
+    }
     map['status'] = Variable<String>(status);
     if (!nullToAbsent || notes != null) {
       map['notes'] = Variable<String>(notes);
@@ -9769,8 +9863,15 @@ class Repair extends DataClass implements Insertable<Repair> {
       completedDate: completedDate == null && nullToAbsent
           ? const Value.absent()
           : Value(completedDate),
+      estimatedCostPoisha: estimatedCostPoisha == null && nullToAbsent
+          ? const Value.absent()
+          : Value(estimatedCostPoisha),
       costPoisha: Value(costPoisha),
       responsibility: Value(responsibility),
+      recoverableFromTenant: Value(recoverableFromTenant),
+      tenantChargeBillId: tenantChargeBillId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(tenantChargeBillId),
       status: Value(status),
       notes: notes == null && nullToAbsent
           ? const Value.absent()
@@ -9795,8 +9896,17 @@ class Repair extends DataClass implements Insertable<Repair> {
       description: serializer.fromJson<String?>(json['description']),
       reportedDate: serializer.fromJson<DateTime>(json['reportedDate']),
       completedDate: serializer.fromJson<DateTime?>(json['completedDate']),
+      estimatedCostPoisha: serializer.fromJson<int?>(
+        json['estimatedCostPoisha'],
+      ),
       costPoisha: serializer.fromJson<int>(json['costPoisha']),
       responsibility: serializer.fromJson<String>(json['responsibility']),
+      recoverableFromTenant: serializer.fromJson<bool>(
+        json['recoverableFromTenant'],
+      ),
+      tenantChargeBillId: serializer.fromJson<String?>(
+        json['tenantChargeBillId'],
+      ),
       status: serializer.fromJson<String>(json['status']),
       notes: serializer.fromJson<String?>(json['notes']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
@@ -9816,8 +9926,11 @@ class Repair extends DataClass implements Insertable<Repair> {
       'description': serializer.toJson<String?>(description),
       'reportedDate': serializer.toJson<DateTime>(reportedDate),
       'completedDate': serializer.toJson<DateTime?>(completedDate),
+      'estimatedCostPoisha': serializer.toJson<int?>(estimatedCostPoisha),
       'costPoisha': serializer.toJson<int>(costPoisha),
       'responsibility': serializer.toJson<String>(responsibility),
+      'recoverableFromTenant': serializer.toJson<bool>(recoverableFromTenant),
+      'tenantChargeBillId': serializer.toJson<String?>(tenantChargeBillId),
       'status': serializer.toJson<String>(status),
       'notes': serializer.toJson<String?>(notes),
       'createdAt': serializer.toJson<DateTime>(createdAt),
@@ -9835,8 +9948,11 @@ class Repair extends DataClass implements Insertable<Repair> {
     Value<String?> description = const Value.absent(),
     DateTime? reportedDate,
     Value<DateTime?> completedDate = const Value.absent(),
+    Value<int?> estimatedCostPoisha = const Value.absent(),
     int? costPoisha,
     String? responsibility,
+    bool? recoverableFromTenant,
+    Value<String?> tenantChargeBillId = const Value.absent(),
     String? status,
     Value<String?> notes = const Value.absent(),
     DateTime? createdAt,
@@ -9853,8 +9969,15 @@ class Repair extends DataClass implements Insertable<Repair> {
     completedDate: completedDate.present
         ? completedDate.value
         : this.completedDate,
+    estimatedCostPoisha: estimatedCostPoisha.present
+        ? estimatedCostPoisha.value
+        : this.estimatedCostPoisha,
     costPoisha: costPoisha ?? this.costPoisha,
     responsibility: responsibility ?? this.responsibility,
+    recoverableFromTenant: recoverableFromTenant ?? this.recoverableFromTenant,
+    tenantChargeBillId: tenantChargeBillId.present
+        ? tenantChargeBillId.value
+        : this.tenantChargeBillId,
     status: status ?? this.status,
     notes: notes.present ? notes.value : this.notes,
     createdAt: createdAt ?? this.createdAt,
@@ -9879,12 +10002,21 @@ class Repair extends DataClass implements Insertable<Repair> {
       completedDate: data.completedDate.present
           ? data.completedDate.value
           : this.completedDate,
+      estimatedCostPoisha: data.estimatedCostPoisha.present
+          ? data.estimatedCostPoisha.value
+          : this.estimatedCostPoisha,
       costPoisha: data.costPoisha.present
           ? data.costPoisha.value
           : this.costPoisha,
       responsibility: data.responsibility.present
           ? data.responsibility.value
           : this.responsibility,
+      recoverableFromTenant: data.recoverableFromTenant.present
+          ? data.recoverableFromTenant.value
+          : this.recoverableFromTenant,
+      tenantChargeBillId: data.tenantChargeBillId.present
+          ? data.tenantChargeBillId.value
+          : this.tenantChargeBillId,
       status: data.status.present ? data.status.value : this.status,
       notes: data.notes.present ? data.notes.value : this.notes,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
@@ -9904,8 +10036,11 @@ class Repair extends DataClass implements Insertable<Repair> {
           ..write('description: $description, ')
           ..write('reportedDate: $reportedDate, ')
           ..write('completedDate: $completedDate, ')
+          ..write('estimatedCostPoisha: $estimatedCostPoisha, ')
           ..write('costPoisha: $costPoisha, ')
           ..write('responsibility: $responsibility, ')
+          ..write('recoverableFromTenant: $recoverableFromTenant, ')
+          ..write('tenantChargeBillId: $tenantChargeBillId, ')
           ..write('status: $status, ')
           ..write('notes: $notes, ')
           ..write('createdAt: $createdAt, ')
@@ -9925,8 +10060,11 @@ class Repair extends DataClass implements Insertable<Repair> {
     description,
     reportedDate,
     completedDate,
+    estimatedCostPoisha,
     costPoisha,
     responsibility,
+    recoverableFromTenant,
+    tenantChargeBillId,
     status,
     notes,
     createdAt,
@@ -9945,8 +10083,11 @@ class Repair extends DataClass implements Insertable<Repair> {
           other.description == this.description &&
           other.reportedDate == this.reportedDate &&
           other.completedDate == this.completedDate &&
+          other.estimatedCostPoisha == this.estimatedCostPoisha &&
           other.costPoisha == this.costPoisha &&
           other.responsibility == this.responsibility &&
+          other.recoverableFromTenant == this.recoverableFromTenant &&
+          other.tenantChargeBillId == this.tenantChargeBillId &&
           other.status == this.status &&
           other.notes == this.notes &&
           other.createdAt == this.createdAt &&
@@ -9963,8 +10104,11 @@ class RepairsCompanion extends UpdateCompanion<Repair> {
   final Value<String?> description;
   final Value<DateTime> reportedDate;
   final Value<DateTime?> completedDate;
+  final Value<int?> estimatedCostPoisha;
   final Value<int> costPoisha;
   final Value<String> responsibility;
+  final Value<bool> recoverableFromTenant;
+  final Value<String?> tenantChargeBillId;
   final Value<String> status;
   final Value<String?> notes;
   final Value<DateTime> createdAt;
@@ -9980,8 +10124,11 @@ class RepairsCompanion extends UpdateCompanion<Repair> {
     this.description = const Value.absent(),
     this.reportedDate = const Value.absent(),
     this.completedDate = const Value.absent(),
+    this.estimatedCostPoisha = const Value.absent(),
     this.costPoisha = const Value.absent(),
     this.responsibility = const Value.absent(),
+    this.recoverableFromTenant = const Value.absent(),
+    this.tenantChargeBillId = const Value.absent(),
     this.status = const Value.absent(),
     this.notes = const Value.absent(),
     this.createdAt = const Value.absent(),
@@ -9998,8 +10145,11 @@ class RepairsCompanion extends UpdateCompanion<Repair> {
     this.description = const Value.absent(),
     required DateTime reportedDate,
     this.completedDate = const Value.absent(),
+    this.estimatedCostPoisha = const Value.absent(),
     this.costPoisha = const Value.absent(),
     required String responsibility,
+    this.recoverableFromTenant = const Value.absent(),
+    this.tenantChargeBillId = const Value.absent(),
     this.status = const Value.absent(),
     this.notes = const Value.absent(),
     this.createdAt = const Value.absent(),
@@ -10021,8 +10171,11 @@ class RepairsCompanion extends UpdateCompanion<Repair> {
     Expression<String>? description,
     Expression<DateTime>? reportedDate,
     Expression<DateTime>? completedDate,
+    Expression<int>? estimatedCostPoisha,
     Expression<int>? costPoisha,
     Expression<String>? responsibility,
+    Expression<bool>? recoverableFromTenant,
+    Expression<String>? tenantChargeBillId,
     Expression<String>? status,
     Expression<String>? notes,
     Expression<DateTime>? createdAt,
@@ -10039,8 +10192,14 @@ class RepairsCompanion extends UpdateCompanion<Repair> {
       if (description != null) 'description': description,
       if (reportedDate != null) 'reported_date': reportedDate,
       if (completedDate != null) 'completed_date': completedDate,
+      if (estimatedCostPoisha != null)
+        'estimated_cost_poisha': estimatedCostPoisha,
       if (costPoisha != null) 'cost_poisha': costPoisha,
       if (responsibility != null) 'responsibility': responsibility,
+      if (recoverableFromTenant != null)
+        'recoverable_from_tenant': recoverableFromTenant,
+      if (tenantChargeBillId != null)
+        'tenant_charge_bill_id': tenantChargeBillId,
       if (status != null) 'status': status,
       if (notes != null) 'notes': notes,
       if (createdAt != null) 'created_at': createdAt,
@@ -10059,8 +10218,11 @@ class RepairsCompanion extends UpdateCompanion<Repair> {
     Value<String?>? description,
     Value<DateTime>? reportedDate,
     Value<DateTime?>? completedDate,
+    Value<int?>? estimatedCostPoisha,
     Value<int>? costPoisha,
     Value<String>? responsibility,
+    Value<bool>? recoverableFromTenant,
+    Value<String?>? tenantChargeBillId,
     Value<String>? status,
     Value<String?>? notes,
     Value<DateTime>? createdAt,
@@ -10077,8 +10239,12 @@ class RepairsCompanion extends UpdateCompanion<Repair> {
       description: description ?? this.description,
       reportedDate: reportedDate ?? this.reportedDate,
       completedDate: completedDate ?? this.completedDate,
+      estimatedCostPoisha: estimatedCostPoisha ?? this.estimatedCostPoisha,
       costPoisha: costPoisha ?? this.costPoisha,
       responsibility: responsibility ?? this.responsibility,
+      recoverableFromTenant:
+          recoverableFromTenant ?? this.recoverableFromTenant,
+      tenantChargeBillId: tenantChargeBillId ?? this.tenantChargeBillId,
       status: status ?? this.status,
       notes: notes ?? this.notes,
       createdAt: createdAt ?? this.createdAt,
@@ -10117,11 +10283,22 @@ class RepairsCompanion extends UpdateCompanion<Repair> {
     if (completedDate.present) {
       map['completed_date'] = Variable<DateTime>(completedDate.value);
     }
+    if (estimatedCostPoisha.present) {
+      map['estimated_cost_poisha'] = Variable<int>(estimatedCostPoisha.value);
+    }
     if (costPoisha.present) {
       map['cost_poisha'] = Variable<int>(costPoisha.value);
     }
     if (responsibility.present) {
       map['responsibility'] = Variable<String>(responsibility.value);
+    }
+    if (recoverableFromTenant.present) {
+      map['recoverable_from_tenant'] = Variable<bool>(
+        recoverableFromTenant.value,
+      );
+    }
+    if (tenantChargeBillId.present) {
+      map['tenant_charge_bill_id'] = Variable<String>(tenantChargeBillId.value);
     }
     if (status.present) {
       map['status'] = Variable<String>(status.value);
@@ -10153,8 +10330,11 @@ class RepairsCompanion extends UpdateCompanion<Repair> {
           ..write('description: $description, ')
           ..write('reportedDate: $reportedDate, ')
           ..write('completedDate: $completedDate, ')
+          ..write('estimatedCostPoisha: $estimatedCostPoisha, ')
           ..write('costPoisha: $costPoisha, ')
           ..write('responsibility: $responsibility, ')
+          ..write('recoverableFromTenant: $recoverableFromTenant, ')
+          ..write('tenantChargeBillId: $tenantChargeBillId, ')
           ..write('status: $status, ')
           ..write('notes: $notes, ')
           ..write('createdAt: $createdAt, ')
@@ -16231,6 +16411,24 @@ final class $$MonthlyBillsTableReferences
       manager.$state.copyWith(prefetchedData: cache),
     );
   }
+
+  static MultiTypedResultKey<$RepairsTable, List<Repair>> _repairsRefsTable(
+    _$AppDatabase db,
+  ) => MultiTypedResultKey.fromTable(
+    db.repairs,
+    aliasName: 'monthly_bills__id__repairs__tenant_charge_bill_id',
+  );
+
+  $$RepairsTableProcessedTableManager get repairsRefs {
+    final manager = $$RepairsTableTableManager($_db, $_db.repairs).filter(
+      (f) => f.tenantChargeBillId.id.sqlEquals($_itemColumn<String>('id')!),
+    );
+
+    final cache = $_typedResult.readTableOrNull(_repairsRefsTable($_db));
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
 }
 
 class $$MonthlyBillsTableFilterComposer
@@ -16422,6 +16620,31 @@ class $$MonthlyBillsTableFilterComposer
           }) => $$PaymentAllocationsTableFilterComposer(
             $db: $db,
             $table: $db.paymentAllocations,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
+  Expression<bool> repairsRefs(
+    Expression<bool> Function($$RepairsTableFilterComposer f) f,
+  ) {
+    final $$RepairsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.repairs,
+      getReferencedColumn: (t) => t.tenantChargeBillId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$RepairsTableFilterComposer(
+            $db: $db,
+            $table: $db.repairs,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
             $removeJoinBuilderFromRootComposer:
@@ -16767,6 +16990,31 @@ class $$MonthlyBillsTableAnnotationComposer
         );
     return f(composer);
   }
+
+  Expression<T> repairsRefs<T extends Object>(
+    Expression<T> Function($$RepairsTableAnnotationComposer a) f,
+  ) {
+    final $$RepairsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.repairs,
+      getReferencedColumn: (t) => t.tenantChargeBillId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$RepairsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.repairs,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
 }
 
 class $$MonthlyBillsTableTableManager
@@ -16788,6 +17036,7 @@ class $$MonthlyBillsTableTableManager
             bool unitId,
             bool billLineItemsRefs,
             bool paymentAllocationsRefs,
+            bool repairsRefs,
           })
         > {
   $$MonthlyBillsTableTableManager(_$AppDatabase db, $MonthlyBillsTable table)
@@ -16896,12 +17145,14 @@ class $$MonthlyBillsTableTableManager
                 unitId = false,
                 billLineItemsRefs = false,
                 paymentAllocationsRefs = false,
+                repairsRefs = false,
               }) {
                 return PrefetchHooks(
                   db: db,
                   explicitlyWatchedTables: [
                     if (billLineItemsRefs) db.billLineItems,
                     if (paymentAllocationsRefs) db.paymentAllocations,
+                    if (repairsRefs) db.repairs,
                   ],
                   addJoins:
                       <
@@ -16999,6 +17250,27 @@ class $$MonthlyBillsTableTableManager
                               ),
                           typedResults: items,
                         ),
+                      if (repairsRefs)
+                        await $_getPrefetchedData<
+                          MonthlyBill,
+                          $MonthlyBillsTable,
+                          Repair
+                        >(
+                          currentTable: table,
+                          referencedTable: $$MonthlyBillsTableReferences
+                              ._repairsRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$MonthlyBillsTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).repairsRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.tenantChargeBillId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
                     ];
                   },
                 );
@@ -17025,6 +17297,7 @@ typedef $$MonthlyBillsTableProcessedTableManager =
         bool unitId,
         bool billLineItemsRefs,
         bool paymentAllocationsRefs,
+        bool repairsRefs,
       })
     >;
 typedef $$BillLineItemsTableCreateCompanionBuilder =
@@ -19954,8 +20227,11 @@ typedef $$RepairsTableCreateCompanionBuilder = RepairsCompanion Function({
   Value<String?> description,
   required DateTime reportedDate,
   Value<DateTime?> completedDate,
+  Value<int?> estimatedCostPoisha,
   Value<int> costPoisha,
   required String responsibility,
+  Value<bool> recoverableFromTenant,
+  Value<String?> tenantChargeBillId,
   Value<String> status,
   Value<String?> notes,
   Value<DateTime> createdAt,
@@ -19972,8 +20248,11 @@ typedef $$RepairsTableUpdateCompanionBuilder = RepairsCompanion Function({
   Value<String?> description,
   Value<DateTime> reportedDate,
   Value<DateTime?> completedDate,
+  Value<int?> estimatedCostPoisha,
   Value<int> costPoisha,
   Value<String> responsibility,
+  Value<bool> recoverableFromTenant,
+  Value<String?> tenantChargeBillId,
   Value<String> status,
   Value<String?> notes,
   Value<DateTime> createdAt,
@@ -20030,6 +20309,24 @@ final class $$RepairsTableReferences
       $_db.tenancies,
     ).filter((f) => f.id.sqlEquals($_column));
     final item = $_typedResult.readTableOrNull(_tenancyIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+
+  static $MonthlyBillsTable _tenantChargeBillIdTable(_$AppDatabase db) => db
+      .monthlyBills
+      .createAlias('repairs__tenant_charge_bill_id__monthly_bills__id');
+
+  $$MonthlyBillsTableProcessedTableManager? get tenantChargeBillId {
+    final $_column = $_itemColumn<String>('tenant_charge_bill_id');
+    if ($_column == null) return null;
+    final manager = $$MonthlyBillsTableTableManager(
+      $_db,
+      $_db.monthlyBills,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_tenantChargeBillIdTable($_db));
     if (item == null) return manager;
     return ProcessedTableManager(
       manager.$state.copyWith(prefetchedData: [item]),
@@ -20097,6 +20394,11 @@ class $$RepairsTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
+  ColumnFilters<int> get estimatedCostPoisha => $composableBuilder(
+    column: $table.estimatedCostPoisha,
+    builder: (column) => ColumnFilters(column),
+  );
+
   ColumnFilters<int> get costPoisha => $composableBuilder(
     column: $table.costPoisha,
     builder: (column) => ColumnFilters(column),
@@ -20104,6 +20406,11 @@ class $$RepairsTableFilterComposer
 
   ColumnFilters<String> get responsibility => $composableBuilder(
     column: $table.responsibility,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get recoverableFromTenant => $composableBuilder(
+    column: $table.recoverableFromTenant,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -20196,6 +20503,29 @@ class $$RepairsTableFilterComposer
     return composer;
   }
 
+  $$MonthlyBillsTableFilterComposer get tenantChargeBillId {
+    final $$MonthlyBillsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.tenantChargeBillId,
+      referencedTable: $db.monthlyBills,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$MonthlyBillsTableFilterComposer(
+            $db: $db,
+            $table: $db.monthlyBills,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
   Expression<bool> repairAttachmentsRefs(
     Expression<bool> Function($$RepairAttachmentsTableFilterComposer f) f,
   ) {
@@ -20261,6 +20591,11 @@ class $$RepairsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<int> get estimatedCostPoisha => $composableBuilder(
+    column: $table.estimatedCostPoisha,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<int> get costPoisha => $composableBuilder(
     column: $table.costPoisha,
     builder: (column) => ColumnOrderings(column),
@@ -20268,6 +20603,11 @@ class $$RepairsTableOrderingComposer
 
   ColumnOrderings<String> get responsibility => $composableBuilder(
     column: $table.responsibility,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get recoverableFromTenant => $composableBuilder(
+    column: $table.recoverableFromTenant,
     builder: (column) => ColumnOrderings(column),
   );
 
@@ -20359,6 +20699,29 @@ class $$RepairsTableOrderingComposer
     );
     return composer;
   }
+
+  $$MonthlyBillsTableOrderingComposer get tenantChargeBillId {
+    final $$MonthlyBillsTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.tenantChargeBillId,
+      referencedTable: $db.monthlyBills,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$MonthlyBillsTableOrderingComposer(
+            $db: $db,
+            $table: $db.monthlyBills,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
 }
 
 class $$RepairsTableAnnotationComposer
@@ -20394,6 +20757,11 @@ class $$RepairsTableAnnotationComposer
     builder: (column) => column,
   );
 
+  GeneratedColumn<int> get estimatedCostPoisha => $composableBuilder(
+    column: $table.estimatedCostPoisha,
+    builder: (column) => column,
+  );
+
   GeneratedColumn<int> get costPoisha => $composableBuilder(
     column: $table.costPoisha,
     builder: (column) => column,
@@ -20401,6 +20769,11 @@ class $$RepairsTableAnnotationComposer
 
   GeneratedColumn<String> get responsibility => $composableBuilder(
     column: $table.responsibility,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<bool> get recoverableFromTenant => $composableBuilder(
+    column: $table.recoverableFromTenant,
     builder: (column) => column,
   );
 
@@ -20485,6 +20858,29 @@ class $$RepairsTableAnnotationComposer
     return composer;
   }
 
+  $$MonthlyBillsTableAnnotationComposer get tenantChargeBillId {
+    final $$MonthlyBillsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.tenantChargeBillId,
+      referencedTable: $db.monthlyBills,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$MonthlyBillsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.monthlyBills,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
   Expression<T> repairAttachmentsRefs<T extends Object>(
     Expression<T> Function($$RepairAttachmentsTableAnnotationComposer a) f,
   ) {
@@ -20529,6 +20925,7 @@ class $$RepairsTableTableManager
             bool propertyId,
             bool unitId,
             bool tenancyId,
+            bool tenantChargeBillId,
             bool repairAttachmentsRefs,
           })
         > {
@@ -20554,8 +20951,11 @@ class $$RepairsTableTableManager
                 Value<String?> description = const Value.absent(),
                 Value<DateTime> reportedDate = const Value.absent(),
                 Value<DateTime?> completedDate = const Value.absent(),
+                Value<int?> estimatedCostPoisha = const Value.absent(),
                 Value<int> costPoisha = const Value.absent(),
                 Value<String> responsibility = const Value.absent(),
+                Value<bool> recoverableFromTenant = const Value.absent(),
+                Value<String?> tenantChargeBillId = const Value.absent(),
                 Value<String> status = const Value.absent(),
                 Value<String?> notes = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
@@ -20571,8 +20971,11 @@ class $$RepairsTableTableManager
                 description: description,
                 reportedDate: reportedDate,
                 completedDate: completedDate,
+                estimatedCostPoisha: estimatedCostPoisha,
                 costPoisha: costPoisha,
                 responsibility: responsibility,
+                recoverableFromTenant: recoverableFromTenant,
+                tenantChargeBillId: tenantChargeBillId,
                 status: status,
                 notes: notes,
                 createdAt: createdAt,
@@ -20590,8 +20993,11 @@ class $$RepairsTableTableManager
                 Value<String?> description = const Value.absent(),
                 required DateTime reportedDate,
                 Value<DateTime?> completedDate = const Value.absent(),
+                Value<int?> estimatedCostPoisha = const Value.absent(),
                 Value<int> costPoisha = const Value.absent(),
                 required String responsibility,
+                Value<bool> recoverableFromTenant = const Value.absent(),
+                Value<String?> tenantChargeBillId = const Value.absent(),
                 Value<String> status = const Value.absent(),
                 Value<String?> notes = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
@@ -20607,8 +21013,11 @@ class $$RepairsTableTableManager
                 description: description,
                 reportedDate: reportedDate,
                 completedDate: completedDate,
+                estimatedCostPoisha: estimatedCostPoisha,
                 costPoisha: costPoisha,
                 responsibility: responsibility,
+                recoverableFromTenant: recoverableFromTenant,
+                tenantChargeBillId: tenantChargeBillId,
                 status: status,
                 notes: notes,
                 createdAt: createdAt,
@@ -20628,6 +21037,7 @@ class $$RepairsTableTableManager
                 propertyId = false,
                 unitId = false,
                 tenancyId = false,
+                tenantChargeBillId = false,
                 repairAttachmentsRefs = false,
               }) {
                 return PrefetchHooks(
@@ -20684,6 +21094,17 @@ class $$RepairsTableTableManager
                                 .id,
                           ) as T;
                         }
+                        if (tenantChargeBillId) {
+                          state = state.withJoin(
+                            currentTable: table,
+                            currentColumn: table.tenantChargeBillId,
+                            referencedTable: $$RepairsTableReferences
+                                ._tenantChargeBillIdTable(db),
+                            referencedColumn: $$RepairsTableReferences
+                                ._tenantChargeBillIdTable(db)
+                                .id,
+                          ) as T;
+                        }
 
                         return state;
                       },
@@ -20734,6 +21155,7 @@ typedef $$RepairsTableProcessedTableManager =
         bool propertyId,
         bool unitId,
         bool tenancyId,
+        bool tenantChargeBillId,
         bool repairAttachmentsRefs,
       })
     >;

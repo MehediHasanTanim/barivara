@@ -361,8 +361,13 @@ class Repairs extends Table {
   TextColumn get description => text().nullable()();
   DateTimeColumn get reportedDate => dateTime()();
   DateTimeColumn get completedDate => dateTime().nullable()();
+  IntColumn get estimatedCostPoisha => integer().nullable()();
   IntColumn get costPoisha => integer().withDefault(const Constant(0))();
   TextColumn get responsibility => text()();
+  BoolColumn get recoverableFromTenant =>
+      boolean().withDefault(const Constant(false))();
+  TextColumn get tenantChargeBillId =>
+      text().nullable().references(MonthlyBills, #id)();
   TextColumn get status => text().withDefault(const Constant('open'))();
   TextColumn get notes => text().nullable()();
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
