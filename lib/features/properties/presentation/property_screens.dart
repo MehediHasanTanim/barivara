@@ -8,6 +8,7 @@ import 'package:barivara/features/properties/application/property_unit_use_cases
 import 'package:barivara/features/settings/application/settings_controller.dart';
 import 'package:barivara/features/settings/domain/app_settings.dart';
 import 'package:barivara/l10n/generated/app_localizations.dart';
+import 'package:barivara/shared/presentation/app_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -64,12 +65,16 @@ class _PropertyListScreenState extends ConsumerState<PropertyListScreen> {
               AsyncSnapshot<Result<List<PropertySummary>>> snapshot,
             ) {
               if (snapshot.connectionState != ConnectionState.done) {
-                return const Center(child: CircularProgressIndicator());
+                return const AppLoadingState(label: 'Loading properties…');
               }
               final Result<List<PropertySummary>>? result = snapshot.data;
               if (result case Success<List<PropertySummary>>(:final value)) {
                 if (value.isEmpty) {
-                  return _EmptyState(message: text.noPropertiesYet);
+                  return AppEmptyState(
+                    icon: Icons.apartment_outlined,
+                    title: text.noPropertiesYet,
+                    message: 'Add a property to begin managing units and rent.',
+                  );
                 }
                 return RefreshIndicator(
                   onRefresh: () async => _refresh(),
@@ -98,7 +103,10 @@ class _PropertyListScreenState extends ConsumerState<PropertyListScreen> {
                   ),
                 );
               }
-              return _EmptyState(message: text.couldNotSave);
+              return AppErrorState(
+                message: text.couldNotSave,
+                onRetry: _refresh,
+              );
             },
       ),
     );
@@ -217,24 +225,12 @@ class _PropertyDetailsScreenState extends ConsumerState<PropertyDetailsScreen> {
 
   Future<bool> _confirmArchive(BuildContext context) async {
     final AppLocalizations text = AppLocalizations.of(context)!;
-    return await showDialog<bool>(
-          context: context,
-          builder: (BuildContext context) => AlertDialog(
-            title: Text(text.archiveProperty),
-            content: Text(text.archivePropertyMessage),
-            actions: <Widget>[
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(false),
-                child: Text(text.cancel),
-              ),
-              FilledButton(
-                onPressed: () => Navigator.of(context).pop(true),
-                child: Text(text.confirmArchive),
-              ),
-            ],
-          ),
-        ) ??
-        false;
+    return AppConfirmationDialog.show(
+      context,
+      title: text.archiveProperty,
+      message: text.archivePropertyMessage,
+      confirmLabel: text.confirmArchive,
+    );
   }
 }
 

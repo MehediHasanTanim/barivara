@@ -9,6 +9,7 @@ import 'package:barivara/features/settings/application/settings_controller.dart'
 import 'package:barivara/features/settings/domain/app_settings.dart';
 import 'package:barivara/features/tenants/application/tenant_tenancy_use_cases.dart';
 import 'package:barivara/l10n/generated/app_localizations.dart';
+import 'package:barivara/shared/presentation/app_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -66,12 +67,18 @@ class _TenantListScreenState extends ConsumerState<TenantListScreen> {
                     AsyncSnapshot<Result<List<TenantSummary>>> snapshot,
                   ) {
                     if (snapshot.connectionState != ConnectionState.done) {
-                      return const Center(child: CircularProgressIndicator());
+                      return const AppLoadingState(label: 'Loading tenants…');
                     }
                     if (snapshot.data case Success<List<TenantSummary>>(
                       :final value,
                     )) {
-                      if (value.isEmpty) return _TenantEmpty(text.noTenantsYet);
+                      if (value.isEmpty) {
+                        return AppEmptyState(
+                          icon: Icons.people_outline_rounded,
+                          title: text.noTenantsYet,
+                          message: 'Add a tenant to record occupancy and rent.',
+                        );
+                      }
                       return ListView.separated(
                         padding: const EdgeInsets.fromLTRB(16, 0, 16, 96),
                         itemCount: value.length,
@@ -94,7 +101,10 @@ class _TenantListScreenState extends ConsumerState<TenantListScreen> {
                             ),
                       );
                     }
-                    return _TenantEmpty(text.couldNotSave);
+                    return AppErrorState(
+                      message: text.couldNotSave,
+                      onRetry: () => setState(() {}),
+                    );
                   },
             ),
           ),
@@ -496,18 +506,9 @@ class _TenantFormScreenState extends ConsumerState<TenantFormScreen> {
         validator: _required(text),
       ),
       const SizedBox(height: 12),
-      TextFormField(
-        controller: _phone,
-        keyboardType: TextInputType.phone,
-        decoration: InputDecoration(labelText: text.mobileNumber),
-        validator: _required(text),
-      ),
+      PhoneInput(controller: _phone, label: text.mobileNumber, required: true),
       const SizedBox(height: 12),
-      TextFormField(
-        controller: _alternate,
-        keyboardType: TextInputType.phone,
-        decoration: InputDecoration(labelText: text.alternateMobile),
-      ),
+      PhoneInput(controller: _alternate, label: text.alternateMobile),
       const SizedBox(height: 12),
       TextFormField(
         controller: _nid,
@@ -524,11 +525,7 @@ class _TenantFormScreenState extends ConsumerState<TenantFormScreen> {
         decoration: InputDecoration(labelText: text.emergencyContact),
       ),
       const SizedBox(height: 12),
-      TextFormField(
-        controller: _emergencyPhone,
-        keyboardType: TextInputType.phone,
-        decoration: InputDecoration(labelText: text.emergencyPhone),
-      ),
+      PhoneInput(controller: _emergencyPhone, label: text.emergencyPhone),
       const SizedBox(height: 12),
       TextFormField(
         controller: _notes,
@@ -543,134 +540,110 @@ class _TenantFormScreenState extends ConsumerState<TenantFormScreen> {
   ) => FutureBuilder<Result<List<Property>>>(
     future: DriftPropertyRepository(ref.read(appServicesProvider).database)
         .list(),
-    builder: (BuildContext context, AsyncSnapshot<Result<List<Property>>> snapshot) {
-      if (snapshot.data case Success<List<Property>>(:final value)) {
-        return Column(
-          children: <Widget>[
-            DropdownButtonFormField<Property>(
-              initialValue: _property,
-              decoration: InputDecoration(labelText: text.selectProperty),
-              items: value
-                  .map(
-                    (Property property) => DropdownMenuItem<Property>(
-                      value: property,
-                      child: Text(property.name),
-                    ),
-                  )
-                  .toList(growable: false),
-              onChanged: (Property? property) => setState(() {
-                _property = property;
-                _unit = null;
-              }),
-            ),
-            if (_property != null)
-              FutureBuilder<Result<List<RentalUnit>>>(
-                future: DriftUnitRepository(
-                  ref.read(appServicesProvider).database,
-                ).listByProperty(_property!.id),
-                builder:
-                    (
-                      BuildContext context,
-                      AsyncSnapshot<Result<List<RentalUnit>>> units,
-                    ) {
-                      if (units.data case Success<List<RentalUnit>>(
-                        :final value,
-                      )) {
-                        return Padding(
-                          padding: const EdgeInsets.only(top: 12),
-                          child: DropdownButtonFormField<RentalUnit>(
-                            initialValue: _unit,
-                            decoration: InputDecoration(
-                              labelText: text.selectUnit,
-                            ),
-                            items: value
-                                .map(
-                                  (RentalUnit unit) =>
-                                      DropdownMenuItem<RentalUnit>(
-                                        value: unit,
-                                        child: Text(unit.name),
-                                      ),
-                                )
-                                .toList(growable: false),
-                            onChanged: (RentalUnit? unit) => setState(() {
-                              _unit = unit;
-                              _rent.text =
-                                  ((unit?.defaultRent.poisha ?? 0) ~/ 100)
-                                      .toString();
-                            }),
-                          ),
-                        );
-                      }
-                      return const SizedBox();
-                    },
-              ),
-            const SizedBox(height: 12),
-            TextButton.icon(
-              onPressed: () async {
-                final DateTime? date = await showDatePicker(
-                  context: context,
-                  initialDate: _moveIn,
+    builder:
+        (BuildContext context, AsyncSnapshot<Result<List<Property>>> snapshot) {
+          if (snapshot.data case Success<List<Property>>(:final value)) {
+            return Column(
+              children: <Widget>[
+                AppSelector<Property>(
+                  value: _property,
+                  label: text.selectProperty,
+                  items: value
+                      .map(
+                        (Property property) => DropdownMenuItem<Property>(
+                          value: property,
+                          child: Text(property.name),
+                        ),
+                      )
+                      .toList(growable: false),
+                  onChanged: (Property? property) => setState(() {
+                    _property = property;
+                    _unit = null;
+                  }),
+                ),
+                if (_property != null)
+                  FutureBuilder<Result<List<RentalUnit>>>(
+                    future: DriftUnitRepository(
+                      ref.read(appServicesProvider).database,
+                    ).listByProperty(_property!.id),
+                    builder:
+                        (
+                          BuildContext context,
+                          AsyncSnapshot<Result<List<RentalUnit>>> units,
+                        ) {
+                          if (units.data case Success<List<RentalUnit>>(
+                            :final value,
+                          )) {
+                            return Padding(
+                              padding: const EdgeInsets.only(top: 12),
+                              child: AppSelector<RentalUnit>(
+                                value: _unit,
+                                label: text.selectUnit,
+                                items: value
+                                    .map(
+                                      (RentalUnit unit) =>
+                                          DropdownMenuItem<RentalUnit>(
+                                            value: unit,
+                                            child: Text(unit.name),
+                                          ),
+                                    )
+                                    .toList(growable: false),
+                                onChanged: (RentalUnit? unit) => setState(() {
+                                  _unit = unit;
+                                  _rent.text =
+                                      ((unit?.defaultRent.poisha ?? 0) ~/ 100)
+                                          .toString();
+                                }),
+                              ),
+                            );
+                          }
+                          return const SizedBox();
+                        },
+                  ),
+                const SizedBox(height: 12),
+                AppDatePickerField(
+                  label: text.moveInDate,
+                  value: _moveIn,
                   firstDate: DateTime(2000),
                   lastDate: DateTime(2100),
-                );
-                if (date != null) setState(() => _moveIn = date);
-              },
-              icon: const Icon(Icons.calendar_today_outlined),
-              label: Text(
-                '${text.moveInDate}: ${_moveIn.toIso8601String().substring(0, 10)}',
-              ),
-            ),
-            TextFormField(
-              controller: _rent,
-              keyboardType: TextInputType.number,
-              decoration: InputDecoration(
-                labelText: text.monthlyRent,
-                prefixText: '৳ ',
-              ),
-              validator: _amount(text),
-            ),
-            const SizedBox(height: 12),
-            DropdownButtonFormField<int>(
-              initialValue: _billingDay,
-              decoration: InputDecoration(labelText: text.billingDay),
-              items: List<DropdownMenuItem<int>>.generate(
-                28,
-                (int index) => DropdownMenuItem<int>(
-                  value: index + 1,
-                  child: Text('${index + 1}'),
+                  onChanged: (DateTime value) =>
+                      setState(() => _moveIn = value),
                 ),
-              ),
-              onChanged: (int? day) {
-                if (day != null) setState(() => _billingDay = day);
-              },
-            ),
-          ],
-        );
-      }
-      return const Center(child: CircularProgressIndicator());
-    },
+                MoneyInput(
+                  controller: _rent,
+                  label: text.monthlyRent,
+                  required: true,
+                ),
+                const SizedBox(height: 12),
+                DropdownButtonFormField<int>(
+                  initialValue: _billingDay,
+                  decoration: InputDecoration(labelText: text.billingDay),
+                  items: List<DropdownMenuItem<int>>.generate(
+                    28,
+                    (int index) => DropdownMenuItem<int>(
+                      value: index + 1,
+                      child: Text('${index + 1}'),
+                    ),
+                  ),
+                  onChanged: (int? day) {
+                    if (day != null) setState(() => _billingDay = day);
+                  },
+                ),
+              ],
+            );
+          }
+          return const AppLoadingState(label: 'Loading properties and units…');
+        },
   );
   Widget _depositFields(AppLocalizations text) => Column(
     children: <Widget>[
-      TextFormField(
+      MoneyInput(
         controller: _deposit,
-        keyboardType: TextInputType.number,
-        decoration: InputDecoration(
-          labelText: text.securityDeposit,
-          prefixText: '৳ ',
-        ),
-        validator: _amount(text),
+        label: text.securityDeposit,
+        required: true,
       ),
       const SizedBox(height: 12),
-      TextFormField(
-        controller: _advance,
-        keyboardType: TextInputType.number,
-        decoration: InputDecoration(
-          labelText: text.advanceRent,
-          prefixText: '৳ ',
-        ),
-        validator: _amount(text),
-      ),
+      MoneyInput(controller: _advance, label: text.advanceRent, required: true),
     ],
   );
 
@@ -824,25 +797,9 @@ class _TenancyTerms extends ConsumerWidget {
   }
 }
 
-class _TenantEmpty extends StatelessWidget {
-  const _TenantEmpty(this.message);
-  final String message;
-  @override
-  Widget build(BuildContext context) => Center(
-    child: Padding(
-      padding: const EdgeInsets.all(24),
-      child: Text(message, textAlign: TextAlign.center),
-    ),
-  );
-}
-
 String? Function(String?) _required(AppLocalizations text) =>
     (String? value) =>
         value == null || value.trim().isEmpty ? text.requiredField : null;
-String? Function(String?) _amount(AppLocalizations text) => (String? value) {
-  final int? number = int.tryParse(value?.trim() ?? '');
-  return number == null || number < 0 ? text.invalidAmount : null;
-};
 void _failure<T>(BuildContext context, Result<T> result) {
   final String message = switch (result) {
     Failure<T>(:final failure) => failure.message,

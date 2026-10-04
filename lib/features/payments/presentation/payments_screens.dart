@@ -10,6 +10,7 @@ import 'package:barivara/features/settings/application/settings_controller.dart'
 import 'package:barivara/features/settings/domain/app_settings.dart';
 import 'package:barivara/features/tenants/application/tenant_tenancy_use_cases.dart';
 import 'package:barivara/l10n/generated/app_localizations.dart';
+import 'package:barivara/shared/presentation/app_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -60,9 +61,9 @@ class _PaymentsDuesScreenState extends ConsumerState<PaymentsDuesScreen> {
                   _ => <TenantSummary>[],
                 };
                 if (snapshot.connectionState != ConnectionState.done) {
-                  return const Padding(
-                    padding: EdgeInsets.all(24),
-                    child: Center(child: CircularProgressIndicator()),
+                  return const AppLoadingState(
+                    label: 'Loading tenants and dues…',
+                    compact: true,
                   );
                 }
                 return Column(
@@ -117,7 +118,9 @@ class _PaymentsDuesScreenState extends ConsumerState<PaymentsDuesScreen> {
                                   mainAxisSize: MainAxisSize.min,
                                   children: <Widget>[
                                     IconButton(
-                                      icon: const Icon(Icons.receipt_long_outlined),
+                                      icon: const Icon(
+                                        Icons.receipt_long_outlined,
+                                      ),
                                       tooltip: 'View receipt',
                                       onPressed: () => _openReceipt(payment),
                                     ),
@@ -254,24 +257,15 @@ class _PaymentEntryScreenState extends ConsumerState<PaymentEntryScreen> {
               );
             },
           ),
-          TextField(
+          MoneyInput(
             controller: _amount,
-            keyboardType: TextInputType.number,
-            decoration: InputDecoration(
-              labelText: text.paymentAmount,
-              prefixText: '৳ ',
-            ),
+            label: text.paymentAmount,
+            required: true,
           ),
-          DropdownButtonFormField<PaymentMethod>(
-            initialValue: _method,
-            decoration: InputDecoration(labelText: text.defaultPaymentMethod),
-            items: PaymentMethod.values
-                .map(
-                  (method) =>
-                      DropdownMenuItem(value: method, child: Text(method.name)),
-                )
-                .toList(),
-            onChanged: (value) => setState(() => _method = value ?? _method),
+          PaymentMethodSelector(
+            value: _method,
+            onChanged: (PaymentMethod? value) =>
+                setState(() => _method = value ?? _method),
           ),
           TextField(
             controller: _reference,

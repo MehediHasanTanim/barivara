@@ -15,6 +15,7 @@ import 'package:barivara/features/settings/application/settings_controller.dart'
 import 'package:barivara/features/settings/domain/app_settings.dart';
 import 'package:barivara/features/tenants/presentation/tenant_screens.dart';
 import 'package:barivara/l10n/generated/app_localizations.dart';
+import 'package:barivara/shared/presentation/app_ui.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -477,15 +478,20 @@ class _DashboardHomeScreenState extends ConsumerState<DashboardHomeScreen> {
                   return Center(child: Text(text.appSubtitle));
                 }
                 if (snapshot.connectionState != ConnectionState.done) {
-                  return const Center(child: CircularProgressIndicator());
+                  return const AppLoadingState(label: 'Loading dashboard…');
                 }
                 final DashboardData? data = switch (snapshot.data) {
                   Success<DashboardData>(:final value) => value,
                   _ => null,
                 };
                 if (data == null) {
-                  return const Center(
-                    child: Text('Dashboard data could not be loaded.'),
+                  return AppErrorState(
+                    message: 'Dashboard data could not be loaded.',
+                    onRetry: () {
+                      if (_service != null) {
+                        setState(() => _dashboard = _service!.dashboard());
+                      }
+                    },
                   );
                 }
                 return ListView(
@@ -563,9 +569,11 @@ class _DashboardHomeScreenState extends ConsumerState<DashboardHomeScreen> {
                     Card(
                       child: Column(
                         children: data.recentPayments.isEmpty
-                            ? const <Widget>[
-                                ListTile(
-                                  title: Text('No posted payments yet.'),
+                            ? <Widget>[
+                                AppEmptyState(
+                                  icon: Icons.payments_outlined,
+                                  title: 'No payment history',
+                                  message: 'Posted payments will appear here.',
                                 ),
                               ]
                             : data.recentPayments

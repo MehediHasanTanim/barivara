@@ -11,6 +11,7 @@ import 'package:barivara/features/settings/application/settings_controller.dart'
 import 'package:barivara/features/settings/domain/app_settings.dart';
 import 'package:barivara/features/tenants/application/tenant_tenancy_use_cases.dart';
 import 'package:barivara/l10n/generated/app_localizations.dart';
+import 'package:barivara/shared/presentation/app_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -77,7 +78,7 @@ class _BillsDashboardScreenState extends ConsumerState<BillsDashboardScreen> {
               AsyncSnapshot<Result<List<MonthlyBill>>> snapshot,
             ) {
               if (snapshot.connectionState != ConnectionState.done) {
-                return const Center(child: CircularProgressIndicator());
+                return const AppLoadingState(label: 'Loading bills…');
               }
               final List<MonthlyBill> bills = switch (snapshot.data) {
                 Success<List<MonthlyBill>>(:final value) => value,
@@ -132,7 +133,11 @@ class _BillsDashboardScreenState extends ConsumerState<BillsDashboardScreen> {
                     if (bills.isEmpty)
                       Padding(
                         padding: const EdgeInsets.only(top: 80),
-                        child: Center(child: Text(text.noBills)),
+                        child: AppEmptyState(
+                          icon: Icons.receipt_long_outlined,
+                          title: text.noBills,
+                          message: 'Generate bills for this month when you are ready.',
+                        ),
                       )
                     else
                       ...bills.map(
@@ -625,28 +630,18 @@ class _MonthHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Card(
-    child: Row(
+    child: Column(
       children: <Widget>[
-        IconButton(
-          onPressed: previous,
-          icon: const Icon(Icons.chevron_left_rounded),
-        ),
-        Expanded(
-          child: Center(
-            child: Text(
-              BariVaraFormatters.billingMonth(
-                month,
-                language: settings.language,
-                digitStyle: settings.digitStyle,
-              ),
-              style: Theme.of(context).textTheme.titleMedium,
-            ),
+        const SizedBox(height: 6),
+        Text(
+          BariVaraFormatters.billingMonth(
+            month,
+            language: settings.language,
+            digitStyle: settings.digitStyle,
           ),
+          style: Theme.of(context).textTheme.titleMedium,
         ),
-        IconButton(
-          onPressed: next,
-          icon: const Icon(Icons.chevron_right_rounded),
-        ),
+        MonthPicker(value: month, onPrevious: previous, onNext: next),
       ],
     ),
   );
