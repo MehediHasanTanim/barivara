@@ -63,7 +63,13 @@ abstract interface class BillingRepository {
     EntityId tenancyId,
     BillingMonth period,
   );
-  Future<Result<void>> save(MonthlyBill bill);
+  Future<Result<List<MonthlyBill>>> listForPeriod(BillingMonth period);
+  Future<Result<Money>> openingDue(EntityId tenancyId, BillingMonth period);
+  Future<Result<MeterReading?>> lastElectricityReading(EntityId unitId);
+  Future<Result<BillDraft?>> findDraft(EntityId billId);
+  Future<Result<void>> saveDraft(BillDraft draft);
+  Future<Result<MonthlyBill>> finalize(EntityId billId);
+  Future<Result<MonthlyBill>> cancel(EntityId billId);
 }
 
 /// Application-facing payment persistence contract.

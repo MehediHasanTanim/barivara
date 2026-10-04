@@ -481,4 +481,85 @@ class AppLocalizationsBn extends AppLocalizations {
 
   @override
   String get saveCharge => 'চার্জ সংরক্ষণ করুন';
+
+  @override
+  String get generateBills => 'বিল তৈরি করুন';
+
+  @override
+  String get billDetails => 'বিলের বিস্তারিত';
+
+  @override
+  String get draft => 'খসড়া';
+
+  @override
+  String get finalized => 'চূড়ান্ত';
+
+  @override
+  String get paid => 'পরিশোধিত';
+
+  @override
+  String get partial => 'আংশিক';
+
+  @override
+  String get due => 'বকেয়া';
+
+  @override
+  String get total => 'মোট';
+
+  @override
+  String get openingDue => 'পূর্বের বকেয়া';
+
+  @override
+  String get currentCharges => 'বর্তমান মাসের চার্জ';
+
+  @override
+  String get outstanding => 'অবশিষ্ট';
+
+  @override
+  String get finalizeBill => 'বিল চূড়ান্ত করুন';
+
+  @override
+  String get billGenerated => 'খসড়া বিল তৈরি হয়েছে';
+
+  @override
+  String get noBills => 'এই মাসের কোনো বিল এখনো তৈরি হয়নি।';
+
+  @override
+  String get selectMonth => 'মাস নির্বাচন করুন';
+
+  @override
+  String get previous => 'আগের মাস';
+
+  @override
+  String get next => 'পরের মাস';
+
+  @override
+  String get reviewDraft => 'খসড়া দেখুন';
+
+  @override
+  String get missingInputs => 'তথ্য প্রয়োজন';
+
+  @override
+  String get billsExpected => 'প্রত্যাশিত বিল';
+
+  @override
+  String get meterReading => 'বিদ্যুৎ মিটার রিডিং';
+
+  @override
+  String get previousReading => 'পূর্বের রিডিং';
+
+  @override
+  String get currentReading => 'বর্তমান রিডিং';
+
+  @override
+  String get consumption => 'ব্যবহৃত ইউনিট';
+
+  @override
+  String get rate => 'রেট';
+
+  @override
+  String get calculatedAmount => 'হিসাবকৃত পরিমাণ';
+
+  @override
+  String get saveReading => 'রিডিং সংরক্ষণ করুন';
 }

@@ -247,22 +247,84 @@ class TenantSummary {
   final String? propertyName;
 }
 
-/// A monthly billing snapshot.
+/// Lifecycle state for an immutable monthly financial snapshot.
+enum BillStatus { draft, finalized, partiallyPaid, paid, cancelled }
+
+/// A single snapshotted bill component, including meter operands where used.
+class BillLineItem {
+  /// Creates a durable bill line item.
+  const BillLineItem({
+    required this.id,
+    required this.billId,
+    required this.type,
+    required this.description,
+    required this.amount,
+    required this.displayOrder,
+    this.quantity,
+    this.unitRate,
+    this.previousReading,
+    this.currentReading,
+    this.sourceRuleId,
+  });
+
+  final EntityId id;
+  final EntityId billId;
+  final ChargeType type;
+  final String description;
+  final int? quantity;
+  final Money? unitRate;
+  final Money amount;
+  final MeterReading? previousReading;
+  final MeterReading? currentReading;
+  final EntityId? sourceRuleId;
+  final int displayOrder;
+}
+
+/// A monthly billing snapshot, including its accounting totals and status.
 class MonthlyBill {
-  /// Creates a bill snapshot.
+  /// Creates a monthly bill header.
   const MonthlyBill({
     required this.id,
     required this.tenancyId,
+    required this.propertyId,
+    required this.unitId,
     required this.period,
+    required this.issueDate,
+    required this.openingDue,
+    required this.currentCharges,
     required this.total,
+    required this.paidAmount,
+    required this.outstandingAmount,
     required this.status,
+    required this.generatedAt,
+    this.dueDate,
+    this.finalizedAt,
   });
 
   final EntityId id;
   final EntityId tenancyId;
+  final EntityId propertyId;
+  final EntityId unitId;
   final BillingMonth period;
+  final DateTime issueDate;
+  final DateTime? dueDate;
+  final Money openingDue;
+  final Money currentCharges;
   final Money total;
-  final String status;
+  final Money paidAmount;
+  final Money outstandingAmount;
+  final BillStatus status;
+  final DateTime generatedAt;
+  final DateTime? finalizedAt;
+}
+
+/// A bill header and its immutable line snapshots prepared before persistence.
+class BillDraft {
+  /// Creates a deterministic draft result.
+  const BillDraft({required this.bill, required this.items});
+
+  final MonthlyBill bill;
+  final List<BillLineItem> items;
 }
 
 /// A locally posted payment.

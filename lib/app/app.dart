@@ -1,4 +1,5 @@
 import 'package:barivara/app/theme/bari_vara_theme.dart';
+import 'package:barivara/features/billing/presentation/bills_screens.dart';
 import 'package:barivara/features/properties/presentation/property_screens.dart';
 import 'package:barivara/features/settings/application/settings_controller.dart';
 import 'package:barivara/features/settings/domain/app_settings.dart';
@@ -54,7 +55,7 @@ class _ApplicationShellState extends State<_ApplicationShell> {
     final Widget page = switch (_selectedIndex) {
       0 => const _HomeScreen(),
       1 => const TenantListScreen(),
-      2 => _PlaceholderScreen(title: text.bills),
+      2 => const BillsDashboardScreen(),
       3 => _PlaceholderScreen(title: text.payments),
       _ => const _MoreScreen(),
     };

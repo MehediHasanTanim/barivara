@@ -174,6 +174,10 @@ class MonthlyBills extends Table {
   TextColumn get unitId => text().references(Units, #id)();
   IntColumn get billingYear => integer()();
   IntColumn get billingMonth => integer()();
+  // Nullable only for migration compatibility with pre-v4 local databases;
+  // every newly written draft supplies this field explicitly.
+  DateTimeColumn get issuedAt => dateTime().nullable()();
+  DateTimeColumn get dueDate => dateTime().nullable()();
   TextColumn get status => text().withDefault(const Constant('draft'))();
   IntColumn get previousDuePoisha => integer().withDefault(const Constant(0))();
   IntColumn get subtotalPoisha => integer().withDefault(const Constant(0))();
@@ -206,6 +210,7 @@ class BillLineItems extends Table {
   IntColumn get quantity => integer().nullable()();
   IntColumn get unitRatePoisha => integer().nullable()();
   IntColumn get amountPoisha => integer()();
+  TextColumn get sourceRuleId => text().nullable()();
   IntColumn get sortOrder => integer().withDefault(const Constant(0))();
   TextColumn get metadataJson => text().nullable()();
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();

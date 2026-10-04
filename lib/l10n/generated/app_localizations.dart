@@ -1027,6 +1027,168 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Save charge'**
   String get saveCharge;
+
+  /// No description provided for @generateBills.
+  ///
+  /// In en, this message translates to:
+  /// **'Generate bills'**
+  String get generateBills;
+
+  /// No description provided for @billDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Bill details'**
+  String get billDetails;
+
+  /// No description provided for @draft.
+  ///
+  /// In en, this message translates to:
+  /// **'Draft'**
+  String get draft;
+
+  /// No description provided for @finalized.
+  ///
+  /// In en, this message translates to:
+  /// **'Finalized'**
+  String get finalized;
+
+  /// No description provided for @paid.
+  ///
+  /// In en, this message translates to:
+  /// **'Paid'**
+  String get paid;
+
+  /// No description provided for @partial.
+  ///
+  /// In en, this message translates to:
+  /// **'Partial'**
+  String get partial;
+
+  /// No description provided for @due.
+  ///
+  /// In en, this message translates to:
+  /// **'Due'**
+  String get due;
+
+  /// No description provided for @total.
+  ///
+  /// In en, this message translates to:
+  /// **'Total'**
+  String get total;
+
+  /// No description provided for @openingDue.
+  ///
+  /// In en, this message translates to:
+  /// **'Opening due'**
+  String get openingDue;
+
+  /// No description provided for @currentCharges.
+  ///
+  /// In en, this message translates to:
+  /// **'Current charges'**
+  String get currentCharges;
+
+  /// No description provided for @outstanding.
+  ///
+  /// In en, this message translates to:
+  /// **'Outstanding'**
+  String get outstanding;
+
+  /// No description provided for @finalizeBill.
+  ///
+  /// In en, this message translates to:
+  /// **'Finalize bill'**
+  String get finalizeBill;
+
+  /// No description provided for @billGenerated.
+  ///
+  /// In en, this message translates to:
+  /// **'Draft bill generated'**
+  String get billGenerated;
+
+  /// No description provided for @noBills.
+  ///
+  /// In en, this message translates to:
+  /// **'No bills for this month yet.'**
+  String get noBills;
+
+  /// No description provided for @selectMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'Select month'**
+  String get selectMonth;
+
+  /// No description provided for @previous.
+  ///
+  /// In en, this message translates to:
+  /// **'Previous'**
+  String get previous;
+
+  /// No description provided for @next.
+  ///
+  /// In en, this message translates to:
+  /// **'Next'**
+  String get next;
+
+  /// No description provided for @reviewDraft.
+  ///
+  /// In en, this message translates to:
+  /// **'Review draft'**
+  String get reviewDraft;
+
+  /// No description provided for @missingInputs.
+  ///
+  /// In en, this message translates to:
+  /// **'Missing inputs'**
+  String get missingInputs;
+
+  /// No description provided for @billsExpected.
+  ///
+  /// In en, this message translates to:
+  /// **'Bills expected'**
+  String get billsExpected;
+
+  /// No description provided for @meterReading.
+  ///
+  /// In en, this message translates to:
+  /// **'Electricity reading'**
+  String get meterReading;
+
+  /// No description provided for @previousReading.
+  ///
+  /// In en, this message translates to:
+  /// **'Previous reading'**
+  String get previousReading;
+
+  /// No description provided for @currentReading.
+  ///
+  /// In en, this message translates to:
+  /// **'Current reading'**
+  String get currentReading;
+
+  /// No description provided for @consumption.
+  ///
+  /// In en, this message translates to:
+  /// **'Units consumed'**
+  String get consumption;
+
+  /// No description provided for @rate.
+  ///
+  /// In en, this message translates to:
+  /// **'Rate'**
+  String get rate;
+
+  /// No description provided for @calculatedAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'Calculated amount'**
+  String get calculatedAmount;
+
+  /// No description provided for @saveReading.
+  ///
+  /// In en, this message translates to:
+  /// **'Save reading'**
+  String get saveReading;
 }
 
 class _AppLocalizationsDelegate

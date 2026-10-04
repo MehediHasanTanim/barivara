@@ -4840,6 +4840,28 @@ class $MonthlyBillsTable extends MonthlyBills
     type: DriftSqlType.int,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _issuedAtMeta = const VerificationMeta(
+    'issuedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> issuedAt = GeneratedColumn<DateTime>(
+    'issued_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _dueDateMeta = const VerificationMeta(
+    'dueDate',
+  );
+  @override
+  late final GeneratedColumn<DateTime> dueDate = GeneratedColumn<DateTime>(
+    'due_date',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _statusMeta = const VerificationMeta('status');
   @override
   late final GeneratedColumn<String> status = GeneratedColumn<String>(
@@ -4953,6 +4975,8 @@ class $MonthlyBillsTable extends MonthlyBills
     unitId,
     billingYear,
     billingMonth,
+    issuedAt,
+    dueDate,
     status,
     previousDuePoisha,
     subtotalPoisha,
@@ -5025,6 +5049,18 @@ class $MonthlyBillsTable extends MonthlyBills
       );
     } else if (isInserting) {
       context.missing(_billingMonthMeta);
+    }
+    if (data.containsKey('issued_at')) {
+      context.handle(
+        _issuedAtMeta,
+        issuedAt.isAcceptableOrUnknown(data['issued_at']!, _issuedAtMeta),
+      );
+    }
+    if (data.containsKey('due_date')) {
+      context.handle(
+        _dueDateMeta,
+        dueDate.isAcceptableOrUnknown(data['due_date']!, _dueDateMeta),
+      );
     }
     if (data.containsKey('status')) {
       context.handle(
@@ -5132,6 +5168,14 @@ class $MonthlyBillsTable extends MonthlyBills
         DriftSqlType.int,
         data['${effectivePrefix}billing_month'],
       )!,
+      issuedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}issued_at'],
+      ),
+      dueDate: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}due_date'],
+      ),
       status: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}status'],
@@ -5184,6 +5228,8 @@ class MonthlyBill extends DataClass implements Insertable<MonthlyBill> {
   final String unitId;
   final int billingYear;
   final int billingMonth;
+  final DateTime? issuedAt;
+  final DateTime? dueDate;
   final String status;
   final int previousDuePoisha;
   final int subtotalPoisha;
@@ -5200,6 +5246,8 @@ class MonthlyBill extends DataClass implements Insertable<MonthlyBill> {
     required this.unitId,
     required this.billingYear,
     required this.billingMonth,
+    this.issuedAt,
+    this.dueDate,
     required this.status,
     required this.previousDuePoisha,
     required this.subtotalPoisha,
@@ -5219,6 +5267,12 @@ class MonthlyBill extends DataClass implements Insertable<MonthlyBill> {
     map['unit_id'] = Variable<String>(unitId);
     map['billing_year'] = Variable<int>(billingYear);
     map['billing_month'] = Variable<int>(billingMonth);
+    if (!nullToAbsent || issuedAt != null) {
+      map['issued_at'] = Variable<DateTime>(issuedAt);
+    }
+    if (!nullToAbsent || dueDate != null) {
+      map['due_date'] = Variable<DateTime>(dueDate);
+    }
     map['status'] = Variable<String>(status);
     map['previous_due_poisha'] = Variable<int>(previousDuePoisha);
     map['subtotal_poisha'] = Variable<int>(subtotalPoisha);
@@ -5241,6 +5295,12 @@ class MonthlyBill extends DataClass implements Insertable<MonthlyBill> {
       unitId: Value(unitId),
       billingYear: Value(billingYear),
       billingMonth: Value(billingMonth),
+      issuedAt: issuedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(issuedAt),
+      dueDate: dueDate == null && nullToAbsent
+          ? const Value.absent()
+          : Value(dueDate),
       status: Value(status),
       previousDuePoisha: Value(previousDuePoisha),
       subtotalPoisha: Value(subtotalPoisha),
@@ -5267,6 +5327,8 @@ class MonthlyBill extends DataClass implements Insertable<MonthlyBill> {
       unitId: serializer.fromJson<String>(json['unitId']),
       billingYear: serializer.fromJson<int>(json['billingYear']),
       billingMonth: serializer.fromJson<int>(json['billingMonth']),
+      issuedAt: serializer.fromJson<DateTime?>(json['issuedAt']),
+      dueDate: serializer.fromJson<DateTime?>(json['dueDate']),
       status: serializer.fromJson<String>(json['status']),
       previousDuePoisha: serializer.fromJson<int>(json['previousDuePoisha']),
       subtotalPoisha: serializer.fromJson<int>(json['subtotalPoisha']),
@@ -5288,6 +5350,8 @@ class MonthlyBill extends DataClass implements Insertable<MonthlyBill> {
       'unitId': serializer.toJson<String>(unitId),
       'billingYear': serializer.toJson<int>(billingYear),
       'billingMonth': serializer.toJson<int>(billingMonth),
+      'issuedAt': serializer.toJson<DateTime?>(issuedAt),
+      'dueDate': serializer.toJson<DateTime?>(dueDate),
       'status': serializer.toJson<String>(status),
       'previousDuePoisha': serializer.toJson<int>(previousDuePoisha),
       'subtotalPoisha': serializer.toJson<int>(subtotalPoisha),
@@ -5307,6 +5371,8 @@ class MonthlyBill extends DataClass implements Insertable<MonthlyBill> {
     String? unitId,
     int? billingYear,
     int? billingMonth,
+    Value<DateTime?> issuedAt = const Value.absent(),
+    Value<DateTime?> dueDate = const Value.absent(),
     String? status,
     int? previousDuePoisha,
     int? subtotalPoisha,
@@ -5323,6 +5389,8 @@ class MonthlyBill extends DataClass implements Insertable<MonthlyBill> {
     unitId: unitId ?? this.unitId,
     billingYear: billingYear ?? this.billingYear,
     billingMonth: billingMonth ?? this.billingMonth,
+    issuedAt: issuedAt.present ? issuedAt.value : this.issuedAt,
+    dueDate: dueDate.present ? dueDate.value : this.dueDate,
     status: status ?? this.status,
     previousDuePoisha: previousDuePoisha ?? this.previousDuePoisha,
     subtotalPoisha: subtotalPoisha ?? this.subtotalPoisha,
@@ -5347,6 +5415,8 @@ class MonthlyBill extends DataClass implements Insertable<MonthlyBill> {
       billingMonth: data.billingMonth.present
           ? data.billingMonth.value
           : this.billingMonth,
+      issuedAt: data.issuedAt.present ? data.issuedAt.value : this.issuedAt,
+      dueDate: data.dueDate.present ? data.dueDate.value : this.dueDate,
       status: data.status.present ? data.status.value : this.status,
       previousDuePoisha: data.previousDuePoisha.present
           ? data.previousDuePoisha.value
@@ -5380,6 +5450,8 @@ class MonthlyBill extends DataClass implements Insertable<MonthlyBill> {
           ..write('unitId: $unitId, ')
           ..write('billingYear: $billingYear, ')
           ..write('billingMonth: $billingMonth, ')
+          ..write('issuedAt: $issuedAt, ')
+          ..write('dueDate: $dueDate, ')
           ..write('status: $status, ')
           ..write('previousDuePoisha: $previousDuePoisha, ')
           ..write('subtotalPoisha: $subtotalPoisha, ')
@@ -5401,6 +5473,8 @@ class MonthlyBill extends DataClass implements Insertable<MonthlyBill> {
     unitId,
     billingYear,
     billingMonth,
+    issuedAt,
+    dueDate,
     status,
     previousDuePoisha,
     subtotalPoisha,
@@ -5421,6 +5495,8 @@ class MonthlyBill extends DataClass implements Insertable<MonthlyBill> {
           other.unitId == this.unitId &&
           other.billingYear == this.billingYear &&
           other.billingMonth == this.billingMonth &&
+          other.issuedAt == this.issuedAt &&
+          other.dueDate == this.dueDate &&
           other.status == this.status &&
           other.previousDuePoisha == this.previousDuePoisha &&
           other.subtotalPoisha == this.subtotalPoisha &&
@@ -5439,6 +5515,8 @@ class MonthlyBillsCompanion extends UpdateCompanion<MonthlyBill> {
   final Value<String> unitId;
   final Value<int> billingYear;
   final Value<int> billingMonth;
+  final Value<DateTime?> issuedAt;
+  final Value<DateTime?> dueDate;
   final Value<String> status;
   final Value<int> previousDuePoisha;
   final Value<int> subtotalPoisha;
@@ -5456,6 +5534,8 @@ class MonthlyBillsCompanion extends UpdateCompanion<MonthlyBill> {
     this.unitId = const Value.absent(),
     this.billingYear = const Value.absent(),
     this.billingMonth = const Value.absent(),
+    this.issuedAt = const Value.absent(),
+    this.dueDate = const Value.absent(),
     this.status = const Value.absent(),
     this.previousDuePoisha = const Value.absent(),
     this.subtotalPoisha = const Value.absent(),
@@ -5474,6 +5554,8 @@ class MonthlyBillsCompanion extends UpdateCompanion<MonthlyBill> {
     required String unitId,
     required int billingYear,
     required int billingMonth,
+    this.issuedAt = const Value.absent(),
+    this.dueDate = const Value.absent(),
     this.status = const Value.absent(),
     this.previousDuePoisha = const Value.absent(),
     this.subtotalPoisha = const Value.absent(),
@@ -5497,6 +5579,8 @@ class MonthlyBillsCompanion extends UpdateCompanion<MonthlyBill> {
     Expression<String>? unitId,
     Expression<int>? billingYear,
     Expression<int>? billingMonth,
+    Expression<DateTime>? issuedAt,
+    Expression<DateTime>? dueDate,
     Expression<String>? status,
     Expression<int>? previousDuePoisha,
     Expression<int>? subtotalPoisha,
@@ -5515,6 +5599,8 @@ class MonthlyBillsCompanion extends UpdateCompanion<MonthlyBill> {
       if (unitId != null) 'unit_id': unitId,
       if (billingYear != null) 'billing_year': billingYear,
       if (billingMonth != null) 'billing_month': billingMonth,
+      if (issuedAt != null) 'issued_at': issuedAt,
+      if (dueDate != null) 'due_date': dueDate,
       if (status != null) 'status': status,
       if (previousDuePoisha != null) 'previous_due_poisha': previousDuePoisha,
       if (subtotalPoisha != null) 'subtotal_poisha': subtotalPoisha,
@@ -5535,6 +5621,8 @@ class MonthlyBillsCompanion extends UpdateCompanion<MonthlyBill> {
     Value<String>? unitId,
     Value<int>? billingYear,
     Value<int>? billingMonth,
+    Value<DateTime?>? issuedAt,
+    Value<DateTime?>? dueDate,
     Value<String>? status,
     Value<int>? previousDuePoisha,
     Value<int>? subtotalPoisha,
@@ -5553,6 +5641,8 @@ class MonthlyBillsCompanion extends UpdateCompanion<MonthlyBill> {
       unitId: unitId ?? this.unitId,
       billingYear: billingYear ?? this.billingYear,
       billingMonth: billingMonth ?? this.billingMonth,
+      issuedAt: issuedAt ?? this.issuedAt,
+      dueDate: dueDate ?? this.dueDate,
       status: status ?? this.status,
       previousDuePoisha: previousDuePoisha ?? this.previousDuePoisha,
       subtotalPoisha: subtotalPoisha ?? this.subtotalPoisha,
@@ -5586,6 +5676,12 @@ class MonthlyBillsCompanion extends UpdateCompanion<MonthlyBill> {
     }
     if (billingMonth.present) {
       map['billing_month'] = Variable<int>(billingMonth.value);
+    }
+    if (issuedAt.present) {
+      map['issued_at'] = Variable<DateTime>(issuedAt.value);
+    }
+    if (dueDate.present) {
+      map['due_date'] = Variable<DateTime>(dueDate.value);
     }
     if (status.present) {
       map['status'] = Variable<String>(status.value);
@@ -5629,6 +5725,8 @@ class MonthlyBillsCompanion extends UpdateCompanion<MonthlyBill> {
           ..write('unitId: $unitId, ')
           ..write('billingYear: $billingYear, ')
           ..write('billingMonth: $billingMonth, ')
+          ..write('issuedAt: $issuedAt, ')
+          ..write('dueDate: $dueDate, ')
           ..write('status: $status, ')
           ..write('previousDuePoisha: $previousDuePoisha, ')
           ..write('subtotalPoisha: $subtotalPoisha, ')
@@ -5726,6 +5824,17 @@ class $BillLineItemsTable extends BillLineItems
     type: DriftSqlType.int,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _sourceRuleIdMeta = const VerificationMeta(
+    'sourceRuleId',
+  );
+  @override
+  late final GeneratedColumn<String> sourceRuleId = GeneratedColumn<String>(
+    'source_rule_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _sortOrderMeta = const VerificationMeta(
     'sortOrder',
   );
@@ -5770,6 +5879,7 @@ class $BillLineItemsTable extends BillLineItems
     quantity,
     unitRatePoisha,
     amountPoisha,
+    sourceRuleId,
     sortOrder,
     metadataJson,
     createdAt,
@@ -5844,6 +5954,15 @@ class $BillLineItemsTable extends BillLineItems
     } else if (isInserting) {
       context.missing(_amountPoishaMeta);
     }
+    if (data.containsKey('source_rule_id')) {
+      context.handle(
+        _sourceRuleIdMeta,
+        sourceRuleId.isAcceptableOrUnknown(
+          data['source_rule_id']!,
+          _sourceRuleIdMeta,
+        ),
+      );
+    }
     if (data.containsKey('sort_order')) {
       context.handle(
         _sortOrderMeta,
@@ -5902,6 +6021,10 @@ class $BillLineItemsTable extends BillLineItems
         DriftSqlType.int,
         data['${effectivePrefix}amount_poisha'],
       )!,
+      sourceRuleId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}source_rule_id'],
+      ),
       sortOrder: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
         data['${effectivePrefix}sort_order'],
@@ -5931,6 +6054,7 @@ class BillLineItem extends DataClass implements Insertable<BillLineItem> {
   final int? quantity;
   final int? unitRatePoisha;
   final int amountPoisha;
+  final String? sourceRuleId;
   final int sortOrder;
   final String? metadataJson;
   final DateTime createdAt;
@@ -5942,6 +6066,7 @@ class BillLineItem extends DataClass implements Insertable<BillLineItem> {
     this.quantity,
     this.unitRatePoisha,
     required this.amountPoisha,
+    this.sourceRuleId,
     required this.sortOrder,
     this.metadataJson,
     required this.createdAt,
@@ -5960,6 +6085,9 @@ class BillLineItem extends DataClass implements Insertable<BillLineItem> {
       map['unit_rate_poisha'] = Variable<int>(unitRatePoisha);
     }
     map['amount_poisha'] = Variable<int>(amountPoisha);
+    if (!nullToAbsent || sourceRuleId != null) {
+      map['source_rule_id'] = Variable<String>(sourceRuleId);
+    }
     map['sort_order'] = Variable<int>(sortOrder);
     if (!nullToAbsent || metadataJson != null) {
       map['metadata_json'] = Variable<String>(metadataJson);
@@ -5981,6 +6109,9 @@ class BillLineItem extends DataClass implements Insertable<BillLineItem> {
           ? const Value.absent()
           : Value(unitRatePoisha),
       amountPoisha: Value(amountPoisha),
+      sourceRuleId: sourceRuleId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(sourceRuleId),
       sortOrder: Value(sortOrder),
       metadataJson: metadataJson == null && nullToAbsent
           ? const Value.absent()
@@ -6002,6 +6133,7 @@ class BillLineItem extends DataClass implements Insertable<BillLineItem> {
       quantity: serializer.fromJson<int?>(json['quantity']),
       unitRatePoisha: serializer.fromJson<int?>(json['unitRatePoisha']),
       amountPoisha: serializer.fromJson<int>(json['amountPoisha']),
+      sourceRuleId: serializer.fromJson<String?>(json['sourceRuleId']),
       sortOrder: serializer.fromJson<int>(json['sortOrder']),
       metadataJson: serializer.fromJson<String?>(json['metadataJson']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
@@ -6018,6 +6150,7 @@ class BillLineItem extends DataClass implements Insertable<BillLineItem> {
       'quantity': serializer.toJson<int?>(quantity),
       'unitRatePoisha': serializer.toJson<int?>(unitRatePoisha),
       'amountPoisha': serializer.toJson<int>(amountPoisha),
+      'sourceRuleId': serializer.toJson<String?>(sourceRuleId),
       'sortOrder': serializer.toJson<int>(sortOrder),
       'metadataJson': serializer.toJson<String?>(metadataJson),
       'createdAt': serializer.toJson<DateTime>(createdAt),
@@ -6032,6 +6165,7 @@ class BillLineItem extends DataClass implements Insertable<BillLineItem> {
     Value<int?> quantity = const Value.absent(),
     Value<int?> unitRatePoisha = const Value.absent(),
     int? amountPoisha,
+    Value<String?> sourceRuleId = const Value.absent(),
     int? sortOrder,
     Value<String?> metadataJson = const Value.absent(),
     DateTime? createdAt,
@@ -6045,6 +6179,7 @@ class BillLineItem extends DataClass implements Insertable<BillLineItem> {
         ? unitRatePoisha.value
         : this.unitRatePoisha,
     amountPoisha: amountPoisha ?? this.amountPoisha,
+    sourceRuleId: sourceRuleId.present ? sourceRuleId.value : this.sourceRuleId,
     sortOrder: sortOrder ?? this.sortOrder,
     metadataJson: metadataJson.present ? metadataJson.value : this.metadataJson,
     createdAt: createdAt ?? this.createdAt,
@@ -6064,6 +6199,9 @@ class BillLineItem extends DataClass implements Insertable<BillLineItem> {
       amountPoisha: data.amountPoisha.present
           ? data.amountPoisha.value
           : this.amountPoisha,
+      sourceRuleId: data.sourceRuleId.present
+          ? data.sourceRuleId.value
+          : this.sourceRuleId,
       sortOrder: data.sortOrder.present ? data.sortOrder.value : this.sortOrder,
       metadataJson: data.metadataJson.present
           ? data.metadataJson.value
@@ -6082,6 +6220,7 @@ class BillLineItem extends DataClass implements Insertable<BillLineItem> {
           ..write('quantity: $quantity, ')
           ..write('unitRatePoisha: $unitRatePoisha, ')
           ..write('amountPoisha: $amountPoisha, ')
+          ..write('sourceRuleId: $sourceRuleId, ')
           ..write('sortOrder: $sortOrder, ')
           ..write('metadataJson: $metadataJson, ')
           ..write('createdAt: $createdAt')
@@ -6098,6 +6237,7 @@ class BillLineItem extends DataClass implements Insertable<BillLineItem> {
     quantity,
     unitRatePoisha,
     amountPoisha,
+    sourceRuleId,
     sortOrder,
     metadataJson,
     createdAt,
@@ -6113,6 +6253,7 @@ class BillLineItem extends DataClass implements Insertable<BillLineItem> {
           other.quantity == this.quantity &&
           other.unitRatePoisha == this.unitRatePoisha &&
           other.amountPoisha == this.amountPoisha &&
+          other.sourceRuleId == this.sourceRuleId &&
           other.sortOrder == this.sortOrder &&
           other.metadataJson == this.metadataJson &&
           other.createdAt == this.createdAt);
@@ -6126,6 +6267,7 @@ class BillLineItemsCompanion extends UpdateCompanion<BillLineItem> {
   final Value<int?> quantity;
   final Value<int?> unitRatePoisha;
   final Value<int> amountPoisha;
+  final Value<String?> sourceRuleId;
   final Value<int> sortOrder;
   final Value<String?> metadataJson;
   final Value<DateTime> createdAt;
@@ -6138,6 +6280,7 @@ class BillLineItemsCompanion extends UpdateCompanion<BillLineItem> {
     this.quantity = const Value.absent(),
     this.unitRatePoisha = const Value.absent(),
     this.amountPoisha = const Value.absent(),
+    this.sourceRuleId = const Value.absent(),
     this.sortOrder = const Value.absent(),
     this.metadataJson = const Value.absent(),
     this.createdAt = const Value.absent(),
@@ -6151,6 +6294,7 @@ class BillLineItemsCompanion extends UpdateCompanion<BillLineItem> {
     this.quantity = const Value.absent(),
     this.unitRatePoisha = const Value.absent(),
     required int amountPoisha,
+    this.sourceRuleId = const Value.absent(),
     this.sortOrder = const Value.absent(),
     this.metadataJson = const Value.absent(),
     this.createdAt = const Value.absent(),
@@ -6168,6 +6312,7 @@ class BillLineItemsCompanion extends UpdateCompanion<BillLineItem> {
     Expression<int>? quantity,
     Expression<int>? unitRatePoisha,
     Expression<int>? amountPoisha,
+    Expression<String>? sourceRuleId,
     Expression<int>? sortOrder,
     Expression<String>? metadataJson,
     Expression<DateTime>? createdAt,
@@ -6181,6 +6326,7 @@ class BillLineItemsCompanion extends UpdateCompanion<BillLineItem> {
       if (quantity != null) 'quantity': quantity,
       if (unitRatePoisha != null) 'unit_rate_poisha': unitRatePoisha,
       if (amountPoisha != null) 'amount_poisha': amountPoisha,
+      if (sourceRuleId != null) 'source_rule_id': sourceRuleId,
       if (sortOrder != null) 'sort_order': sortOrder,
       if (metadataJson != null) 'metadata_json': metadataJson,
       if (createdAt != null) 'created_at': createdAt,
@@ -6196,6 +6342,7 @@ class BillLineItemsCompanion extends UpdateCompanion<BillLineItem> {
     Value<int?>? quantity,
     Value<int?>? unitRatePoisha,
     Value<int>? amountPoisha,
+    Value<String?>? sourceRuleId,
     Value<int>? sortOrder,
     Value<String?>? metadataJson,
     Value<DateTime>? createdAt,
@@ -6209,6 +6356,7 @@ class BillLineItemsCompanion extends UpdateCompanion<BillLineItem> {
       quantity: quantity ?? this.quantity,
       unitRatePoisha: unitRatePoisha ?? this.unitRatePoisha,
       amountPoisha: amountPoisha ?? this.amountPoisha,
+      sourceRuleId: sourceRuleId ?? this.sourceRuleId,
       sortOrder: sortOrder ?? this.sortOrder,
       metadataJson: metadataJson ?? this.metadataJson,
       createdAt: createdAt ?? this.createdAt,
@@ -6240,6 +6388,9 @@ class BillLineItemsCompanion extends UpdateCompanion<BillLineItem> {
     if (amountPoisha.present) {
       map['amount_poisha'] = Variable<int>(amountPoisha.value);
     }
+    if (sourceRuleId.present) {
+      map['source_rule_id'] = Variable<String>(sourceRuleId.value);
+    }
     if (sortOrder.present) {
       map['sort_order'] = Variable<int>(sortOrder.value);
     }
@@ -6265,6 +6416,7 @@ class BillLineItemsCompanion extends UpdateCompanion<BillLineItem> {
           ..write('quantity: $quantity, ')
           ..write('unitRatePoisha: $unitRatePoisha, ')
           ..write('amountPoisha: $amountPoisha, ')
+          ..write('sourceRuleId: $sourceRuleId, ')
           ..write('sortOrder: $sortOrder, ')
           ..write('metadataJson: $metadataJson, ')
           ..write('createdAt: $createdAt, ')
@@ -15022,6 +15174,8 @@ typedef $$MonthlyBillsTableCreateCompanionBuilder =
       required String unitId,
       required int billingYear,
       required int billingMonth,
+      Value<DateTime?> issuedAt,
+      Value<DateTime?> dueDate,
       Value<String> status,
       Value<int> previousDuePoisha,
       Value<int> subtotalPoisha,
@@ -15041,6 +15195,8 @@ typedef $$MonthlyBillsTableUpdateCompanionBuilder =
       Value<String> unitId,
       Value<int> billingYear,
       Value<int> billingMonth,
+      Value<DateTime?> issuedAt,
+      Value<DateTime?> dueDate,
       Value<String> status,
       Value<int> previousDuePoisha,
       Value<int> subtotalPoisha,
@@ -15169,6 +15325,16 @@ class $$MonthlyBillsTableFilterComposer
 
   ColumnFilters<int> get billingMonth => $composableBuilder(
     column: $table.billingMonth,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get issuedAt => $composableBuilder(
+    column: $table.issuedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get dueDate => $composableBuilder(
+    column: $table.dueDate,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -15361,6 +15527,16 @@ class $$MonthlyBillsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<DateTime> get issuedAt => $composableBuilder(
+    column: $table.issuedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get dueDate => $composableBuilder(
+    column: $table.dueDate,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<String> get status => $composableBuilder(
     column: $table.status,
     builder: (column) => ColumnOrderings(column),
@@ -15497,6 +15673,12 @@ class $$MonthlyBillsTableAnnotationComposer
     column: $table.billingMonth,
     builder: (column) => column,
   );
+
+  GeneratedColumn<DateTime> get issuedAt =>
+      $composableBuilder(column: $table.issuedAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get dueDate =>
+      $composableBuilder(column: $table.dueDate, builder: (column) => column);
 
   GeneratedColumn<String> get status =>
       $composableBuilder(column: $table.status, builder: (column) => column);
@@ -15698,6 +15880,8 @@ class $$MonthlyBillsTableTableManager
                 Value<String> unitId = const Value.absent(),
                 Value<int> billingYear = const Value.absent(),
                 Value<int> billingMonth = const Value.absent(),
+                Value<DateTime?> issuedAt = const Value.absent(),
+                Value<DateTime?> dueDate = const Value.absent(),
                 Value<String> status = const Value.absent(),
                 Value<int> previousDuePoisha = const Value.absent(),
                 Value<int> subtotalPoisha = const Value.absent(),
@@ -15715,6 +15899,8 @@ class $$MonthlyBillsTableTableManager
                 unitId: unitId,
                 billingYear: billingYear,
                 billingMonth: billingMonth,
+                issuedAt: issuedAt,
+                dueDate: dueDate,
                 status: status,
                 previousDuePoisha: previousDuePoisha,
                 subtotalPoisha: subtotalPoisha,
@@ -15734,6 +15920,8 @@ class $$MonthlyBillsTableTableManager
                 required String unitId,
                 required int billingYear,
                 required int billingMonth,
+                Value<DateTime?> issuedAt = const Value.absent(),
+                Value<DateTime?> dueDate = const Value.absent(),
                 Value<String> status = const Value.absent(),
                 Value<int> previousDuePoisha = const Value.absent(),
                 Value<int> subtotalPoisha = const Value.absent(),
@@ -15751,6 +15939,8 @@ class $$MonthlyBillsTableTableManager
                 unitId: unitId,
                 billingYear: billingYear,
                 billingMonth: billingMonth,
+                issuedAt: issuedAt,
+                dueDate: dueDate,
                 status: status,
                 previousDuePoisha: previousDuePoisha,
                 subtotalPoisha: subtotalPoisha,
@@ -15917,6 +16107,7 @@ typedef $$BillLineItemsTableCreateCompanionBuilder =
       Value<int?> quantity,
       Value<int?> unitRatePoisha,
       required int amountPoisha,
+      Value<String?> sourceRuleId,
       Value<int> sortOrder,
       Value<String?> metadataJson,
       Value<DateTime> createdAt,
@@ -15931,6 +16122,7 @@ typedef $$BillLineItemsTableUpdateCompanionBuilder =
       Value<int?> quantity,
       Value<int?> unitRatePoisha,
       Value<int> amountPoisha,
+      Value<String?> sourceRuleId,
       Value<int> sortOrder,
       Value<String?> metadataJson,
       Value<DateTime> createdAt,
@@ -15999,6 +16191,11 @@ class $$BillLineItemsTableFilterComposer
 
   ColumnFilters<int> get amountPoisha => $composableBuilder(
     column: $table.amountPoisha,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get sourceRuleId => $composableBuilder(
+    column: $table.sourceRuleId,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -16080,6 +16277,11 @@ class $$BillLineItemsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get sourceRuleId => $composableBuilder(
+    column: $table.sourceRuleId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<int> get sortOrder => $composableBuilder(
     column: $table.sortOrder,
     builder: (column) => ColumnOrderings(column),
@@ -16149,6 +16351,11 @@ class $$BillLineItemsTableAnnotationComposer
 
   GeneratedColumn<int> get amountPoisha => $composableBuilder(
     column: $table.amountPoisha,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get sourceRuleId => $composableBuilder(
+    column: $table.sourceRuleId,
     builder: (column) => column,
   );
 
@@ -16222,6 +16429,7 @@ class $$BillLineItemsTableTableManager
                 Value<int?> quantity = const Value.absent(),
                 Value<int?> unitRatePoisha = const Value.absent(),
                 Value<int> amountPoisha = const Value.absent(),
+                Value<String?> sourceRuleId = const Value.absent(),
                 Value<int> sortOrder = const Value.absent(),
                 Value<String?> metadataJson = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
@@ -16234,6 +16442,7 @@ class $$BillLineItemsTableTableManager
                 quantity: quantity,
                 unitRatePoisha: unitRatePoisha,
                 amountPoisha: amountPoisha,
+                sourceRuleId: sourceRuleId,
                 sortOrder: sortOrder,
                 metadataJson: metadataJson,
                 createdAt: createdAt,
@@ -16248,6 +16457,7 @@ class $$BillLineItemsTableTableManager
                 Value<int?> quantity = const Value.absent(),
                 Value<int?> unitRatePoisha = const Value.absent(),
                 required int amountPoisha,
+                Value<String?> sourceRuleId = const Value.absent(),
                 Value<int> sortOrder = const Value.absent(),
                 Value<String?> metadataJson = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
@@ -16260,6 +16470,7 @@ class $$BillLineItemsTableTableManager
                 quantity: quantity,
                 unitRatePoisha: unitRatePoisha,
                 amountPoisha: amountPoisha,
+                sourceRuleId: sourceRuleId,
                 sortOrder: sortOrder,
                 metadataJson: metadataJson,
                 createdAt: createdAt,

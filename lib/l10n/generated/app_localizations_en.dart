@@ -479,4 +479,85 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get saveCharge => 'Save charge';
+
+  @override
+  String get generateBills => 'Generate bills';
+
+  @override
+  String get billDetails => 'Bill details';
+
+  @override
+  String get draft => 'Draft';
+
+  @override
+  String get finalized => 'Finalized';
+
+  @override
+  String get paid => 'Paid';
+
+  @override
+  String get partial => 'Partial';
+
+  @override
+  String get due => 'Due';
+
+  @override
+  String get total => 'Total';
+
+  @override
+  String get openingDue => 'Opening due';
+
+  @override
+  String get currentCharges => 'Current charges';
+
+  @override
+  String get outstanding => 'Outstanding';
+
+  @override
+  String get finalizeBill => 'Finalize bill';
+
+  @override
+  String get billGenerated => 'Draft bill generated';
+
+  @override
+  String get noBills => 'No bills for this month yet.';
+
+  @override
+  String get selectMonth => 'Select month';
+
+  @override
+  String get previous => 'Previous';
+
+  @override
+  String get next => 'Next';
+
+  @override
+  String get reviewDraft => 'Review draft';
+
+  @override
+  String get missingInputs => 'Missing inputs';
+
+  @override
+  String get billsExpected => 'Bills expected';
+
+  @override
+  String get meterReading => 'Electricity reading';
+
+  @override
+  String get previousReading => 'Previous reading';
+
+  @override
+  String get currentReading => 'Current reading';
+
+  @override
+  String get consumption => 'Units consumed';
+
+  @override
+  String get rate => 'Rate';
+
+  @override
+  String get calculatedAmount => 'Calculated amount';
+
+  @override
+  String get saveReading => 'Save reading';
 }

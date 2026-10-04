@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:barivara/core/database/app_database.dart' as db;
 import 'package:barivara/core/database/tables.dart';
 import 'package:barivara/core/domain/models.dart' as domain;
@@ -869,4 +871,341 @@ class DriftChargeConfigurationRepository extends DriftRepository
         (domain.ChargeCalculationMethod method) => method.name == value,
         orElse: () => domain.ChargeCalculationMethod.fixed,
       );
+}
+
+/// Drift persistence for immutable bill headers and line-item snapshots.
+class DriftBillingRepository extends DriftRepository
+    implements BillingRepository {
+  /// Creates billing persistence operations.
+  const DriftBillingRepository(super.database);
+
+  @override
+  Future<Result<domain.MonthlyBill?>> findForPeriod(
+    EntityId tenancyId,
+    BillingMonth period,
+  ) => guard<domain.MonthlyBill?>(() async {
+    final db.MonthlyBill? row =
+        await (database.select(database.monthlyBills)..where(
+              (MonthlyBills table) =>
+                  table.tenancyId.equals(tenancyId.value) &
+                  table.billingYear.equals(period.year) &
+                  table.billingMonth.equals(period.month),
+            ))
+            .getSingleOrNull();
+    return row == null ? null : _bill(row);
+  });
+
+  @override
+  Future<Result<domain.BillDraft?>> findDraft(EntityId billId) =>
+      guard<domain.BillDraft?>(() async {
+        final db.MonthlyBill? header =
+            await (database.select(
+                  database.monthlyBills,
+                )..where((MonthlyBills table) => table.id.equals(billId.value)))
+                .getSingleOrNull();
+        if (header == null) {
+          return null;
+        }
+        final List<db.BillLineItem> rows =
+            await (database.select(database.billLineItems)
+                  ..where(
+                    (BillLineItems table) => table.billId.equals(billId.value),
+                  )
+                  ..orderBy(<OrderingTerm Function(BillLineItems)>[
+                    (BillLineItems table) => OrderingTerm.asc(table.sortOrder),
+                  ]))
+                .get();
+        return domain.BillDraft(
+          bill: _bill(header),
+          items: rows.map(_item).toList(growable: false),
+        );
+      });
+
+  @override
+  Future<Result<List<domain.MonthlyBill>>> listForPeriod(BillingMonth period) =>
+      guard<List<domain.MonthlyBill>>(() async {
+        final List<db.MonthlyBill> rows =
+            await (database.select(database.monthlyBills)
+                  ..where(
+                    (MonthlyBills table) =>
+                        table.billingYear.equals(period.year) &
+                        table.billingMonth.equals(period.month),
+                  )
+                  ..orderBy(<OrderingTerm Function(MonthlyBills)>[
+                    (MonthlyBills table) => OrderingTerm.asc(table.createdAt),
+                  ]))
+                .get();
+        return rows.map(_bill).toList(growable: false);
+      });
+
+  @override
+  Future<Result<MeterReading?>> lastElectricityReading(EntityId unitId) =>
+      guard<MeterReading?>(() async {
+        final QueryRow? row = await database
+            .customSelect(
+              '''
+          SELECT bill_line_items.metadata_json
+          FROM bill_line_items
+          INNER JOIN monthly_bills ON monthly_bills.id = bill_line_items.bill_id
+          WHERE monthly_bills.unit_id = ?
+            AND bill_line_items.item_type = ?
+            AND monthly_bills.status <> ?
+          ORDER BY monthly_bills.billing_year DESC, monthly_bills.billing_month DESC
+          LIMIT 1
+          ''',
+              variables: <Variable<Object>>[
+                Variable<String>(unitId.value),
+                Variable<String>(ChargeType.electricity.name),
+                Variable<String>(domain.BillStatus.cancelled.name),
+              ],
+            )
+            .getSingleOrNull();
+        final String? metadataJson = row?.read<String>('metadata_json');
+        if (metadataJson == null) {
+          return null;
+        }
+        final dynamic current = (jsonDecode(
+          metadataJson,
+        ) as Map<String, dynamic>)['currentReading'];
+        return current is int ? MeterReading(current) : null;
+      });
+
+  @override
+  Future<Result<Money>> openingDue(EntityId tenancyId, BillingMonth period) =>
+      guard<Money>(() async {
+        final List<db.MonthlyBill> rows =
+            await (database.select(database.monthlyBills)
+                  ..where(
+                    (MonthlyBills table) =>
+                        table.tenancyId.equals(tenancyId.value) &
+                        (table.billingYear.isSmallerThanValue(period.year) |
+                            (table.billingYear.equals(period.year) &
+                                table.billingMonth.isSmallerThanValue(
+                                  period.month,
+                                ))) &
+                        table.status.isNotValue(domain.BillStatus.draft.name) &
+                        table.status.isNotValue(
+                          domain.BillStatus.cancelled.name,
+                        ),
+                  )
+                  ..orderBy(<OrderingTerm Function(MonthlyBills)>[
+                    (MonthlyBills table) =>
+                        OrderingTerm.desc(table.billingYear),
+                    (MonthlyBills table) =>
+                        OrderingTerm.desc(table.billingMonth),
+                  ])
+                  ..limit(1))
+                .get();
+        if (rows.isEmpty || rows.single.balancePoisha <= 0) {
+          return Money.zero;
+        }
+        // The most recent finalized balance is an already-carried opening
+        // balance. Using it once prevents duplicate old principal.
+        return Money.fromPoisha(rows.single.balancePoisha);
+      });
+
+  @override
+  Future<Result<domain.MonthlyBill>> finalize(EntityId billId) =>
+      guard<domain.MonthlyBill>(() async {
+        final db.MonthlyBill? existing =
+            await (database.select(
+                  database.monthlyBills,
+                )..where((MonthlyBills table) => table.id.equals(billId.value)))
+                .getSingleOrNull();
+        if (existing == null) {
+          throw StateError('Bill not found.');
+        }
+        if (existing.status != domain.BillStatus.draft.name) {
+          return _bill(existing);
+        }
+        final DateTime now = DateTime.now().toUtc();
+        await (database.update(
+          database.monthlyBills,
+        )..where((MonthlyBills table) => table.id.equals(billId.value))).write(
+          db.MonthlyBillsCompanion(
+            status: const Value<String>("finalized"),
+            finalizedAt: Value<DateTime?>(now),
+            updatedAt: Value<DateTime>(now),
+          ),
+        );
+        final domain.MonthlyBill bill = _bill(existing);
+        return domain.MonthlyBill(
+          id: bill.id,
+          tenancyId: bill.tenancyId,
+          propertyId: bill.propertyId,
+          unitId: bill.unitId,
+          period: bill.period,
+          issueDate: bill.issueDate,
+          dueDate: bill.dueDate,
+          openingDue: bill.openingDue,
+          currentCharges: bill.currentCharges,
+          total: bill.total,
+          paidAmount: bill.paidAmount,
+          outstandingAmount: bill.outstandingAmount,
+          status: domain.BillStatus.finalized,
+          generatedAt: bill.generatedAt,
+          finalizedAt: now,
+        );
+      });
+
+  @override
+  Future<Result<domain.MonthlyBill>> cancel(EntityId billId) =>
+      guard<domain.MonthlyBill>(() async {
+        final db.MonthlyBill? existing =
+            await (database.select(
+                  database.monthlyBills,
+                )..where((MonthlyBills table) => table.id.equals(billId.value)))
+                .getSingleOrNull();
+        if (existing == null) {
+          throw StateError('Bill not found.');
+        }
+        final DateTime now = DateTime.now().toUtc();
+        await (database.update(
+          database.monthlyBills,
+        )..where((MonthlyBills table) => table.id.equals(billId.value))).write(
+          db.MonthlyBillsCompanion(
+            status: const Value<String>('cancelled'),
+            updatedAt: Value<DateTime>(now),
+          ),
+        );
+        final domain.MonthlyBill bill = _bill(existing);
+        return domain.MonthlyBill(
+          id: bill.id,
+          tenancyId: bill.tenancyId,
+          propertyId: bill.propertyId,
+          unitId: bill.unitId,
+          period: bill.period,
+          issueDate: bill.issueDate,
+          dueDate: bill.dueDate,
+          openingDue: bill.openingDue,
+          currentCharges: bill.currentCharges,
+          total: bill.total,
+          paidAmount: bill.paidAmount,
+          outstandingAmount: bill.outstandingAmount,
+          status: domain.BillStatus.cancelled,
+          generatedAt: bill.generatedAt,
+          finalizedAt: bill.finalizedAt,
+        );
+      });
+
+  @override
+  Future<Result<void>> saveDraft(domain.BillDraft draft) =>
+      inTransaction<void>(() async {
+        final db.MonthlyBill? existing =
+            await (database.select(database.monthlyBills)..where(
+                  (MonthlyBills table) =>
+                      table.tenancyId.equals(draft.bill.tenancyId.value) &
+                      table.billingYear.equals(draft.bill.period.year) &
+                      table.billingMonth.equals(draft.bill.period.month),
+                ))
+                .getSingleOrNull();
+        if (existing != null) {
+          throw StateError('A bill already exists for this tenancy and month.');
+        }
+        final DateTime now = DateTime.now().toUtc();
+        await database
+            .into(database.monthlyBills)
+            .insert(
+              db.MonthlyBillsCompanion.insert(
+                id: draft.bill.id.value,
+                tenancyId: draft.bill.tenancyId.value,
+                propertyId: draft.bill.propertyId.value,
+                unitId: draft.bill.unitId.value,
+                billingYear: draft.bill.period.year,
+                billingMonth: draft.bill.period.month,
+                issuedAt: Value<DateTime?>(draft.bill.issueDate.toUtc()),
+                dueDate: Value<DateTime?>(draft.bill.dueDate?.toUtc()),
+                status: Value<String>(draft.bill.status.name),
+                previousDuePoisha: Value<int>(draft.bill.openingDue.poisha),
+                subtotalPoisha: Value<int>(draft.bill.currentCharges.poisha),
+                totalPoisha: Value<int>(draft.bill.total.poisha),
+                paidPoisha: Value<int>(draft.bill.paidAmount.poisha),
+                balancePoisha: Value<int>(draft.bill.outstandingAmount.poisha),
+                finalizedAt: Value<DateTime?>(draft.bill.finalizedAt?.toUtc()),
+                createdAt: Value<DateTime>(draft.bill.generatedAt.toUtc()),
+                updatedAt: Value<DateTime>(now),
+              ),
+            );
+        await database.batch((Batch batch) {
+          batch.insertAll(
+            database.billLineItems,
+            draft.items
+                .map((domain.BillLineItem item) {
+                  final Map<String, int> metadata = <String, int>{
+                    if (item.previousReading != null)
+                      'previousReading': item.previousReading!.value,
+                    if (item.currentReading != null)
+                      'currentReading': item.currentReading!.value,
+                  };
+                  return db.BillLineItemsCompanion.insert(
+                    id: item.id.value,
+                    billId: item.billId.value,
+                    itemType: item.type.name,
+                    description: item.description,
+                    quantity: Value<int?>(item.quantity),
+                    unitRatePoisha: Value<int?>(item.unitRate?.poisha),
+                    amountPoisha: item.amount.poisha,
+                    sourceRuleId: Value<String?>(item.sourceRuleId?.value),
+                    sortOrder: Value<int>(item.displayOrder),
+                    metadataJson: Value<String?>(
+                      metadata.isEmpty ? null : jsonEncode(metadata),
+                    ),
+                    createdAt: Value<DateTime>(now),
+                  );
+                })
+                .toList(growable: false),
+          );
+        });
+      });
+
+  domain.MonthlyBill _bill(db.MonthlyBill row) => domain.MonthlyBill(
+    id: EntityId(row.id),
+    tenancyId: EntityId(row.tenancyId),
+    propertyId: EntityId(row.propertyId),
+    unitId: EntityId(row.unitId),
+    period: BillingMonth(row.billingYear, row.billingMonth),
+    issueDate: row.issuedAt ?? row.createdAt,
+    dueDate: row.dueDate,
+    openingDue: Money.fromPoisha(row.previousDuePoisha),
+    currentCharges: Money.fromPoisha(row.subtotalPoisha),
+    total: Money.fromPoisha(row.totalPoisha),
+    paidAmount: Money.fromPoisha(row.paidPoisha),
+    outstandingAmount: Money.fromPoisha(row.balancePoisha),
+    status: domain.BillStatus.values.firstWhere(
+      (domain.BillStatus status) => status.name == row.status,
+      orElse: () => domain.BillStatus.draft,
+    ),
+    generatedAt: row.createdAt,
+    finalizedAt: row.finalizedAt,
+  );
+
+  domain.BillLineItem _item(db.BillLineItem row) {
+    final Map<String, dynamic> metadata = row.metadataJson == null
+        ? <String, dynamic>{}
+        : jsonDecode(row.metadataJson!) as Map<String, dynamic>;
+    return domain.BillLineItem(
+      id: EntityId(row.id),
+      billId: EntityId(row.billId),
+      type: ChargeType.values.firstWhere(
+        (ChargeType type) => type.name == row.itemType,
+        orElse: () => ChargeType.other,
+      ),
+      description: row.description,
+      quantity: row.quantity,
+      unitRate: row.unitRatePoisha == null
+          ? null
+          : Money.fromPoisha(row.unitRatePoisha!),
+      amount: Money.fromPoisha(row.amountPoisha),
+      previousReading: metadata['previousReading'] is int
+          ? MeterReading(metadata['previousReading'] as int)
+          : null,
+      currentReading: metadata['currentReading'] is int
+          ? MeterReading(metadata['currentReading'] as int)
+          : null,
+      sourceRuleId: row.sourceRuleId == null
+          ? null
+          : EntityId(row.sourceRuleId!),
+      displayOrder: row.sortOrder,
+    );
+  }
 }

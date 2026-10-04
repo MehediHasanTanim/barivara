@@ -128,6 +128,14 @@ class AppDatabase extends _$AppDatabase {
               await migrator.addColumn(tenancies, tenancies.advanceRentPoisha);
               await migrator.addColumn(tenancies, tenancies.agreementNotes);
             }
+            if (from < 4) {
+              await migrator.addColumn(monthlyBills, monthlyBills.issuedAt);
+              await migrator.addColumn(monthlyBills, monthlyBills.dueDate);
+              await migrator.addColumn(
+                billLineItems,
+                billLineItems.sourceRuleId,
+              );
+            }
           },
         );
       },

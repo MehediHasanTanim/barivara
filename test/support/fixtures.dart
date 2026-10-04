@@ -55,9 +55,17 @@ abstract final class Fixtures {
   static MonthlyBill bill({String id = 'bill-1'}) => MonthlyBill(
     id: EntityId(id),
     tenancyId: EntityId('tenancy-1'),
+    propertyId: EntityId('property-1'),
+    unitId: EntityId('unit-1'),
     period: BillingMonth(2026, 10),
+    issueDate: createdAt,
+    openingDue: Money.zero,
+    currentCharges: Money.fromTaka(19510),
     total: Money.fromTaka(19510),
-    status: 'draft',
+    paidAmount: Money.zero,
+    outstandingAmount: Money.fromTaka(19510),
+    status: BillStatus.draft,
+    generatedAt: createdAt,
   );
 
   /// Creates a payment fixture.
