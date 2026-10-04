@@ -17,6 +17,31 @@ abstract interface class AppLogger {
   void error(String message, {Object? error, StackTrace? stackTrace});
 }
 
+/// Diagnostic details that are safe to hand to the platform logger.
+///
+/// Release logs retain only an event name. Exception text can contain a local
+/// path, SQL statement, phone number, or other user-entered value, so it is
+/// included solely in debug/profile diagnostics.
+class AppLogErrorDetails {
+  /// Creates the error details selected by the logging privacy policy.
+  const AppLogErrorDetails({this.error, this.stackTrace});
+
+  final Object? error;
+  final StackTrace? stackTrace;
+}
+
+/// Keeps release diagnostics useful without serialising private local data.
+abstract final class AppLogPrivacy {
+  /// Returns diagnostic exception details only for non-release logging.
+  static AppLogErrorDetails errorDetails({
+    required bool includeDiagnostics,
+    Object? error,
+    StackTrace? stackTrace,
+  }) => includeDiagnostics
+      ? AppLogErrorDetails(error: error, stackTrace: stackTrace)
+      : const AppLogErrorDetails();
+}
+
 class _DeveloperAppLogger implements AppLogger {
   static const String _name = 'BariVara';
 
@@ -36,12 +61,17 @@ class _DeveloperAppLogger implements AppLogger {
 
   @override
   void error(String message, {Object? error, StackTrace? stackTrace}) {
+    final AppLogErrorDetails details = AppLogPrivacy.errorDetails(
+      includeDiagnostics: AppConfig.verboseLoggingEnabled,
+      error: error,
+      stackTrace: stackTrace,
+    );
     developer.log(
       message,
       name: _name,
       level: 1000,
-      error: error,
-      stackTrace: stackTrace,
+      error: details.error,
+      stackTrace: details.stackTrace,
     );
   }
 }
